@@ -66,10 +66,10 @@ Automatic Trigger checks the game every 10 seconds and will trigger the opponent
 
 typing:
 
-opponent
-!opponent
-!opp
-opp
+'opponent' or 
+'!opponent' or
+'!opp' or
+'opp'
 
 Will result in the bot displaying the selected statistic data in the twitch.tv chat.
 
