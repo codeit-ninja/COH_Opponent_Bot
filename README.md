@@ -5,7 +5,7 @@ This COH_Opponent_Bot is a Company of Heroes (COH) Opponent Chat Bot that uses a
 
 For use with COH 1 only.
 
-This program is for use in twitch chat for displaying COH 1v1 opponents to your viewers:
+This program is for people who stream/broadcast COH1 games on twitch.tv to provide COH opponents information to their viewers:
 
 It parses opponent data from the COH warning.log file and fetches opponent leaderboard statistic information from the Relic Server via a proxy web address.
 
@@ -62,6 +62,16 @@ AUTOMATIC MODE shows only the stats for the game you are currently in; eg basic 
 
 Automatic Trigger checks the game every 10 seconds and will trigger the opponent command automatically if it detects a new game.
 
+# Twitch TV Chat Bot Commands
+
+typing:
+
+opponent
+!opponent
+!opp
+opp
+
+Will result in the bot displaying the selected statistic data in the twitch.tv chat.
 
 Enjoy, 
 
