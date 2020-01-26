@@ -17,6 +17,10 @@ These can be installed using pip or pip3 using pip install pyinstaller
 
 On Windows you can compile a single executable using pyinstaller, the commands can be executed in the build.bat batch file.
 
+# A precompiled windows 10 compatable executable can be downloaded :
+
+HERE : https://xcoins.co.uk/Misc/COHOpponentBot.rar
+
 To use the executable:
 
 1. Execute the main file (COHOpponentBotGUI.exe) by double clicking on the icon. (Windows 10)
