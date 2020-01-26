@@ -7,7 +7,7 @@ For use with COH 1 only.
 
 This program is for use in twitch chat for displaying COH 1v1 opponents to your viewers:
 
-It parses opponent data from the COH warning.log file and fetches opponent leaderboard statititic information from the Relic Server via a proxy web address.
+It parses opponent data from the COH warning.log file and fetches opponent leaderboard statistic information from the Relic Server via a proxy web address.
 
 To execute it from source code:
 Extract files to the same directory including the .ico file.
