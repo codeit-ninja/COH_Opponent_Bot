@@ -43,7 +43,7 @@ IF NOT:
 
 visit https://steamid.co/ and enter your steam account name if your ID number doesn't show up in the steam client URL
 
-# Your warning.log file location is typically found at (windows 10):
+Your warning.log file location is typically found at (windows 10):
 
 C:\Users\*YOURCOMPUTERACCOUNTNAME*\Documents\my games\Company of Heroes Relaunch\warning.log
 
