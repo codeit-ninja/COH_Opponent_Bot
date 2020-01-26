@@ -29,7 +29,6 @@ Doing so will connect using this user name as your bot. It is ok to use the same
 
 Get your OAuth Key from twitch at this address  : https://twitchapps.com/tmi/
 
-
 Your warning.log location should be found automatically... unless you have a non standard install or are running coh on mac or linux or some weird shit.
 Your STEAM64 ID should be found automatically if you have previously run coh and set the warning.log correctly.
 
