@@ -713,10 +713,10 @@ class factionResult:
 		except Exception as e:
 			print(str(e))
 		try:
-			if (self.losses != 0):
+			if (int(self.losses) != 0):
 				self.winLossRatio = str(round(self.wins/self.losses, 2))
 			else:
-				if(self.wins > 0):
+				if(int(self.wins) > 0):
 					self.winLossRatio = "Unbeaten"
 		except Exception as e:
 			print(str(e))	
@@ -744,6 +744,9 @@ class cohUser:
 		self.steamString = steamString
 		self.country = country
 		self.steamProfileAddress = None
+		self.totalWins = None
+		self.totalLosses = None
+		self.totalWLRation = None
 		try:
 			self.steamProfileAddress = "https://steamcommunity.com/profiles/" + str(self.steamString).replace("/steam/", "")
 		except Exception as e:
