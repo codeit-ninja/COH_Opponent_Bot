@@ -445,7 +445,7 @@ class FileMonitor (threading.Thread):
 			self.filePath = filePath
 			self.fileIndex = 0
 			self.theFile = []
-			self.event = Event()
+			self.event = threading.Event()
 			with open(self.filePath, 'r') as f:
 				lines = f.readlines()
 			for line in lines: 
@@ -475,7 +475,6 @@ class FileMonitor (threading.Thread):
 						if (self.opponentBot):
 							#trigger the opponent command in the opponentbot thread
 							self.opponentBot.queue.put("OPPONENT")
-					pass
 				self.fileIndex = len(lines)
 				self.event = threading.Event()
 				self.event.wait(timeout = self.pollInterval)
@@ -485,6 +484,7 @@ class FileMonitor (threading.Thread):
     
 	def close(self):
 		self.running = False
+		self.event.set()
 
 class HandleCOHlogFile:
 	
