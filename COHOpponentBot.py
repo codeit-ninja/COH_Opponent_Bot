@@ -1,3 +1,5 @@
+VersionNumber = "Version 1.0"
+
 import IRCBetBot_Parameters
 import sys
 import tkinter as tk
@@ -13,6 +15,8 @@ from tkinter.ttk import *
 from tkinter import ttk
 import base64
 import os
+
+import logging # For logging information and warnings about opperation errors
 
 
 class COHBotGUI:
@@ -155,6 +159,10 @@ class COHBotGUI:
         scrollb.grid(row=8, column=4, sticky='nsew')
         self.txt['yscrollcommand'] = scrollb.set
 
+
+        # The following literal string is the one way I could encode the icon inside the file for pyinstaller because it didn't like the external file
+        # Possibly move this to another file in future to make the code cleaner
+        # The icon was encoded to Base64 using the facility at this location https://www.motobit.com/util/base64-decoder-encoder.asp
         icon = \
         """AAABAAUAEBAAAAEAIABoBAAAVgAAABgYAAABACAAiAkAAL4EAAAgIAAAAQAgAKgQAABGDgAAMDAA
         AAEAIACoJQAA7h4AABgYAAABACAAiAkAAJZEAAAoAAAAEAAAACAAAAABACAAAAAAAAAEAAAAAAAA
@@ -599,7 +607,7 @@ class COHBotGUI:
         try:
             self.optionsMenu.focus()
         except Exception as e:
-            print(str(e))
+            logging.exception('Exception : ')
 
     def testStats(self):
         print("Testing Stats")
@@ -667,7 +675,7 @@ class COHBotGUI:
             if self.thread:
                 self.thread.parameters = self.parameters
         except Exception as e:
-            print(str(e))
+            logging.exception('Exception : ')
 
     
     def on_close_options(self):
@@ -679,7 +687,7 @@ class COHBotGUI:
             print(bool(self.consoleDisplayBool.get()))
             self.thread.displayConsoleOut = bool(self.consoleDisplayBool.get())
         except Exception as e:
-            print(str(e))
+            logging.exception('Exception : ')
 
     def disableEverything(self):
         self.b1.config(state = DISABLED)
@@ -787,7 +795,7 @@ class COHBotGUI:
                 return True
             return False
         except Exception as e:
-            print(str(e))
+            logging.exception('Exception : ')
             return False
 
     def checkSteamNumber(self, number):
@@ -798,7 +806,7 @@ class COHBotGUI:
                     return True
             return False
         except Exception as e:
-            print(str(e))
+            logging.exception('Exception : ')
 
     def locateWarningLog(self):
         self.disableEverything()
@@ -840,10 +848,17 @@ class COHBotGUI:
                 self.automaticFileMonitor.close()
                 self.automaticFileMonitor.event.set()
         except Exception as e:
-            print(str(e))
+            logging.exception('Exception : ')
         while (threading.active_count() > 1):
             pass
         print("exiting main thread")
         sys.exit()
+
+
+# Program Entry Starts here
+# Default error logging log file location:
+logging.basicConfig(format='%(asctime)s (%(threadName)-10s) [%(levelname)s] %(message)s', filename= 'IRCOpponent_Temp_ERROR.log',filemode = "w", level=logging.DEBUG)
+logging.info("Logging Started")
+logging.info(VersionNumber)
 
 main = COHBotGUI()

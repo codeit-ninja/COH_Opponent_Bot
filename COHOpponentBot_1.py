@@ -676,8 +676,6 @@ class cohStat:
 			print(str(e))
 	
 	
-	
-	
 	def __str__(self):
 		output = str(self.user)
 		output += "Basic\n"
