@@ -596,6 +596,10 @@ class cohStat:
 		self.ones = { }
 		self.twos = { }
 		self.threes = { }
+		self.totalWins = 0
+		self.totalLosses = 0
+		self.totalWLRatio = None
+
 
 		statString = "/steam/"+str(steamNumber)
 
@@ -659,6 +663,21 @@ class cohStat:
 						self.threes[Faction.CW] = factionResult(name = "Commonwealth", nameShort = "CW" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
 					if item.get('leaderboard_id') == 15:
 						self.threes[Faction.PE] = factionResult(name = "Panzer Elite", nameShort = "PE" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
+		allFactions = self.basic + self.ones + self.twos + self. threes
+		
+		for item in allFactions:
+			self.totalWins += item.get('wins')
+			self.totalLosses += item.get('losses')
+		
+		try:
+			if (int(self.totalLosses) > 0):
+				self.totalWLRatio = round(self.totalWins/self.totalLosses, 2)
+		except Exception as e:
+			print(str(e))
+	
+	
+	
+	
 	def __str__(self):
 		output = str(self.user)
 		output += "Basic\n"
@@ -681,6 +700,11 @@ class cohStat:
 		output += str(self.basic.get(Faction.WM))+"\n"
 		output += str(self.basic.get(Faction.PE))+"\n"
 		output += str(self.basic.get(Faction.CW))+"\n"
+
+		output += "Totals\n"
+		output += "Wins : " + str(self.totalWins) + "\n"
+		output += "Losses : " + str(self.totalLosses) + "\n"
+		output += "W/L Ratio : " + str(self.totalWLRatio) + "\n"
 
 		return output
 
@@ -744,9 +768,7 @@ class cohUser:
 		self.steamString = steamString
 		self.country = country
 		self.steamProfileAddress = None
-		self.totalWins = None
-		self.totalLosses = None
-		self.totalWLRation = None
+
 		try:
 			self.steamProfileAddress = "https://steamcommunity.com/profiles/" + str(self.steamString).replace("/steam/", "")
 		except Exception as e:
