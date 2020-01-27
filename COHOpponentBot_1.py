@@ -696,14 +696,14 @@ class factionResult:
 		self.name = name
 		self.nameShort = nameShort
 		self.id = leaderboard_id
-		self.wins = wins
-		self.losses = losses
-		self.streak = streak
-		self.disputes = disputes
-		self.drops = drops
-		self.rank = rank
-		self.rankLevel = rankLevel
-		self.lastMatch = lastMatch
+		self.wins = str(wins).replace("-1", "None")
+		self.losses = str(losses).replace("-1", "None")
+		self.streak = str(streak).replace("-1", "None")
+		self.disputes = str(disputes).replace("-1", "None")
+		self.drops = str(drops).replace("-1", "None")
+		self.rank = str(rank).replace("-1", "None")
+		self.rankLevel = str(rankLevel).replace("-1", "None")
+		self.lastMatch = str(lastMatch).replace("-1", "None")
 		self.lastTime = None
 		self.winLossRatio = None
 		try:
