@@ -261,8 +261,9 @@ class IRC_Channel(threading.Thread):
 		if (message.lower() == "opponent") or (message.lower() == "place your bets") or (message.lower() == "!opponent") or (message.lower() == "!opp") or (message.lower() == "opp"):
 			myHandleCOHlogFile = HandleCOHlogFile(self.parent.parameters)
 			returnedList =  myHandleCOHlogFile.loadLog()
-			for item in returnedList:
-				self.parent.SendPrivateMessageToIRC(str(item))
+			if returnedList:
+				for item in returnedList:
+					self.parent.SendPrivateMessageToIRC(str(item))
 		if (message.lower() == "test"):
 			self.parent.SendPrivateMessageToIRC("I'm here! Pls give me mod to prevent twitch from autobanning me for spam if I have to send a few messages quickly.")
 			self.parent.output.insert(END, "Oh hi again, I heard you in the " +self.channel[1:] + " channel.\n")
