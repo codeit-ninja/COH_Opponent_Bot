@@ -663,15 +663,21 @@ class cohStat:
 						self.threes[Faction.CW] = factionResult(name = "Commonwealth", nameShort = "CW" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
 					if item.get('leaderboard_id') == 15:
 						self.threes[Faction.PE] = factionResult(name = "Panzer Elite", nameShort = "PE" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
-		allFactions = self.basic + self.ones + self.twos + self. threes
+		
+		allFactions = {}
+		allFactions.update(self.basic) 
+		allFactions.update(self.ones)
+		allFactions.update(self.twos)
+		allFactions.update(self.threes)
 		
 		for item in allFactions:
-			self.totalWins += item.get('wins')
-			self.totalLosses += item.get('losses')
+			self.totalWins += int(item.get('wins'))
+			self.totalLosses += int(item.get('losses'))
 		
 		try:
 			if (int(self.totalLosses) > 0):
 				self.totalWLRatio = round(self.totalWins/self.totalLosses, 2)
+
 		except Exception as e:
 			print(str(e))
 	

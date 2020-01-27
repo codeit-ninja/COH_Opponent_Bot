@@ -565,6 +565,12 @@ class COHBotGUI:
             self.checkWLRatio.grid( sticky=tk.W)
             self.checkWLRatio = tk.Checkbutton(self.f2, text="Steam Profile", variable=self.showSteamProfile, command = self.saveToggles)
             self.checkWLRatio.grid( sticky=tk.W) 
+            self.checkTotalWins = tk.Checkbutton(self.f2, text="Total Wins", variable=self.showTotalWins, command = self.saveToggles)
+            self.checkTotalWins.grid( sticky=tk.W)             
+            self.checkTotalLosses = tk.Checkbutton(self.f2, text="Total Losses", variable=self.showTotalLosses, command = self.saveToggles)
+            self.checkTotalLosses.grid( sticky=tk.W) 
+            self.checkTotalWLRatio = tk.Checkbutton(self.f2, text="Total W/L Ratio", variable=self.showTotalWLRatio, command = self.saveToggles)
+            self.checkTotalWLRatio.grid( sticky=tk.W) 
 
 
             #s1 = ttk.Separator(OptionMenu, orient=HORIZONTAL)
@@ -652,6 +658,9 @@ class COHBotGUI:
         self.parameters.data['showOwn'] = bool(self.showOwn.get())
 
         self.parameters.data['automaticMode'] = bool(self.automaticMode.get())
+        self.parameters.data['showTotalWins'] = bool(self.showTotalWins.get())
+        self.parameters.data['showTotalLosses'] = bool(self.showTotalLosses.get())
+        self.parameters.data['showTotalWLRatio'] = bool(self.showTotalWLRatio.get())
 
         self.parameters.data['showBasic'] = bool(self.showBasic.get())
         self.parameters.data['show1v1'] = bool(self.show1v1.get())
