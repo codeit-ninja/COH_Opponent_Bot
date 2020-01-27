@@ -34,6 +34,10 @@ class parameters:
 
 		self.data['showOwn'] = False
 
+		self.data['showTotalWins'] = False
+		self.data['showTotalLosses'] = False
+		self.data['showTotalWLRatio'] = False
+
 		self.data['automaticMode'] = True
 
 		self.data['filePollInterval'] = 10

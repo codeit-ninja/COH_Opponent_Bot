@@ -42,6 +42,10 @@ class COHBotGUI:
         self.showOwn = IntVar(value = int(bool(self.parameters.data.get('showOwn'))))
 
         self.automaticMode = IntVar(value = int(bool(self.parameters.data.get('automaticMode'))))
+
+        self.showTotalWins = IntVar(value = int(bool(self.parameters.data.get('showTotalWins'))))
+        self.showTotalLosses = IntVar(value = int(bool(self.parameters.data.get('showTotalLosses'))))
+        self.showTotalWLRatio = IntVar(value = int(bool(self.parameters.data.get('showTotalWLRatio'))))
         
         self.showBasic = IntVar(value = int(bool(self.parameters.data.get('showBasic'))))
         self.show1v1 = IntVar(value = int(bool(self.parameters.data.get('show1v1'))))
