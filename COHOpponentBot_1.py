@@ -676,7 +676,7 @@ class cohStat:
 		
 		try:
 			if (int(self.totalLosses) > 0):
-				self.totalWLRatio = round(self.totalWins/self.totalLosses, 2)
+				self.totalWLRatio = round(int(self.totalWins)/int(self.totalLosses), 2)
 
 		except Exception as e:
 			print(str(e))
@@ -742,7 +742,7 @@ class factionResult:
 			print(str(e))
 		try:
 			if (int(self.losses) != 0):
-				self.winLossRatio = str(round(self.wins/self.losses, 2))
+				self.winLossRatio = str(round(int(self.wins)/int(self.losses), 2))
 			else:
 				if(int(self.wins) > 0):
 					self.winLossRatio = "Unbeaten"
