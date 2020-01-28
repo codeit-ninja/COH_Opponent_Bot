@@ -328,7 +328,7 @@ class StatsRequest:
 			if ((self.parameters.data.get('showBasic')) or (bool(self.parameters.data.get('automaticMode')) and (int(self.numberOfComputers) > 0))):
 				output += " : Basic :-"
 				for item in Faction:
-					if (stats.ones.get(item).nameShort):
+					if (stats.basic.get(item).nameShort):
 						output += ":- " + str(stats.ones.get(item).nameShort)
 					if (self.parameters.data.get('showWins')):
 						output += " : Wins " + str(stats.ones.get(item).wins)
@@ -378,7 +378,7 @@ class StatsRequest:
 			if ((self.parameters.data.get('show2v2')) or ((bool(self.parameters.data.get('automaticMode')) and (3 <= int(self.mapSize) <= 4)) and (int(self.numberOfComputers) == 0))):
 				output += " : 2v2 :-"
 				for item in Faction:
-					if (stats.ones.get(item).nameShort):
+					if (stats.twos.get(item).nameShort):
 						output += ":- " + str(stats.ones.get(item).nameShort)
 					if (self.parameters.data.get('showWins')):
 						output += " : Wins " + str(stats.ones.get(item).wins)
@@ -403,7 +403,7 @@ class StatsRequest:
 			if ((self.parameters.data.get('show3v3')) or ((bool(self.parameters.data.get('automaticMode')) and (5 <= int(self.mapSize) <= 6)) and (int(self.numberOfComputers) == 0))):
 				output += " : 3v3 :-"
 				for item in Faction:
-					if (stats.ones.get(item).nameShort):
+					if (stats.threes.get(item).nameShort):
 						output += ":- " + str(stats.ones.get(item).nameShort)
 					if (self.parameters.data.get('showWins')):
 						output += " : Wins " + str(stats.ones.get(item).wins)
