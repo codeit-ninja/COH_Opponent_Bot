@@ -329,25 +329,25 @@ class StatsRequest:
 				output += " : Basic :-"
 				for item in Faction:
 					if (stats.basic.get(item).nameShort):
-						output += ":- " + str(stats.ones.get(item).nameShort)
+						output += ":- " + str(stats.basic.get(item).nameShort)
 					if (self.parameters.data.get('showWins')):
-						output += " : Wins " + str(stats.ones.get(item).wins)
+						output += " : Wins " + str(stats.basic.get(item).wins)
 					if (self.parameters.data.get('showLosses')):
-						output += " : Losses " + str(stats.ones.get(item).losses)
+						output += " : Losses " + str(stats.basic.get(item).losses)
 					if (self.parameters.data.get('showDisputes')):
-						output += " : Disputes " + str(stats.ones.get(item).disputes)					
+						output += " : Disputes " + str(stats.basic.get(item).disputes)					
 					if (self.parameters.data.get('showStreak')):
-						output += " : Streak " + str(stats.ones.get(item).streak)
+						output += " : Streak " + str(stats.basic.get(item).streak)
 					if (self.parameters.data.get('showDrops')):
-						output += " : Drops " + str(stats.ones.get(item).drops)
+						output += " : Drops " + str(stats.basic.get(item).drops)
 					if (self.parameters.data.get('showRank')):
-						output += " : Rank " + str(stats.ones.get(item).rank)
+						output += " : Rank " + str(stats.basic.get(item).rank)
 					if (self.parameters.data.get('showLevel')):
-						output += " : LvL " + str(stats.ones.get(item).rankLevel)
+						output += " : LvL " + str(stats.basic.get(item).rankLevel)
 					if (self.parameters.data.get('showLastPlayed')):
-						output += " : Last Played " + str(stats.ones.get(item).lastTime)
+						output += " : Last Played " + str(stats.basic.get(item).lastTime)
 					if (self.parameters.data.get('showWLRatio')):
-						output += " : W/L Ratio " + str(stats.ones.get(item).winLossRatio)
+						output += " : W/L Ratio " + str(stats.basic.get(item).winLossRatio)
 					output += " -"
 
 			if ((self.parameters.data.get('show1v1')) or ((bool(self.parameters.data.get('automaticMode')) and (0 <= int(self.mapSize) <= 2)) and (int(self.numberOfComputers) == 0))):
@@ -379,50 +379,50 @@ class StatsRequest:
 				output += " : 2v2 :-"
 				for item in Faction:
 					if (stats.twos.get(item).nameShort):
-						output += ":- " + str(stats.ones.get(item).nameShort)
+						output += ":- " + str(stats.twos.get(item).nameShort)
 					if (self.parameters.data.get('showWins')):
-						output += " : Wins " + str(stats.ones.get(item).wins)
+						output += " : Wins " + str(stats.twos.get(item).wins)
 					if (self.parameters.data.get('showLosses')):
-						output += " : Losses " + str(stats.ones.get(item).losses)
+						output += " : Losses " + str(stats.twos.get(item).losses)
 					if (self.parameters.data.get('showDisputes')):
-						output += " : Disputes " + str(stats.ones.get(item).disputes)					
+						output += " : Disputes " + str(stats.twos.get(item).disputes)					
 					if (self.parameters.data.get('showStreak')):
-						output += " : Streak " + str(stats.ones.get(item).streak)
+						output += " : Streak " + str(stats.twos.get(item).streak)
 					if (self.parameters.data.get('showDrops')):
-						output += " : Drops " + str(stats.ones.get(item).drops)
+						output += " : Drops " + str(stats.twos.get(item).drops)
 					if (self.parameters.data.get('showRank')):
-						output += " : Rank " + str(stats.ones.get(item).rank)
+						output += " : Rank " + str(stats.twos.get(item).rank)
 					if (self.parameters.data.get('showLevel')):
-						output += " : LvL " + str(stats.ones.get(item).rankLevel)
+						output += " : LvL " + str(stats.twos.get(item).rankLevel)
 					if (self.parameters.data.get('showLastPlayed')):
-						output += " : Last Played " + str(stats.ones.get(item).lastTime)
+						output += " : Last Played " + str(stats.twos.get(item).lastTime)
 					if (self.parameters.data.get('showWLRatio')):
-						output += " : W/L Ratio " + str(stats.ones.get(item).winLossRatio)
+						output += " : W/L Ratio " + str(stats.twos.get(item).winLossRatio)
 				output += " -"
 
 			if ((self.parameters.data.get('show3v3')) or ((bool(self.parameters.data.get('automaticMode')) and (5 <= int(self.mapSize) <= 6)) and (int(self.numberOfComputers) == 0))):
 				output += " : 3v3 :-"
 				for item in Faction:
 					if (stats.threes.get(item).nameShort):
-						output += ":- " + str(stats.ones.get(item).nameShort)
+						output += ":- " + str(stats.threes.get(item).nameShort)
 					if (self.parameters.data.get('showWins')):
-						output += " : Wins " + str(stats.ones.get(item).wins)
+						output += " : Wins " + str(stats.threes.get(item).wins)
 					if (self.parameters.data.get('showLosses')):
-						output += " : Losses " + str(stats.ones.get(item).losses)
+						output += " : Losses " + str(stats.threes.get(item).losses)
 					if (self.parameters.data.get('showDisputes')):
-						output += " : Disputes " + str(stats.ones.get(item).disputes)					
+						output += " : Disputes " + str(stats.threes.get(item).disputes)					
 					if (self.parameters.data.get('showStreak')):
-						output += " : Streak " + str(stats.ones.get(item).streak)
+						output += " : Streak " + str(stats.threes.get(item).streak)
 					if (self.parameters.data.get('showDrops')):
-						output += " : Drops " + str(stats.ones.get(item).drops)
+						output += " : Drops " + str(stats.threes.get(item).drops)
 					if (self.parameters.data.get('showRank')):
-						output += " : Rank " + str(stats.ones.get(item).rank)
+						output += " : Rank " + str(stats.threes.get(item).rank)
 					if (self.parameters.data.get('showLevel')):
-						output += " : LvL " + str(stats.ones.get(item).rankLevel)
+						output += " : LvL " + str(stats.threes.get(item).rankLevel)
 					if (self.parameters.data.get('showLastPlayed')):
-						output += " : Last Played " + str(stats.ones.get(item).lastTime)
+						output += " : Last Played " + str(stats.threes.get(item).lastTime)
 					if (self.parameters.data.get('showWLRatio')):
-						output += " : W/L Ratio " + str(stats.ones.get(item).winLossRatio)
+						output += " : W/L Ratio " + str(stats.threes.get(item).winLossRatio)
 				output += " -"
 
 			outputList = list(self.split_by_n(output, 500))
