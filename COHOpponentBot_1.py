@@ -22,6 +22,7 @@ from threading import Thread
 from datetime import datetime
 from enum import Enum
 from queue import Queue # to talk to the threads
+import logging
 
 
 #Because python floating point arthmatic is a nightmare
@@ -670,9 +671,12 @@ class cohStat:
 		allFactions.update(self.twos)
 		allFactions.update(self.threes)
 		
-		for item in allFactions:
-			self.totalWins += int(item.get('wins'))
-			self.totalLosses += int(item.get('losses'))
+		try:
+			for item in allFactions:
+				self.totalWins += int(item.get('wins'))
+				self.totalLosses += int(item.get('losses'))
+		except Exception as e:
+			logging.exception("Exceptions : ")
 		
 		try:
 			if (int(self.totalLosses) > 0):
