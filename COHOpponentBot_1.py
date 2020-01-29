@@ -665,18 +665,18 @@ class cohStat:
 					if item.get('leaderboard_id') == 15:
 						self.threes[Faction.PE] = factionResult(name = "Panzer Elite", nameShort = "PE" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
 		
-		allFactions = {}
-		allFactions.update(self.basic) 
-		allFactions.update(self.ones)
-		allFactions.update(self.twos)
-		allFactions.update(self.threes)
+		#allFactions = {}
+		#allFactions.update(self.basic) 
+		#allFactions.update(self.ones)
+		#allFactions.update(self.twos)
+		#allFactions.update(self.threes)
 		
-		try:
-			for item in allFactions:
-				self.totalWins += int(item.get('wins'))
-				self.totalLosses += int(item.get('losses'))
-		except Exception as e:
-			logging.exception("Exceptions : ")
+		#try:
+		#	for item in allFactions:
+		#		self.totalWins += int(item.get('wins'))
+		#		self.totalLosses += int(item.get('losses'))
+		#except Exception as e:
+		#	logging.exception("Exceptions : ")
 		
 		try:
 			if (int(self.totalLosses) > 0):
