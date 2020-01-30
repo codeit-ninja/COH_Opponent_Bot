@@ -64,6 +64,7 @@ class parameters:
 		self.data['automaticTrigger'] = False
 
 		self.data['outputPlayerOverlayFiles'] = True
+		self.data['showOnlyDetectedFactionPlayed'] = True
 		
 
 		#your personal steam number

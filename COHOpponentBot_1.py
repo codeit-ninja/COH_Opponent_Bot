@@ -328,10 +328,13 @@ class StatsRequest:
 					output += " Faction : " + str(self.player.faction.name)
 			if (self.parameters.data.get('showUserCountry')):
 				output += " : (" + str(stats.user.country) + ")"
-			if (self.parameters.data.get('showTotalLosses')):
-				output += " : Total Losses " + str(stats.totalLosses)
+
 			if (self.parameters.data.get('showTotalWins')):
 				output += " : Total Wins " + str(stats.totalWins)
+
+			if (self.parameters.data.get('showTotalLosses')):
+				output += " : Total Losses " + str(stats.totalLosses)
+
 			if (self.parameters.data.get('showTotalWLRatio')):
 				output += " : Total W/L Ratio " + str(stats.totalWLRatio)
 
