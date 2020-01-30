@@ -277,8 +277,9 @@ class IRC_Channel(threading.Thread):
 
 
 class StatsRequest:
-	def __init__(self, parameters, numberOfHumans, numberOfComputers, mapSize):
+	def __init__(self, parameters, numberOfHumans, numberOfComputers, mapSize, player = None):
 		self.parameters = parameters
+		self.player = player
 		try:
 			self.numberOfHumans = int(numberOfHumans)
 			self.numberOfComputers = int(numberOfComputers)
@@ -322,8 +323,19 @@ class StatsRequest:
 
 			output = ""
 			output += "Name : " + str(stats.user.name)
+			if(self.player):
+				if(self.player.faction):
+					output += " Faction : " + str(self.player.faction.name)
 			if (self.parameters.data.get('showUserCountry')):
 				output += " : (" + str(stats.user.country) + ")"
+			if (self.parameters.data.get('showTotalLosses')):
+				output += " : Total Losses " + str(stats.totalLosses)
+			if (self.parameters.data.get('showTotalWins')):
+				output += " : Total Wins " + str(stats.totalWins)
+			if (self.parameters.data.get('showTotalWLRatio')):
+				output += " : Total W/L Ratio " + str(stats.totalWLRatio)
+
+			
 
 			if ((self.parameters.data.get('showBasic')) or (bool(self.parameters.data.get('automaticMode')) and (int(self.numberOfComputers) > 0))):
 				output += " : Basic :-"
@@ -425,6 +437,11 @@ class StatsRequest:
 						output += " : W/L Ratio " + str(stats.threes.get(item).winLossRatio)
 				output += " -"
 
+			# output each player to file
+			if (self.parameters.data.get('outputPlayerOverlayFiles')):
+				self.savePlayer(stats)
+
+
 			outputList = list(self.split_by_n(output, 500))
 			if (self.parameters.data.get('showSteamProfile')):
 				outputList.append("Steam profile " + str(stats.user.steamProfileAddress))
@@ -432,6 +449,15 @@ class StatsRequest:
 			print("output list " + str (outputList))
 
 			return outputList
+
+	def savePlayer(self, stats):
+		try:
+			playerNumber = "player" + str(self.player.slot) + ".txt"
+			with open(playerNumber , 'w') as outfile:
+				outfile.write(str("{0}".format(str(stats.user.name))))
+		except Exception as e:
+			print("Problem in save")
+			print(str(e))
 
 class FileMonitor (threading.Thread):
 
@@ -501,7 +527,7 @@ class HandleCOHlogFile:
 		with open(self.logPath, encoding='ISO-8859-1') as file:
 			content = file.readlines()
 		print(self.parameters.data['steamNumber'])
-		steamNumberList = []
+		playerList = []
 		humans = 0
 		computers = 0
 		eazyCPUCount = 0
@@ -509,17 +535,39 @@ class HandleCOHlogFile:
 		hardCPUCount = 0
 		expertCPUCount = 0
 		mapSize = 0
+
+
 		for item in content:
 			if ("match started") in item.lower():
 				print (item)
+				# dictionary containing player number linked to steamnumber
 				steamNumber = self.find_between(item, "steam/", "]")
-				ranking = self.find_between(item, "ranking =","\n")
-				if (str(steamNumber) == str(self.parameters.data['steamNumber'])):
-					if(self.parameters.data.get('showOwn')):
-						steamNumberList.append(steamNumber)
-				else:
-					steamNumberList.append(steamNumber)
+				#ranking = self.find_between(item, "ranking =","\n")
+				slot = self.find_between(item, "slot =  ", ", ranking")
+				thePlayer = Player(slot = slot, steamNumber=steamNumber)
+				playerList.append(thePlayer)
 			# set the number of players
+			if ("Setting player" in item):
+					theSlotNumber = self.find_between(item, "player (", ")")
+					print ("The slot number : " + str(theSlotNumber))
+					for x in range (len(playerList)):
+						if (str(theSlotNumber) == str(playerList[x].slot)):
+							factionString = self.find_between(item , "race to: " , "\n")
+							print("factionString : " + str(factionString))
+							print("x = " + str(x))
+							if factionString == "allies_commonwealth":
+								playerList[x].faction = Faction.CW
+								print("Setting faction to CW")
+							if factionString == "allies":
+								playerList[x].faction = Faction.US
+								print("Setting faction to US")
+							if factionString == "axis_panzer_elite":
+								playerList[x].faction = Faction.PE
+								print("Setting faction to PE")
+							if factionString == "axis":
+								playerList[x].faction = Faction.WM
+								print("Setting faction to WM")
+
 			if ("GAME -- ***") in item:
 				# need to reverse the string to get the humans bit out uniquely or other strings in the line can interfere with the parsing
 				reverseString = item[::-1]
@@ -537,7 +585,7 @@ class HandleCOHlogFile:
 				humans = 0
 				computers = 0
 				mapSize = 0
-				steamNumberList.clear()
+				playerList.clear()
 			if ("Player CPU - Expert" in item):
 				expertCPUCount += 1
 			if ("Player CPU - Hard" in item):
@@ -548,7 +596,7 @@ class HandleCOHlogFile:
 				eazyCPUCount += 1
 		
 		# default backup player numbers - not used if file human and computers are legit numbers
-		numberOfPlayers = len(steamNumberList)
+		numberOfPlayers = len(playerList)
 
 		try:
 			numberOfPlayers = int(float(humans)) + int(float(computers)) # the float then int removes change of value error
@@ -558,21 +606,27 @@ class HandleCOHlogFile:
 		print("computers " + str(computers) +"\n")
 		print("number of players " + str(numberOfPlayers) + "\n")
 		print("map size" + str(mapSize) + "\n")
+		for item in playerList:
+			print("playerList : " + str(item))
+
 		try:
 			if (int(computers) > 0):
 				self.data.append("Game with " + str(computers) + " computer AI, ("+str(eazyCPUCount)+") Easy, ("+str(normalCPUCount)+") Normal, ("+str(hardCPUCount)+") Hard, ("+str(expertCPUCount)+") Expert.")
 		except Exception as e:
 			print(str(e))
 		
-		if (steamNumberList):
-			print(steamNumberList)
-
-			for item in steamNumberList:
-				myStatRequest = StatsRequest(self.parameters, humans, computers, mapSize)
+		if (playerList):
+			for player in playerList:
+				myStatRequest = StatsRequest(self.parameters, humans, computers, mapSize, player = player)
 				try:
-					statNumber = int(item)
-					self.data = self.data + list(myStatRequest.returnStats(statNumber))
-					#print("DATA OUTPUT " + str (self.data))
+					statNumber = int(player.steamNumber)
+					returnedList = list(myStatRequest.returnStats(statNumber))
+					if(player.steamNumber == self.parameters.data.get('steamNumber')):
+						if (self.parameters.data.get('showOwn')):
+							self.data = self.data + returnedList
+					else:
+						self.data = self.data + returnedList
+
 				except ValueError:
 					print ("got a value error")						
 		if self.data:
@@ -664,20 +718,24 @@ class cohStat:
 						self.threes[Faction.CW] = factionResult(name = "Commonwealth", nameShort = "CW" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
 					if item.get('leaderboard_id') == 15:
 						self.threes[Faction.PE] = factionResult(name = "Panzer Elite", nameShort = "PE" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
+	
+
+		try:
+			self.totalWins += int(self.basic[Faction.US].wins) + int(self.basic[Faction.WM].wins) + int(self.basic[Faction.CW].wins) + int(self.basic[Faction.PE].wins)
+			self.totalLosses += int(self.basic[Faction.US].losses) + int(self.basic[Faction.WM].losses) + int(self.basic[Faction.CW].losses) + int(self.basic[Faction.PE].losses)
+
+			self.totalWins += int(self.ones[Faction.US].wins) + int(self.ones[Faction.WM].wins) + int(self.ones[Faction.CW].wins) + int(self.ones[Faction.PE].wins)
+			self.totalLosses += int(self.ones[Faction.US].losses) + int(self.ones[Faction.WM].losses) + int(self.ones[Faction.CW].losses) + int(self.ones[Faction.PE].losses)
 		
-		#allFactions = {}
-		#allFactions.update(self.basic) 
-		#allFactions.update(self.ones)
-		#allFactions.update(self.twos)
-		#allFactions.update(self.threes)
+			self.totalWins += int(self.twos[Faction.US].wins) + int(self.twos[Faction.WM].wins) + int(self.twos[Faction.CW].wins) + int(self.twos[Faction.PE].wins)
+			self.totalLosses += int(self.twos[Faction.US].losses) + int(self.twos[Faction.WM].losses) + int(self.twos[Faction.CW].losses) + int(self.twos[Faction.PE].losses)
 		
-		#try:
-		#	for item in allFactions:
-		#		self.totalWins += int(item.get('wins'))
-		#		self.totalLosses += int(item.get('losses'))
-		#except Exception as e:
-		#	logging.exception("Exceptions : ")
-		
+			self.totalWins += int(self.threes[Faction.US].wins) + int(self.threes[Faction.WM].wins) + int(self.threes[Faction.CW].wins) + int(self.threes[Faction.PE].wins)
+			self.totalLosses += int(self.threes[Faction.US].losses) + int(self.threes[Faction.WM].losses) + int(self.threes[Faction.CW].losses) + int(self.threes[Faction.PE].losses)
+		except Exception as e:
+			print(str(e))
+
+
 		try:
 			if (int(self.totalLosses) > 0):
 				self.totalWLRatio = round(int(self.totalWins)/int(self.totalLosses), 2)
@@ -694,20 +752,20 @@ class cohStat:
 		output += str(self.basic.get(Faction.PE))+"\n"
 		output += str(self.basic.get(Faction.CW))+"\n"		
 		output += "1v1\n"
-		output += str(self.basic.get(Faction.US))+"\n"
-		output += str(self.basic.get(Faction.WM))+"\n"
-		output += str(self.basic.get(Faction.PE))+"\n"
-		output += str(self.basic.get(Faction.CW))+"\n"
+		output += str(self.ones.get(Faction.US))+"\n"
+		output += str(self.ones.get(Faction.WM))+"\n"
+		output += str(self.ones.get(Faction.PE))+"\n"
+		output += str(self.ones.get(Faction.CW))+"\n"
 		output += "2v2\n"
-		output += str(self.basic.get(Faction.US))+"\n"
-		output += str(self.basic.get(Faction.WM))+"\n"
-		output += str(self.basic.get(Faction.PE))+"\n"
-		output += str(self.basic.get(Faction.CW))+"\n"
+		output += str(self.twos.get(Faction.US))+"\n"
+		output += str(self.twos.get(Faction.WM))+"\n"
+		output += str(self.twos.get(Faction.PE))+"\n"
+		output += str(self.twos.get(Faction.CW))+"\n"
 		output += "3v3\n"
-		output += str(self.basic.get(Faction.US))+"\n"
-		output += str(self.basic.get(Faction.WM))+"\n"
-		output += str(self.basic.get(Faction.PE))+"\n"
-		output += str(self.basic.get(Faction.CW))+"\n"
+		output += str(self.threes.get(Faction.US))+"\n"
+		output += str(self.threes.get(Faction.WM))+"\n"
+		output += str(self.threes.get(Faction.PE))+"\n"
+		output += str(self.threes.get(Faction.CW))+"\n"
 
 		output += "Totals\n"
 		output += "Wins : " + str(self.totalWins) + "\n"
@@ -768,6 +826,22 @@ class factionResult:
 
 		return output
 
+		
+
+class Player:
+
+	def __init__(self, slot = None, steamNumber = None, faction = None):
+		self.slot = slot
+		self.steamNumber = steamNumber
+		self.faction = faction
+
+	def __str__(self):
+		output = "slot : " + str(self.slot) + "\n"
+		output += "steamNumber : " + str(self.steamNumber) + "\n"
+		output += "faction : " + str(self.faction) + "\n"
+
+		return output
+
 class cohUser:
 
 	def __init__(self, profile_id = -1, name = -1, steamString = -1, country = -1):
@@ -776,6 +850,7 @@ class cohUser:
 		self.steamString = steamString
 		self.country = country
 		self.steamProfileAddress = None
+		self.faction = None
 
 		try:
 			self.steamProfileAddress = "https://steamcommunity.com/profiles/" + str(self.steamString).replace("/steam/", "")
