@@ -1,0 +1,26 @@
+body {
+  background-color: transparent;
+}
+
+h1 {
+  color: navy;
+  font-size:2vw; 
+  }
+
+player {
+	
+}
+
+.team1 {
+	color: red;
+	float: right;
+	margin-right: 20px;
+
+	}
+
+.team2 {
+	color: white;
+	float: left;
+	margin-left: 20px;
+	
+}
