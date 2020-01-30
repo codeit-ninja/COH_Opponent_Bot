@@ -7,8 +7,8 @@
 *.pkg
 *.pyz
 build/COHOpponentBot/warn-COHOpponentBot.txt
-*.html
 data.json
 IRCOpponent_Temp_ERROR.log
 player1.txt
 player0.txt
+build/COHOpponentBot/xref-COHOpponentBot.html
