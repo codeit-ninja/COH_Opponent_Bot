@@ -544,29 +544,70 @@ class HandleCOHlogFile:
 				steamNumber = self.find_between(item, "steam/", "]")
 				#ranking = self.find_between(item, "ranking =","\n")
 				slot = self.find_between(item, "slot =  ", ", ranking")
-				thePlayer = Player(slot = slot, steamNumber=steamNumber)
-				playerList.append(thePlayer)
+				# if slot does not exist in playerList then create player with new slot and steamNumber
+				slotExists = False
+				for i in range(len(playerList)):
+					if str(playerList[i].slot) == str(slot):
+						slotExists = True
+						playerList[i].steamNumber = steamNumber
+						print("the slot exists and I'm assigning steamNumber to it")
+				if (not slotExists):
+					thePlayer = Player(slot = slot, steamNumber=steamNumber)
+					playerList.append(thePlayer)
+					print("the slot does not exist and I'm creating a new player")
 			# set the number of players
 			if ("Setting player" in item):
 					theSlotNumber = self.find_between(item, "player (", ")")
 					print ("The slot number : " + str(theSlotNumber))
-					for x in range (len(playerList)):
-						if (str(theSlotNumber) == str(playerList[x].slot)):
-							factionString = self.find_between(item , "race to: " , "\n")
-							print("factionString : " + str(factionString))
-							print("x = " + str(x))
-							if factionString == "allies_commonwealth":
-								playerList[x].faction = Faction.CW
-								print("Setting faction to CW")
-							if factionString == "allies":
-								playerList[x].faction = Faction.US
-								print("Setting faction to US")
-							if factionString == "axis_panzer_elite":
-								playerList[x].faction = Faction.PE
-								print("Setting faction to PE")
-							if factionString == "axis":
-								playerList[x].faction = Faction.WM
-								print("Setting faction to WM")
+					# if slot does not exist in playerList then create player with new slot number
+					slotExists = False
+					for i in range(len(playerList)):
+						if str(playerList[i].slot) == str(theSlotNumber):
+							slotExists = True
+
+					factionString = self.find_between(item , "race to: " , "\n")
+					print("factionString : " + str(factionString))
+
+					if (slotExists):		
+						for x in range (len(playerList)):
+							if (str(theSlotNumber) == str(playerList[x].slot)):
+
+								if factionString == "allies_commonwealth":
+									playerList[x].faction = Faction.CW
+									print("Setting faction to CW")
+
+								if factionString == "allies":
+									playerList[x].faction = Faction.US								
+									print("Setting faction to US")
+
+								if factionString == "axis_panzer_elite":
+									playerList[x].faction = Faction.PE									
+									print("Setting faction to PE")
+
+								if factionString == "axis":
+									playerList[x].faction = Faction.WM
+									print("Setting faction to WM")
+					else:
+						if factionString == "allies_commonwealth":
+							player = Player(slot=theSlotNumber, faction = Faction.CW)
+							playerList.append(player)
+							print("Setting faction to CW")
+
+						if factionString == "allies":
+							player = Player(slot=theSlotNumber, faction = Faction.US)
+							playerList.append(player)									
+							print("Setting faction to US")
+
+						if factionString == "axis_panzer_elite":
+							player = Player(slot=theSlotNumber, faction = Faction.PE)
+							playerList.append(player)									
+							print("Setting faction to PE")
+
+						if factionString == "axis":
+							player = Player(slot=theSlotNumber, faction = Faction.WM)
+							playerList.append(player)
+							print("Setting faction to WM")
+	
 
 			if ("GAME -- ***") in item:
 				# need to reverse the string to get the humans bit out uniquely or other strings in the line can interfere with the parsing
@@ -577,7 +618,7 @@ class HandleCOHlogFile:
 			if ("PerformanceRecorder::StartRecording") in item:
 					mapSize = self.find_between(item, "game size " , "\n")
 			# clear the steam number list if a new game is found in the file
-			if ("successful game start") in item:
+			if ("MatchSetup: Sending start game message!") in item:
 				eazyCPUCount = 0
 				normalCPUCount = 0
 				hardCPUCount = 0
