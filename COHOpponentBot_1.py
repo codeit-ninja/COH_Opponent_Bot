@@ -22,6 +22,7 @@ from threading import Thread
 from datetime import datetime
 from enum import Enum
 from queue import Queue # to talk to the threads
+import logging
 
 
 #Because python floating point arthmatic is a nightmare
@@ -339,26 +340,26 @@ class StatsRequest:
 			if ((self.parameters.data.get('showBasic')) or (bool(self.parameters.data.get('automaticMode')) and (int(self.numberOfComputers) > 0))):
 				output += " : Basic :-"
 				for item in Faction:
-					if (stats.ones.get(item).nameShort):
-						output += ":- " + str(stats.ones.get(item).nameShort)
+					if (stats.basic.get(item).nameShort):
+						output += ":- " + str(stats.basic.get(item).nameShort)
 					if (self.parameters.data.get('showWins')):
-						output += " : Wins " + str(stats.ones.get(item).wins)
+						output += " : Wins " + str(stats.basic.get(item).wins)
 					if (self.parameters.data.get('showLosses')):
-						output += " : Losses " + str(stats.ones.get(item).losses)
+						output += " : Losses " + str(stats.basic.get(item).losses)
 					if (self.parameters.data.get('showDisputes')):
-						output += " : Disputes " + str(stats.ones.get(item).disputes)					
+						output += " : Disputes " + str(stats.basic.get(item).disputes)					
 					if (self.parameters.data.get('showStreak')):
-						output += " : Streak " + str(stats.ones.get(item).streak)
+						output += " : Streak " + str(stats.basic.get(item).streak)
 					if (self.parameters.data.get('showDrops')):
-						output += " : Drops " + str(stats.ones.get(item).drops)
+						output += " : Drops " + str(stats.basic.get(item).drops)
 					if (self.parameters.data.get('showRank')):
-						output += " : Rank " + str(stats.ones.get(item).rank)
+						output += " : Rank " + str(stats.basic.get(item).rank)
 					if (self.parameters.data.get('showLevel')):
-						output += " : LvL " + str(stats.ones.get(item).rankLevel)
+						output += " : LvL " + str(stats.basic.get(item).rankLevel)
 					if (self.parameters.data.get('showLastPlayed')):
-						output += " : Last Played " + str(stats.ones.get(item).lastTime)
+						output += " : Last Played " + str(stats.basic.get(item).lastTime)
 					if (self.parameters.data.get('showWLRatio')):
-						output += " : W/L Ratio " + str(stats.ones.get(item).winLossRatio)
+						output += " : W/L Ratio " + str(stats.basic.get(item).winLossRatio)
 					output += " -"
 
 			if ((self.parameters.data.get('show1v1')) or ((bool(self.parameters.data.get('automaticMode')) and (0 <= int(self.mapSize) <= 2)) and (int(self.numberOfComputers) == 0))):
@@ -389,51 +390,51 @@ class StatsRequest:
 			if ((self.parameters.data.get('show2v2')) or ((bool(self.parameters.data.get('automaticMode')) and (3 <= int(self.mapSize) <= 4)) and (int(self.numberOfComputers) == 0))):
 				output += " : 2v2 :-"
 				for item in Faction:
-					if (stats.ones.get(item).nameShort):
-						output += ":- " + str(stats.ones.get(item).nameShort)
+					if (stats.twos.get(item).nameShort):
+						output += ":- " + str(stats.twos.get(item).nameShort)
 					if (self.parameters.data.get('showWins')):
-						output += " : Wins " + str(stats.ones.get(item).wins)
+						output += " : Wins " + str(stats.twos.get(item).wins)
 					if (self.parameters.data.get('showLosses')):
-						output += " : Losses " + str(stats.ones.get(item).losses)
+						output += " : Losses " + str(stats.twos.get(item).losses)
 					if (self.parameters.data.get('showDisputes')):
-						output += " : Disputes " + str(stats.ones.get(item).disputes)					
+						output += " : Disputes " + str(stats.twos.get(item).disputes)					
 					if (self.parameters.data.get('showStreak')):
-						output += " : Streak " + str(stats.ones.get(item).streak)
+						output += " : Streak " + str(stats.twos.get(item).streak)
 					if (self.parameters.data.get('showDrops')):
-						output += " : Drops " + str(stats.ones.get(item).drops)
+						output += " : Drops " + str(stats.twos.get(item).drops)
 					if (self.parameters.data.get('showRank')):
-						output += " : Rank " + str(stats.ones.get(item).rank)
+						output += " : Rank " + str(stats.twos.get(item).rank)
 					if (self.parameters.data.get('showLevel')):
-						output += " : LvL " + str(stats.ones.get(item).rankLevel)
+						output += " : LvL " + str(stats.twos.get(item).rankLevel)
 					if (self.parameters.data.get('showLastPlayed')):
-						output += " : Last Played " + str(stats.ones.get(item).lastTime)
+						output += " : Last Played " + str(stats.twos.get(item).lastTime)
 					if (self.parameters.data.get('showWLRatio')):
-						output += " : W/L Ratio " + str(stats.ones.get(item).winLossRatio)
+						output += " : W/L Ratio " + str(stats.twos.get(item).winLossRatio)
 				output += " -"
 
 			if ((self.parameters.data.get('show3v3')) or ((bool(self.parameters.data.get('automaticMode')) and (5 <= int(self.mapSize) <= 6)) and (int(self.numberOfComputers) == 0))):
 				output += " : 3v3 :-"
 				for item in Faction:
-					if (stats.ones.get(item).nameShort):
-						output += ":- " + str(stats.ones.get(item).nameShort)
+					if (stats.threes.get(item).nameShort):
+						output += ":- " + str(stats.threes.get(item).nameShort)
 					if (self.parameters.data.get('showWins')):
-						output += " : Wins " + str(stats.ones.get(item).wins)
+						output += " : Wins " + str(stats.threes.get(item).wins)
 					if (self.parameters.data.get('showLosses')):
-						output += " : Losses " + str(stats.ones.get(item).losses)
+						output += " : Losses " + str(stats.threes.get(item).losses)
 					if (self.parameters.data.get('showDisputes')):
-						output += " : Disputes " + str(stats.ones.get(item).disputes)					
+						output += " : Disputes " + str(stats.threes.get(item).disputes)					
 					if (self.parameters.data.get('showStreak')):
-						output += " : Streak " + str(stats.ones.get(item).streak)
+						output += " : Streak " + str(stats.threes.get(item).streak)
 					if (self.parameters.data.get('showDrops')):
-						output += " : Drops " + str(stats.ones.get(item).drops)
+						output += " : Drops " + str(stats.threes.get(item).drops)
 					if (self.parameters.data.get('showRank')):
-						output += " : Rank " + str(stats.ones.get(item).rank)
+						output += " : Rank " + str(stats.threes.get(item).rank)
 					if (self.parameters.data.get('showLevel')):
-						output += " : LvL " + str(stats.ones.get(item).rankLevel)
+						output += " : LvL " + str(stats.threes.get(item).rankLevel)
 					if (self.parameters.data.get('showLastPlayed')):
-						output += " : Last Played " + str(stats.ones.get(item).lastTime)
+						output += " : Last Played " + str(stats.threes.get(item).lastTime)
 					if (self.parameters.data.get('showWLRatio')):
-						output += " : W/L Ratio " + str(stats.ones.get(item).winLossRatio)
+						output += " : W/L Ratio " + str(stats.threes.get(item).winLossRatio)
 				output += " -"
 
 			# output each player to file
@@ -717,12 +718,7 @@ class cohStat:
 						self.threes[Faction.CW] = factionResult(name = "Commonwealth", nameShort = "CW" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
 					if item.get('leaderboard_id') == 15:
 						self.threes[Faction.PE] = factionResult(name = "Panzer Elite", nameShort = "PE" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
-		
-		#allGameTypes = {}
-		#allGameTypes.update(self.basic) 
-		#allGameTypes.update(self.ones)
-		#allGameTypes.update(self.twos)
-		#allGameTypes.update(self.threes)
+	
 
 		try:
 			self.totalWins += int(self.basic[Faction.US].wins) + int(self.basic[Faction.WM].wins) + int(self.basic[Faction.CW].wins) + int(self.basic[Faction.PE].wins)
