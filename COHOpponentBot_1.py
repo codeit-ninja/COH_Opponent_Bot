@@ -276,9 +276,9 @@ class IRC_Channel(threading.Thread):
 
 
 class StatsRequest:
-	def __init__(self, parameters, numberOfHumans, numberOfComputers, mapSize, faction = None):
+	def __init__(self, parameters, numberOfHumans, numberOfComputers, mapSize, player = None):
 		self.parameters = parameters
-		self.faction = faction
+		self.player = player
 		try:
 			self.numberOfHumans = int(numberOfHumans)
 			self.numberOfComputers = int(numberOfComputers)
@@ -322,10 +322,19 @@ class StatsRequest:
 
 			output = ""
 			output += "Name : " + str(stats.user.name)
-			if(self.faction):
-				output += " Faction : " + str(self.faction)
+			if(self.player):
+				if(self.player.faction):
+					output += " Faction : " + str(self.player.faction.name)
 			if (self.parameters.data.get('showUserCountry')):
 				output += " : (" + str(stats.user.country) + ")"
+			if (self.parameters.data.get('showTotalLosses')):
+				output += " : Total Losses " + str(stats.totalLosses)
+			if (self.parameters.data.get('showTotalWins')):
+				output += " : Total Wins " + str(stats.totalWins)
+			if (self.parameters.data.get('showTotalWLRatio')):
+				output += " : Total W/L Ratio " + str(stats.totalWLRatio)
+
+			
 
 			if ((self.parameters.data.get('showBasic')) or (bool(self.parameters.data.get('automaticMode')) and (int(self.numberOfComputers) > 0))):
 				output += " : Basic :-"
@@ -427,6 +436,11 @@ class StatsRequest:
 						output += " : W/L Ratio " + str(stats.ones.get(item).winLossRatio)
 				output += " -"
 
+			# output each player to file
+			if (self.parameters.data.get('outputPlayerOverlayFiles')):
+				self.savePlayer(stats)
+
+
 			outputList = list(self.split_by_n(output, 500))
 			if (self.parameters.data.get('showSteamProfile')):
 				outputList.append("Steam profile " + str(stats.user.steamProfileAddress))
@@ -434,6 +448,15 @@ class StatsRequest:
 			print("output list " + str (outputList))
 
 			return outputList
+
+	def savePlayer(self, stats):
+		try:
+			playerNumber = "player" + str(self.player.slot) + ".txt"
+			with open(playerNumber , 'w') as outfile:
+				outfile.write(str("{0}".format(str(stats.user.name))))
+		except Exception as e:
+			print("Problem in save")
+			print(str(e))
 
 class FileMonitor (threading.Thread):
 
@@ -521,11 +544,7 @@ class HandleCOHlogFile:
 				#ranking = self.find_between(item, "ranking =","\n")
 				slot = self.find_between(item, "slot =  ", ", ranking")
 				thePlayer = Player(slot = slot, steamNumber=steamNumber)
-				if (str(steamNumber) == str(self.parameters.data['steamNumber'])):
-					if(self.parameters.data.get('showOwn')):
-						playerList.append(thePlayer)
-				else:
-					playerList.append(thePlayer)
+				playerList.append(thePlayer)
 			# set the number of players
 			if ("Setting player" in item):
 					theSlotNumber = self.find_between(item, "player (", ")")
@@ -588,6 +607,7 @@ class HandleCOHlogFile:
 		print("map size" + str(mapSize) + "\n")
 		for item in playerList:
 			print("playerList : " + str(item))
+
 		try:
 			if (int(computers) > 0):
 				self.data.append("Game with " + str(computers) + " computer AI, ("+str(eazyCPUCount)+") Easy, ("+str(normalCPUCount)+") Normal, ("+str(hardCPUCount)+") Hard, ("+str(expertCPUCount)+") Expert.")
@@ -595,14 +615,17 @@ class HandleCOHlogFile:
 			print(str(e))
 		
 		if (playerList):
-			#print(playerList)
-
 			for player in playerList:
-				myStatRequest = StatsRequest(self.parameters, humans, computers, mapSize, faction = player.faction)
+				myStatRequest = StatsRequest(self.parameters, humans, computers, mapSize, player = player)
 				try:
 					statNumber = int(player.steamNumber)
-					self.data = self.data + list(myStatRequest.returnStats(statNumber))
-					#print("DATA OUTPUT " + str (self.data))
+					returnedList = list(myStatRequest.returnStats(statNumber))
+					if(player.steamNumber == self.parameters.data.get('steamNumber')):
+						if (self.parameters.data.get('showOwn')):
+							self.data = self.data + returnedList
+					else:
+						self.data = self.data + returnedList
+
 				except ValueError:
 					print ("got a value error")						
 		if self.data:

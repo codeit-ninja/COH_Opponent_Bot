@@ -62,6 +62,8 @@ class parameters:
 		self.data['showSteamProfile'] = True
 
 		self.data['automaticTrigger'] = False
+
+		self.data['outputPlayerOverlayFiles'] = True
 		
 
 		#your personal steam number
