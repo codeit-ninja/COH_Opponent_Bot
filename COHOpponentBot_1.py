@@ -322,7 +322,8 @@ class StatsRequest:
 
 			output = ""
 			output += "Name : " + str(stats.user.name)
-			output += " Faction : " + self.faction
+			if(self.faction):
+				output += " Faction : " + str(self.faction)
 			if (self.parameters.data.get('showUserCountry')):
 				output += " : (" + str(stats.user.country) + ")"
 
@@ -528,17 +529,24 @@ class HandleCOHlogFile:
 			# set the number of players
 			if ("Setting player" in item):
 					theSlotNumber = self.find_between(item, "player (", ")")
-					for player in playerList:
-						if (str(theSlotNumber) == str(player.slot)):
+					print ("The slot number : " + str(theSlotNumber))
+					for x in range (len(playerList)):
+						if (str(theSlotNumber) == str(playerList[x].slot)):
 							factionString = self.find_between(item , "race to: " , "\n")
+							print("factionString : " + str(factionString))
+							print("x = " + str(x))
 							if factionString == "allies_commonwealth":
-								player.faction = Faction.CW
+								playerList[x].faction = Faction.CW
+								print("Setting faction to CW")
 							if factionString == "allies":
-								player.faction = Faction.US
+								playerList[x].faction = Faction.US
+								print("Setting faction to US")
 							if factionString == "axis_panzer_elite":
-								player.faction = Faction.PE
+								playerList[x].faction = Faction.PE
+								print("Setting faction to PE")
 							if factionString == "axis":
-								player.faction = Faction.WM
+								playerList[x].faction = Faction.WM
+								print("Setting faction to WM")
 
 			if ("GAME -- ***") in item:
 				# need to reverse the string to get the humans bit out uniquely or other strings in the line can interfere with the parsing
@@ -578,6 +586,8 @@ class HandleCOHlogFile:
 		print("computers " + str(computers) +"\n")
 		print("number of players " + str(numberOfPlayers) + "\n")
 		print("map size" + str(mapSize) + "\n")
+		for item in playerList:
+			print("playerList : " + str(item))
 		try:
 			if (int(computers) > 0):
 				self.data.append("Game with " + str(computers) + " computer AI, ("+str(eazyCPUCount)+") Easy, ("+str(normalCPUCount)+") Normal, ("+str(hardCPUCount)+") Hard, ("+str(expertCPUCount)+") Expert.")
@@ -585,7 +595,7 @@ class HandleCOHlogFile:
 			print(str(e))
 		
 		if (playerList):
-			print(playerList)
+			#print(playerList)
 
 			for player in playerList:
 				myStatRequest = StatsRequest(self.parameters, humans, computers, mapSize, faction = player.faction)
@@ -775,7 +785,7 @@ class factionResult:
 			print(str(e))
 		try:
 			if (int(self.losses) != 0):
-				self.winLossRatio = str(round(self.wins/self.losses, 2))
+				self.winLossRatio = str(round(int(self.wins)/int(self.losses), 2))
 			else:
 				if(int(self.wins) > 0):
 					self.winLossRatio = "Unbeaten"
@@ -806,6 +816,12 @@ class Player:
 		self.steamNumber = steamNumber
 		self.faction = faction
 
+	def __str__(self):
+		output = "slot : " + str(self.slot) + "\n"
+		output += "steamNumber : " + str(self.steamNumber) + "\n"
+		output += "faction : " + str(self.faction) + "\n"
+
+		return output
 
 class cohUser:
 
