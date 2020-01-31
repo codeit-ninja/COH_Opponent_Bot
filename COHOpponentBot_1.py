@@ -502,7 +502,7 @@ class FileMonitor (threading.Thread):
 					#Handle New Lines since load
 					#self.queue.put(lines[x])
 					if ("GAME -- Starting mission..." in lines[x]):
-						time.sleep(1) # allow an extra second for computer AI info to load if the game is a human vs ai game
+						time.sleep(5) # allow an extra seconds for computer AI info to load if the game is a human vs ai game
 						if (self.opponentBot):
 							#trigger the opponent command in the opponentbot thread
 							self.opponentBot.queue.put("OPPONENT")
