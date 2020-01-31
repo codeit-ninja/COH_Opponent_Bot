@@ -764,20 +764,40 @@ class cohStat:
 						self.threes[Faction.PE] = factionResult(name = "Panzer Elite", nameShort = "PE" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
 	
 
-		try:
-			self.totalWins += int(self.basic[Faction.US].wins) + int(self.basic[Faction.WM].wins) + int(self.basic[Faction.CW].wins) + int(self.basic[Faction.PE].wins)
-			self.totalLosses += int(self.basic[Faction.US].losses) + int(self.basic[Faction.WM].losses) + int(self.basic[Faction.CW].losses) + int(self.basic[Faction.PE].losses)
+		for faction in Faction:
+			try:
+				self.totalWins += int(self.basic[faction].wins)
+			except Exception as e:
+				pass
+			try:
+				self.totalWins += int(self.ones[faction].wins)
+			except Exception as e:
+				pass
+			try:
+				self.totalWins += int(self.twos[faction].wins)
+			except Exception as e:
+				pass
+			try:
+				self.totalWins += int(self.threes[faction].wins)
+			except Exception as e:
+				pass									
+			try:
+				self.totalLosses += int(self.basic[faction].losses)
+			except Exception as e:
+				pass
+			try:
+				self.totalLosses += int(self.ones[faction].losses)
+			except Exception as e:
+				pass
+			try:
+				self.totalLosses += int(self.twos[faction].losses)
+			except Exception as e:
+				pass
+			try:
+				self.totalLosses += int(self.threes[faction].losses)
+			except Exception as e:
+				pass	
 
-			self.totalWins += int(self.ones[Faction.US].wins) + int(self.ones[Faction.WM].wins) + int(self.ones[Faction.CW].wins) + int(self.ones[Faction.PE].wins)
-			self.totalLosses += int(self.ones[Faction.US].losses) + int(self.ones[Faction.WM].losses) + int(self.ones[Faction.CW].losses) + int(self.ones[Faction.PE].losses)
-		
-			self.totalWins += int(self.twos[Faction.US].wins) + int(self.twos[Faction.WM].wins) + int(self.twos[Faction.CW].wins) + int(self.twos[Faction.PE].wins)
-			self.totalLosses += int(self.twos[Faction.US].losses) + int(self.twos[Faction.WM].losses) + int(self.twos[Faction.CW].losses) + int(self.twos[Faction.PE].losses)
-		
-			self.totalWins += int(self.threes[Faction.US].wins) + int(self.threes[Faction.WM].wins) + int(self.threes[Faction.CW].wins) + int(self.threes[Faction.PE].wins)
-			self.totalLosses += int(self.threes[Faction.US].losses) + int(self.threes[Faction.WM].losses) + int(self.threes[Faction.CW].losses) + int(self.threes[Faction.PE].losses)
-		except Exception as e:
-			print(str(e))
 
 
 		try:
