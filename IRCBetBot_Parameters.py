@@ -67,6 +67,9 @@ class parameters:
 		self.data['outputPlayerOverlayFiles'] = True
 
 		self.data['showOnlyDetectedFactionPlayed'] = True
+
+		self.data['logPath'] = ""
+		self.data['temprecReplayPath'] = ""
 		
 
 		#your personal steam number
@@ -100,6 +103,13 @@ class parameters:
 					print(str(e))
 		except Exception as e:
 			print(str(e))
+
+		try:
+			self.data['temprecReplayPath'] = self.data.get('logPath').replace("warnings.log" , "playback\\temp.rec")
+		except Exception as e:
+			print(str(e))
+		
+		
 		#attempt to get userName from steamNumber
 		try:
 			statString = "/steam/" + str(self.data['steamNumber'])
@@ -137,8 +147,9 @@ class parameters:
 	def checkDataIntegrity(self, data):
 		success = True
 		for key, value in data.items():
-			if key not in self.data:
+			if self.data.get(key) == None:
 				success = False
+				break
 		return success
 
 		

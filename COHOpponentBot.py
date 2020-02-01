@@ -519,4 +519,7 @@ logging.basicConfig(format='%(asctime)s (%(threadName)-10s) [%(levelname)s] %(me
 logging.info("Logging Started")
 logging.info(VersionNumber)
 
+
+COHOpponentBot_1.HandleCOHlogFile().clearOverlayHTML()
+
 main = COHBotGUI()
