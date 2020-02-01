@@ -23,6 +23,7 @@ from datetime import datetime
 from enum import Enum
 from queue import Queue # to talk to the threads
 import logging
+import re
 
 
 #Because python floating point arthmatic is a nightmare
@@ -226,6 +227,8 @@ class IRC_Channel(threading.Thread):
 		self.irc = irc
 		self.queue = queue
 		self.channel = channel
+		self.parameters = parameters()
+		self.parameters.load()
 		
 	def run(self):
 		self.irc.send(('JOIN ' + self.channel + '\r\n').encode("utf8"))
@@ -263,13 +266,13 @@ class IRC_Channel(threading.Thread):
 
 
 	def CheckForUserCommand(self, userName, message):
-		if (message.lower() == "opponent") or (message.lower() == "place your bets") or (message.lower() == "!opponent") or (message.lower() == "!opp") or (message.lower() == "opp"):
+		if (bool(re.match("^(!)?opponent(\?)?$", message.lower())) or bool(re.match("^(!)?place your bets$" , message.lower())) or bool(re.match("^(!)?opp(\?)?$", message.lower()))):
 			myHandleCOHlogFile = HandleCOHlogFile(self.parent.parameters)
 			returnedList =  myHandleCOHlogFile.loadLog()
 			if returnedList:
 				for item in returnedList:
 					self.parent.SendPrivateMessageToIRC(str(item))
-		if (message.lower() == "test"):
+		if (message.lower() == "test") and ((userName == self.parameters.privatedata.get('adminUserName')) or (userName == self.parameters.data.get('channel'))):
 			self.parent.SendPrivateMessageToIRC("I'm here! Pls give me mod to prevent twitch from autobanning me for spam if I have to send a few messages quickly.")
 			self.parent.output.insert(END, "Oh hi again, I heard you in the " +self.channel[1:] + " channel.\n")
 
