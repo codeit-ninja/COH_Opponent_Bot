@@ -45,6 +45,8 @@ class COHBotGUI:
         self.showTotalWins = IntVar(value = int(bool(self.parameters.data.get('showTotalWins'))))
         self.showTotalLosses = IntVar(value = int(bool(self.parameters.data.get('showTotalLosses'))))
         self.showTotalWLRatio = IntVar(value = int(bool(self.parameters.data.get('showTotalWLRatio'))))
+
+        self.showUserFactionOnly = IntVar(value = int(bool(self.parameters.data.get('showOnlyDetectedFactionPlayed'))))
         
         self.showBasic = IntVar(value = int(bool(self.parameters.data.get('showBasic'))))
         self.show1v1 = IntVar(value = int(bool(self.parameters.data.get('show1v1'))))
@@ -216,7 +218,8 @@ class COHBotGUI:
             self.checkTotalLosses.grid( sticky=tk.W) 
             self.checkTotalWLRatio = tk.Checkbutton(self.f2, text="Total W/L Ratio", variable=self.showTotalWLRatio, command = self.saveToggles)
             self.checkTotalWLRatio.grid( sticky=tk.W) 
-
+            self.checkPlayedFactionOnly = tk.Checkbutton(self.f2, text="Played Faction ONLY", variable=self.showUserFactionOnly, command = self.saveToggles)
+            self.checkPlayedFactionOnly.grid( sticky=tk.W)
 
             #s1 = ttk.Separator(OptionMenu, orient=HORIZONTAL)
             #s1.grid()
@@ -306,6 +309,8 @@ class COHBotGUI:
         self.parameters.data['showTotalWins'] = bool(self.showTotalWins.get())
         self.parameters.data['showTotalLosses'] = bool(self.showTotalLosses.get())
         self.parameters.data['showTotalWLRatio'] = bool(self.showTotalWLRatio.get())
+
+        self.parameters.data['showOnlyDetectedFactionPlayed'] = bool(self.showUserFactionOnly.get())
 
         self.parameters.data['showBasic'] = bool(self.showBasic.get())
         self.parameters.data['show1v1'] = bool(self.show1v1.get())

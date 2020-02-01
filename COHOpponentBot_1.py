@@ -530,25 +530,45 @@ class HandleCOHlogFile:
 			output += " : Basic :-"
 			for value in playerStats.leaderboardData:
 				if (str(playerStats.leaderboardData[value].matchType) == str(MatchType.BASIC)):
-					output += self.getFactionString(playerStats.leaderboardData[value])
+					if self.parameters.data.get('showOnlyDetectedFactionPlayed') and (playerStats.user.faction != None):
+						if (str(playerStats.leaderboardData[value].faction) == str(playerStats.user.faction)):
+							output += self.getFactionString(playerStats.leaderboardData[value])
+							break
+					else:
+						output += self.getFactionString(playerStats.leaderboardData[value])
 
 		if ((self.parameters.data.get('show1v1')) or ((bool(self.parameters.data.get('automaticMode')) and (0 <= int(self.mapSize) <= 2)) and (int(self.numberOfComputers) == 0))):
 			output += " : 1v1 :-"
 			for value in playerStats.leaderboardData:
 				if (str(playerStats.leaderboardData[value].matchType) == str(MatchType.ONES)):
-					output += self.getFactionString(playerStats.leaderboardData[value])					
+					if self.parameters.data.get('showOnlyDetectedFactionPlayed') and (playerStats.user.faction != None):
+						if (str(playerStats.leaderboardData[value].faction) == str(playerStats.user.faction)):
+							output += self.getFactionString(playerStats.leaderboardData[value])
+							break
+					else:
+						output += self.getFactionString(playerStats.leaderboardData[value])				
 
 		if ((self.parameters.data.get('show2v2')) or ((bool(self.parameters.data.get('automaticMode')) and (3 <= int(self.mapSize) <= 4)) and (int(self.numberOfComputers) == 0))):
 			output += " : 2v2 :-"
 			for value in playerStats.leaderboardData:	
 				if (str(playerStats.leaderboardData[value].matchType) == str(MatchType.TWOS)):
-					output += self.getFactionString(playerStats.leaderboardData[value])	
+					if self.parameters.data.get('showOnlyDetectedFactionPlayed') and (playerStats.user.faction != None):
+						if (str(playerStats.leaderboardData[value].faction) == str(playerStats.user.faction)):
+							output += self.getFactionString(playerStats.leaderboardData[value])
+							break
+					else:
+						output += self.getFactionString(playerStats.leaderboardData[value])
 
 		if ((self.parameters.data.get('show3v3')) or ((bool(self.parameters.data.get('automaticMode')) and (5 <= int(self.mapSize) <= 6)) and (int(self.numberOfComputers) == 0))):
 			output += " : 3v3 :-"
 			for value in playerStats.leaderboardData:
 				if (str(playerStats.leaderboardData[value].matchType) == str(MatchType.THREES)):
-					output += self.getFactionString(playerStats.leaderboardData[value])	
+					if self.parameters.data.get('showOnlyDetectedFactionPlayed') and (playerStats.user.faction != None):
+						if (str(playerStats.leaderboardData[value].faction) == str(playerStats.user.faction)):
+							output += self.getFactionString(playerStats.leaderboardData[value])
+							break
+					else:
+						output += self.getFactionString(playerStats.leaderboardData[value])
 
 
 		# removed this because it was creating confusion
