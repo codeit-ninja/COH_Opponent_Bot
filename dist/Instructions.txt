@@ -37,6 +37,13 @@ AUTOMATIC MODE shows only the stats for the game you are currently in; eg basic 
 
 Automatic Trigger checks the game every 10 seconds and will trigger the opponent command automatically if it detects a new game.
 
+TO USE THE OVERLAY IN OBS:
+create a new source of type browser.
+point the browser at local file overlay.html in the programs base directory.
+expand the source to overlay/cover the entire preview screen.
+teams can be custom formatted using the overlaystyle.css file that will be created in the same directory.
+
+
 
 Enjoy, 
 

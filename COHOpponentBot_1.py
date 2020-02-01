@@ -475,7 +475,7 @@ class HandleCOHlogFile:
 		# assign faction values to the players
 		for item in replayReader.listOfPlayers:
 			for x in range(len(playerStatList)):
-				if(item.name == playerStatList[x].user.name):
+				if(str(item.name).lower() == str(playerStatList[x].user.name).lower()):
 					playerStatList[x].user.faction = item.faction
 					playerStatList[x].user.factionString = item.factionString
 					playerStatList[x].user.slot = item.slot
@@ -550,8 +550,10 @@ class HandleCOHlogFile:
 				if (str(playerStats.leaderboardData[value].matchType) == str(MatchType.THREES)):
 					output += self.getFactionString(playerStats.leaderboardData[value])	
 
-		if (self.parameters.data.get('outputPlayerOverlayFiles')):
-			self.savePlayer(playerStats)
+
+		# removed this because it was creating confusion
+		#if (self.parameters.data.get('outputPlayerOverlayFiles')):
+		#	self.savePlayer(playerStats)
 
 		outputList = list(self.split_by_n(output, 500))
 		if (self.parameters.data.get('showSteamProfile')):
@@ -800,7 +802,7 @@ class factionResult:
 				ts = int(self.lastMatch)
 				self.lastTime = str(datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'))
 		except Exception as e:
-			logging.exception("In factionResult Creating timestamp")
+			#logging.exception("In factionResult Creating timestamp")
 			print(str(e))
 		try:
 			if (int(self.losses) != 0):
@@ -876,56 +878,54 @@ class Player:
 	def __repr__(self):
 		return str(self)
 
-
 class ReplayReader:
+	def __init__(self, replayFilePath = None):
+		
+		self.parameters = parameters()
+		self.listOfPlayers = []
+		self.filePath = ""
+		if (replayFilePath):
+			self.filePath = replayFilePath
+		else:
+			self.filePath = self.parameters.data.get('temprecReplayPath')
 
-    def __init__(self):
-
-        self.parameters = parameters()
-
-        self.listOfPlayers = []
-
-        self.temprecFilePath = self.parameters.data.get('temprecReplayPath')
-
-        print(self.temprecFilePath)
-
-        with open(self.temprecFilePath, "rb") as binary_file:
-            # Read the whole file at once
-            data = binary_file.read()
-            binary_file.seek(4)
-            cohrecString = binary_file.read(8)
-            print(cohrecString)
-            dataarray = bytearray(binary_file.read(32))
-            print(str(dataarray.decode()))
-            binary_file.seek(76)
-            relicChunky = binary_file.read(12)
-            print(relicChunky.decode())
+		if (os.path.isfile(self.filePath)):
+			with open(self.filePath, "rb") as binary_file:
+				data = binary_file.read()
+				binary_file.seek(4)
+				cohrecString = binary_file.read(8)
+				print(cohrecString)
+				dataarray = bytearray(binary_file.read(32))
+				print(str(dataarray.decode()))
+				binary_file.seek(76)
+				relicChunky = binary_file.read(12)
+				print(relicChunky.decode())
 
 
-            self.indexOfDATAINFO = 0
+				self.indexOfDATAINFO = 0
 
-            while True:
-                self.indexOfDATAINFO = data.find('DATAINFO'.encode(), self.indexOfDATAINFO + 8)
-                if self.indexOfDATAINFO == -1:
-                    break
-                print(self.indexOfDATAINFO)
-                #print(str(data.find('DATAINFO'.encode())))
-                binary_file.seek(self.indexOfDATAINFO + 28)
-                lenghtOfString  = int.from_bytes(binary_file.read(4), byteorder = 'little')
-                print(lenghtOfString)
-                binary_file.seek(self.indexOfDATAINFO + 32)
-                userNameByteArray = binary_file.read(lenghtOfString*2)
-                userName = userNameByteArray.decode(encoding="utf-16")
-                print(userName)
+				while True:
+					self.indexOfDATAINFO = data.find('DATAINFO'.encode(), self.indexOfDATAINFO + 8)
+					if self.indexOfDATAINFO == -1:
+						break
+					print(self.indexOfDATAINFO)
+					#print(str(data.find('DATAINFO'.encode())))
+					binary_file.seek(self.indexOfDATAINFO + 28)
+					lenghtOfString  = int.from_bytes(binary_file.read(4), byteorder = 'little')
+					print(lenghtOfString)
+					binary_file.seek(self.indexOfDATAINFO + 32)
+					userNameByteArray = binary_file.read(lenghtOfString*2)
+					userName = userNameByteArray.decode(encoding="utf-16")
+					print(userName)
 
-                binary_file.seek(self.indexOfDATAINFO + 32 + lenghtOfString*2 + 8)
-                lengthOfFaction = int.from_bytes(binary_file.read(4), byteorder = 'little')
-                print(lengthOfFaction)
-                factionName = binary_file.read(lengthOfFaction).decode()
-                print(factionName)
-                self.listOfPlayers.append(Player(name=userName, factionString=factionName))
+					binary_file.seek(self.indexOfDATAINFO + 32 + lenghtOfString*2 + 8)
+					lengthOfFaction = int.from_bytes(binary_file.read(4), byteorder = 'little')
+					print(lengthOfFaction)
+					factionName = binary_file.read(lengthOfFaction).decode()
+					print(factionName)
+					self.listOfPlayers.append(Player(name=userName, factionString=factionName))
 
-            print(self.listOfPlayers)		
+				print(self.listOfPlayers)		
 
 # to use this file without the GUI be sure to have the parameters file in the same directory and uncomment below
 #myIRC = IRCClient()
