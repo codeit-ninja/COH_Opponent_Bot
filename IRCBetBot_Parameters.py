@@ -10,6 +10,7 @@ import requests
 import urllib.request # more for loadings jsons from urls
 import string
 import sys
+import logging
 
 class parameters:
 	
@@ -64,6 +65,7 @@ class parameters:
 		self.data['automaticTrigger'] = False
 
 		self.data['outputPlayerOverlayFiles'] = True
+
 		self.data['showOnlyDetectedFactionPlayed'] = True
 		
 
