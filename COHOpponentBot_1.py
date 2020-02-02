@@ -231,6 +231,7 @@ class IRC_Channel(threading.Thread):
 		self.channel = channel
 		self.parameters = parameters()
 		self.parameters.load()
+		self.myHandleCOHlogFile = None
 		
 	def run(self):
 		self.irc.send(('JOIN ' + self.channel + '\r\n').encode("utf8"))
@@ -269,8 +270,8 @@ class IRC_Channel(threading.Thread):
 
 	def CheckForUserCommand(self, userName, message):
 		if (bool(re.match("^(!)?opponent(\?)?$", message.lower())) or bool(re.match("^(!)?place your bets$" , message.lower())) or bool(re.match("^(!)?opp(\?)?$", message.lower()))):
-			myHandleCOHlogFile = HandleCOHlogFile()
-			returnedList =  myHandleCOHlogFile.loadLog()
+			self.myHandleCOHlogFile = HandleCOHlogFile()
+			returnedList =  self.myHandleCOHlogFile.loadLog()
 			if returnedList:
 				for item in returnedList:
 					self.parent.SendPrivateMessageToIRC(str(item))
@@ -280,6 +281,8 @@ class IRC_Channel(threading.Thread):
 
 	def close(self):
 		self.running = False
+		if self.myHandleCOHlogFile:
+			self.myHandleCOHlogFile.close()
 		print("Closing Channel " + str(self.channel) + " thread.")
 
 
@@ -378,6 +381,11 @@ class HandleCOHlogFile:
 		self.mapSize = -1
 
 
+		# values for closing the while loop if it is waiting
+		self.running = True
+		self.closeEvent = threading.Event()
+
+
 	
 	def loadLog(self):
 		print("In loadLog")
@@ -471,7 +479,7 @@ class HandleCOHlogFile:
 	
 		loop = 0
 
-		while loop < 5:
+		while loop < 5 and self.running:
 			# import faction values from replay temp.rec file
 			replayReader = ReplayReader()
 
@@ -487,7 +495,7 @@ class HandleCOHlogFile:
 			#check that all playerStatList players.user.faction are not None if any are wait 10 seconds try getting them again, do this 5 times then if  not continue
 			for player in playerStatList:
 				if (str(player.user.faction) == str(None)):
-					time.sleep(10)
+					self.closeEvent.wait(timeout = 10)
 					loop += 1
 					break
 				else:
@@ -519,6 +527,10 @@ class HandleCOHlogFile:
 			return self.data
 		else:
 			return None
+
+	def close(self):
+		self.running = False
+		self.closeEvent.set()
 
 	def createOutputList(self, playerStats):
 
