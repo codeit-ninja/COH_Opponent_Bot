@@ -376,6 +376,8 @@ class HandleCOHlogFile:
 		self.numberOfComputers = 0
 
 		self.mapSize = -1
+
+
 	
 	def loadLog(self):
 		print("In loadLog")
@@ -466,19 +468,31 @@ class HandleCOHlogFile:
 						playerStatList.append(returnedStat)
 				except Exception as e:
 					print(str(e))
+	
+		loop = 0
+
+		while loop < 5:
+			# import faction values from replay temp.rec file
+			replayReader = ReplayReader()
 
 
-		# import faction values from replay temp.rec file
-		replayReader = ReplayReader()
+			# assign faction values to the players
+			for item in replayReader.listOfPlayers:
+				for x in range(len(playerStatList)):
+					if(str(item.name) == str(playerStatList[x].user.name)):
+						playerStatList[x].user.faction = item.faction
+						playerStatList[x].user.factionString = item.factionString
+						playerStatList[x].user.slot = item.slot
 
-
-		# assign faction values to the players
-		for item in replayReader.listOfPlayers:
-			for x in range(len(playerStatList)):
-				if(str(item.name).lower() == str(playerStatList[x].user.name).lower()):
-					playerStatList[x].user.faction = item.faction
-					playerStatList[x].user.factionString = item.factionString
-					playerStatList[x].user.slot = item.slot
+			#check that all playerStatList players.user.faction are not None if any are wait 10 seconds try getting them again, do this 5 times then if  not continue
+			for player in playerStatList:
+				if (str(player.user.faction) == str(None)):
+					time.sleep(10)
+					loop += 1
+					break
+				else:
+					loop = 5
+					break
 
 		axisTeam = []
 		alliesTeam = []
@@ -904,6 +918,7 @@ class ReplayReader:
 		self.parameters = parameters()
 		self.listOfPlayers = []
 		self.filePath = ""
+
 		if (replayFilePath):
 			self.filePath = replayFilePath
 		else:
