@@ -281,8 +281,6 @@ class IRC_Channel(threading.Thread):
 
 	def close(self):
 		self.running = False
-		if self.myHandleCOHlogFile:
-			self.myHandleCOHlogFile.close()
 		print("Closing Channel " + str(self.channel) + " thread.")
 
 
@@ -381,11 +379,6 @@ class HandleCOHlogFile:
 		self.mapSize = -1
 
 
-		# values for closing the while loop if it is waiting
-		self.running = True
-		self.closeEvent = threading.Event()
-
-
 	
 	def loadLog(self):
 		print("In loadLog")
@@ -408,9 +401,74 @@ class HandleCOHlogFile:
 				# dictionary containing player number linked to steamnumber
 				steamNumber = self.find_between(item, "steam/", "]")
 				slot = self.find_between(item , "slot =  " , ", ranking")
-				print ("steamNumber from File : " + str(steamNumber))
-				thePlayer = Player( steamNumber = str(steamNumber), slot = slot)
-				playerList.append(thePlayer)
+				# if slot does not exist in playerList then create player with new slot and steamNumber
+				slotExists = False
+				for i in range(len(playerList)):
+					if str(playerList[i].slot) == str(slot):
+						slotExists = True
+						playerList[i].steamNumber = steamNumber
+						print("the slot exists and I'm assigning steamNumber to it")
+				if (not slotExists):
+					thePlayer = Player(slot = slot, steamNumber=steamNumber)
+					playerList.append(thePlayer)
+					print("the slot does not exist and I'm creating a new player")
+
+
+			# set the number of players
+			if ("Setting player" in item):
+					theSlotNumber = self.find_between(item, "player (", ")")
+					print ("The slot number : " + str(theSlotNumber))
+
+					# if slot does not exist in playerList then create player with new slot number
+					slotExists = False
+					for i in range(len(playerList)):
+						if str(playerList[i].slot) == str(theSlotNumber):
+							slotExists = True
+
+					factionString = self.find_between(item , "race to: " , "\n")
+					print("factionString : " + str(factionString))
+
+					if (slotExists):		
+						for x in range (len(playerList)):
+							if (str(theSlotNumber) == str(playerList[x].slot)):
+
+								if factionString == "allies_commonwealth":
+									playerList[x].faction = Faction.CW
+									print("Setting faction to CW")
+
+								if factionString == "allies":
+									playerList[x].faction = Faction.US								
+									print("Setting faction to US")
+
+								if factionString == "axis_panzer_elite":
+									playerList[x].faction = Faction.PE									
+									print("Setting faction to PE")
+
+								if factionString == "axis":
+									playerList[x].faction = Faction.WM
+									print("Setting faction to WM")
+					else:
+						if factionString == "allies_commonwealth":
+							player = Player(slot=theSlotNumber, faction = Faction.CW)
+							playerList.append(player)
+							print("Setting faction to CW")
+
+						if factionString == "allies":
+							player = Player(slot=theSlotNumber, faction = Faction.US)
+							playerList.append(player)									
+							print("Setting faction to US")
+
+						if factionString == "axis_panzer_elite":
+							player = Player(slot=theSlotNumber, faction = Faction.PE)
+							playerList.append(player)									
+							print("Setting faction to PE")
+
+						if factionString == "axis":
+							player = Player(slot=theSlotNumber, faction = Faction.WM)
+							playerList.append(player)
+							print("Setting faction to WM")
+
+
 
 			if ("GAME -- ***") in item:
 				# need to reverse the string to get the humans bit out uniquely or other strings in the line can interfere with the parsing
@@ -442,8 +500,6 @@ class HandleCOHlogFile:
 		# default backup player numbers - not used if file human and computers are legit numbers
 		numberOfPlayers = len(playerList)
 
-		#
-		#replayReader.listOfPlayers
 
 		try:
 			numberOfPlayers = int(float(self.numberOfHumans)) + int(float(self.numberOfComputers)) # the float then int removes change of value error
@@ -477,30 +533,18 @@ class HandleCOHlogFile:
 				except Exception as e:
 					print(str(e))
 	
-		loop = 0
+		#
+		#replayReader = ReplayReader()
+		# not using replay reader anymore due to temp.rec file not being written to until the game is over.
+		#
 
-		while loop < 5 and self.running:
-			# import faction values from replay temp.rec file
-			replayReader = ReplayReader()
-
-
-			# assign faction values to the players
-			for item in replayReader.listOfPlayers:
-				for x in range(len(playerStatList)):
-					if(str(item.name) == str(playerStatList[x].user.name)):
-						playerStatList[x].user.faction = item.faction
-						playerStatList[x].user.factionString = item.factionString
-						playerStatList[x].user.slot = item.slot
-
-			#check that all playerStatList players.user.faction are not None if any are wait 10 seconds try getting them again, do this 5 times then if  not continue
-			for player in playerStatList:
-				if (str(player.user.faction) == str(None)):
-					self.closeEvent.wait(timeout = 10)
-					loop += 1
-					break
-				else:
-					loop = 5
-					break
+		# assign faction values to the players
+		for item in playerList:
+			for x in range(len(playerStatList)):
+				if(str(item.name) == str(playerStatList[x].user.name)):
+					playerStatList[x].user.faction = item.faction
+					playerStatList[x].user.factionString = item.factionString
+					playerStatList[x].user.slot = item.slot
 
 		axisTeam = []
 		alliesTeam = []
@@ -528,9 +572,6 @@ class HandleCOHlogFile:
 		else:
 			return None
 
-	def close(self):
-		self.running = False
-		self.closeEvent.set()
 
 	def createOutputList(self, playerStats):
 
@@ -605,13 +646,13 @@ class HandleCOHlogFile:
 		if (self.parameters.data.get('showSteamProfile')):
 			outputList.append("Steam profile " + str(playerStats.user.steamProfileAddress))
 
-		print("output list " + str (outputList))
+		#print("output list " + str (outputList))
 
 		return outputList
 
 	def getFactionString(self, factionData):
 
-		print("Building FactionString")
+		#print("Building FactionString")
 		output = ""
 		
 		try:
@@ -880,7 +921,7 @@ class factionResult:
 
 class Player:
 
-	def __init__(self, profile_id = None, name = None, steamString = None, steamNumber = None, country = None, factionString = None, slot = None):
+	def __init__(self, profile_id = None, name = None, steamString = None, steamNumber = None, country = None, factionString = None, slot = None, faction = None):
 		self.profile_id = profile_id
 		self.name = name
 		self.steamString = steamString
@@ -888,7 +929,7 @@ class Player:
 		self.country = country
 		self.steamProfileAddress = None
 		self.factionString = factionString
-		self.faction = None
+		self.faction = faction
 		self.slot = slot
 
 		if self.factionString == "axis":
@@ -924,6 +965,9 @@ class Player:
 	def __repr__(self):
 		return str(self)
 
+#
+# The replay reader class gets the faction and username from the replay file. this works but sadly the temp.rec replay isn't written until the game is over so it isn't useful for this opponent bot.
+#
 class ReplayReader:
 	def __init__(self, replayFilePath = None):
 		
