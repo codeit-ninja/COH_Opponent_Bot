@@ -198,18 +198,17 @@ class IRCClient(threading.Thread):
 		if not os.path.exists(dir):
 			os.makedirs(dir)
 					
-	def CheckIRCSendBufferEveryTwoSeconds(self):
-		self.running
+	def CheckIRCSendBufferEveryThreeSeconds(self):
 		if (self.running == True): 
-			threading.Timer(3.0, self.CheckIRCSendBufferEveryTwoSeconds).start()
-		self.IRCSendCalledEveryTwoSeconds()
-	# above is the send to IRC timer loop that runs every two seconds
+			threading.Timer(3.0, self.CheckIRCSendBufferEveryThreeSeconds).start()
+		self.IRCSendCalledEveryThreeSeconds()
+	# above is the send to IRC timer loop that runs every three seconds
 	
 	def SendPrivateMessageToIRC(self, message):
 		self.ircMessageBuffer.append(message)   # removed this to stop message being sent to IRC
 		self.output.insert(END, message + "\n") # output message to text window
 
-	def IRCSendCalledEveryTwoSeconds(self):
+	def IRCSendCalledEveryThreeSeconds(self):
 		if (self.ircMessageBuffer):
 			try:
 				self.irc.send(("PRIVMSG " + self.channel + " :" + str(self.ircMessageBuffer.popleft()) + "\r\n").encode('utf8'))
@@ -217,7 +216,7 @@ class IRCClient(threading.Thread):
 				print("IRC send error:")
 				logging.exception("In IRCSendCalledEveryTwoSeconds")
 				print(str(e))
-	#above is called by the timer every two seconds and checks for items in buffer to be sent, if there is one it'll send it
+	#above is called by the timer every three seconds and checks for items in buffer to be sent, if there is one it'll send it
 
 
 
