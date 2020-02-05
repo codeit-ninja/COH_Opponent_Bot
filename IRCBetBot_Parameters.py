@@ -72,10 +72,10 @@ class parameters:
 		self.data['temprecReplayPath'] = ""
 
 		self.data['useOverlayPreFormat'] = False
-		self.data['overlayStringPreFormat'] = "$NAME : ($RANK) : $LEVEL lvl"
+		self.data['overlayStringPreFormat'] = "$NAME : Rank $RANK : lvl $LEVEL"
 
 		self.data['useCustomPreFormat'] = False
-		self.data['customStringPreFormat'] = "$NAME : ($COUNTRY) : $FACTION : ($RANK) : $LEVEL lvl"
+		self.data['customStringPreFormat'] = "$NAME : $COUNTRY : $FACTION : $MATCHTYPE Rank $RANK : lvl $LEVEL"
 		
 
 		#your personal steam number
@@ -150,6 +150,8 @@ class parameters:
 		self.stringFormattingDictionary['$RANK'] = None
 		self.stringFormattingDictionary['$LEVEL'] = None
 		self.stringFormattingDictionary['$WLRATIO'] = None
+
+		self.stringFormattingDictionary['$MATCHTYPE'] = None
  
 		
 	
