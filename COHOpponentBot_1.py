@@ -785,7 +785,7 @@ class HandleCOHlogFile:
 					stringFormattingDictionary = self.populateStringFormattingDictionary(item)
 					preFormattedString = self.parameters.data.get('overlayStringPreFormat')
 					theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary)
-					team1 += str(theString) + str("<BR>") + "\n"
+					team2 += str(theString) + str("<BR>") + "\n"
 			else:
 			
 				for item in axisTeamList:
