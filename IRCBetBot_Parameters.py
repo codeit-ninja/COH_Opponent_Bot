@@ -70,6 +70,12 @@ class parameters:
 
 		self.data['logPath'] = ""
 		self.data['temprecReplayPath'] = ""
+
+		self.data['useOverlayPreFormat'] = False
+		self.data['overlayStringPreFormat'] = "$NAME : ($RANK) : $LEVEL lvl"
+
+		self.data['useCustomPreFormat'] = False
+		self.data['customStringPreFormat'] = "$NAME : ($COUNTRY) : $FACTION : ($RANK) : $LEVEL lvl"
 		
 
 		#your personal steam number
@@ -128,22 +134,22 @@ class parameters:
 		except Exception as e:
 			print(str(e))
 
-		stringFormatting = {}
-		stringFormatting['$NAME'] = None
-		stringFormatting['$FACTION'] = None
-		stringFormatting['$COUNTRY'] = None
-		stringFormatting['$TOTALWINS'] = None
-		stringFormatting['$TOTALLOSSES'] = None
-		stringFormatting['$TOTALWLRATIO'] = None
+		self.stringFormattingDictionary = {}
+		self.stringFormattingDictionary['$NAME'] = None
+		self.stringFormattingDictionary['$FACTION'] = None
+		self.stringFormattingDictionary['$COUNTRY'] = None
+		self.stringFormattingDictionary['$TOTALWINS'] = None
+		self.stringFormattingDictionary['$TOTALLOSSES'] = None
+		self.stringFormattingDictionary['$TOTALWLRATIO'] = None
 
-		stringFormatting['$WINS'] = None
-		stringFormatting['$LOSSES'] = None
-		stringFormatting['$DISPUTES'] = None
-		stringFormatting['$STREAK'] = None
-		stringFormatting['$DROPS'] = None
-		stringFormatting['$RANK'] = None
-		stringFormatting['$LEVEL'] = None
-		stringFormatting['$WLRATIO'] = None
+		self.stringFormattingDictionary['$WINS'] = None
+		self.stringFormattingDictionary['$LOSSES'] = None
+		self.stringFormattingDictionary['$DISPUTES'] = None
+		self.stringFormattingDictionary['$STREAK'] = None
+		self.stringFormattingDictionary['$DROPS'] = None
+		self.stringFormattingDictionary['$RANK'] = None
+		self.stringFormattingDictionary['$LEVEL'] = None
+		self.stringFormattingDictionary['$WLRATIO'] = None
  
 		
 	
