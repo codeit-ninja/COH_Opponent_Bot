@@ -108,7 +108,9 @@ class IRCClient(threading.Thread):
 
 		self.running = True
 		
+
 		# Start checking send buffer every 3 seconds.
+
 		self.CheckIRCSendBufferEveryThreeSeconds() # only call this once.	
 		
 
@@ -301,7 +303,7 @@ class StatsRequest:
 		if (statdata['result']['message'] == "SUCCESS"):
 			print ("statdata load succeeded")
 			playerStats = playerStat(statdata, statnumber)
-			print("playerStats : " + str(playerStats))
+			#print("playerStats : " + str(playerStats))
 
 			return playerStats
 
@@ -433,37 +435,41 @@ class HandleCOHlogFile:
 
 								if factionString == "allies_commonwealth":
 									playerList[x].faction = Faction.CW
+									playerList[x].factionString = factionString
 									print("Setting faction to CW")
 
 								if factionString == "allies":
-									playerList[x].faction = Faction.US								
+									playerList[x].faction = Faction.US
+									playerList[x].factionString = factionString							
 									print("Setting faction to US")
 
 								if factionString == "axis_panzer_elite":
-									playerList[x].faction = Faction.PE									
+									playerList[x].faction = Faction.PE
+									playerList[x].factionString = factionString								
 									print("Setting faction to PE")
 
 								if factionString == "axis":
 									playerList[x].faction = Faction.WM
+									playerList[x].factionString = factionString
 									print("Setting faction to WM")
 					else:
 						if factionString == "allies_commonwealth":
-							player = Player(slot=theSlotNumber, faction = Faction.CW)
+							player = Player(slot=theSlotNumber, faction = Faction.CW, factionString=factionString)
 							playerList.append(player)
 							print("Setting faction to CW")
 
 						if factionString == "allies":
-							player = Player(slot=theSlotNumber, faction = Faction.US)
+							player = Player(slot=theSlotNumber, faction = Faction.US, factionString=factionString)
 							playerList.append(player)									
 							print("Setting faction to US")
 
 						if factionString == "axis_panzer_elite":
-							player = Player(slot=theSlotNumber, faction = Faction.PE)
+							player = Player(slot=theSlotNumber, faction = Faction.PE, factionString=factionString)
 							playerList.append(player)									
 							print("Setting faction to PE")
 
 						if factionString == "axis":
-							player = Player(slot=theSlotNumber, faction = Faction.WM)
+							player = Player(slot=theSlotNumber, faction = Faction.WM, factionString=factionString)
 							playerList.append(player)
 							print("Setting faction to WM")
 
@@ -478,7 +484,7 @@ class HandleCOHlogFile:
 			if ("PerformanceRecorder::StartRecording") in item:
 					self.mapSize = self.find_between(item, "game size " , "\n")
 			# clear the steam number list if a new game is found in the file
-			if ("detected successful game start") in item:
+			if ("AutoMatchForm - Starting game") in item:
 				eazyCPUCount = 0
 				normalCPUCount = 0
 				hardCPUCount = 0
@@ -487,6 +493,7 @@ class HandleCOHlogFile:
 				self.numberOfComputers = 0
 				self.mapSize = 0
 				playerList.clear()
+				print("CLEARING PLAYER LIST\n")
 			if ("Player CPU - Expert" in item):
 				expertCPUCount += 1
 			if ("Player CPU - Hard" in item):
@@ -540,10 +547,15 @@ class HandleCOHlogFile:
 		# assign faction values to the players
 		for item in playerList:
 			for x in range(len(playerStatList)):
-				if(str(item.name) == str(playerStatList[x].user.name)):
+				if(str(item.steamNumber) == str(playerStatList[x].user.steamNumber)):
 					playerStatList[x].user.faction = item.faction
 					playerStatList[x].user.factionString = item.factionString
 					playerStatList[x].user.slot = item.slot
+
+
+		print("FULL PLAYERSTATLIST\n")
+		for item in playerStatList:
+			print(item)
 
 		axisTeam = []
 		alliesTeam = []
@@ -554,23 +566,86 @@ class HandleCOHlogFile:
 			if (str(item.user.faction) == str(Faction.WM)) or (str(item.user.faction)== str(Faction.PE)):
 				axisTeam.append(item)
 
+
 		# output each player to file
 		if (self.parameters.data.get('outputPlayerOverlayFiles')):
 			self.saveOverlayHTML(axisTeam, alliesTeam)
 		
+		# check if using custom formatting
+		useCustomChatOutputFormat = self.parameters.data.get('useCustomPreFormat')
 
-		for item in playerStatList:
-			if(item.user.steamNumber == self.parameters.data.get('steamNumber')):
-				if (self.parameters.data.get('showOwn')):
+		if (useCustomChatOutputFormat):
+			for item in playerStatList:
+				if(item.user.steamNumber == self.parameters.data.get('steamNumber')):
+					if (self.parameters.data.get('showOwn')):
+						self.data = self.data + self.createCustomOutput(item)
+				else:
+					self.data = self.data + self.createCustomOutput(item)				
+		else:
+			for item in playerStatList:
+				if(item.user.steamNumber == self.parameters.data.get('steamNumber')):
+					if (self.parameters.data.get('showOwn')):
+						self.data = self.data + self.createOutputList(item)
+				else:
 					self.data = self.data + self.createOutputList(item)
-			else:
-				self.data = self.data + self.createOutputList(item)
 				
 		if self.data:
 			return self.data
 		else:
 			return None
 
+	def createCustomOutput(self, playerStats):
+		stringFormattingDictionary = self.populateStringFormattingDictionary(playerStats)
+		customPreFormattedOutputString = self.parameters.data.get('customStringPreFormat')
+		theString = self.formatPreFormattedString(customPreFormattedOutputString, stringFormattingDictionary)
+		outputList = list(self.split_by_n(theString, 500))
+		if (self.parameters.data.get('showSteamProfile')):
+			outputList.append("Steam profile " + str(playerStats.user.steamProfileAddress))
+		return outputList
+
+	def populateStringFormattingDictionary(self, playerStats):
+		stringFormattingDictionary = self.parameters.stringFormattingDictionary
+		stringFormattingDictionary['$NAME'] = playerStats.user.name
+		stringFormattingDictionary['$FACTION'] = playerStats.user.faction.name
+		stringFormattingDictionary['$COUNTRY'] = playerStats.user.country
+		stringFormattingDictionary['$TOTALWINS'] = playerStats.totalWins
+		stringFormattingDictionary['$TOTALLOSSES'] = playerStats.totalLosses
+		stringFormattingDictionary['$TOTALWLRATIO'] = playerStats.totalWLRatio
+
+		matchType = MatchType.BASIC
+		if (int(self.numberOfComputers) > 0):
+			matchType = MatchType.BASIC
+			stringFormattingDictionary['$MATCHTYPE'] = "Basic"
+		if (0 <= int(self.mapSize) <= 2) and (int(self.numberOfComputers) == 0):
+			matchType = MatchType.ONES
+			stringFormattingDictionary['$MATCHTYPE'] = "1v1"
+		if (3 <= int(self.mapSize) <= 4) and (int(self.numberOfComputers) == 0):
+			matchType = MatchType.TWOS
+			stringFormattingDictionary['$MATCHTYPE'] = "2v2"
+		if (5 <= int(self.mapSize) <= 6) and (int(self.numberOfComputers) == 0):
+			matchType = MatchType.THREES
+			stringFormattingDictionary['$MATCHTYPE'] = "3v3"
+
+
+		for value in playerStats.leaderboardData:
+			if (str(playerStats.leaderboardData[value].matchType) == str(matchType)):
+				if (str(playerStats.leaderboardData[value].faction) == str(playerStats.user.faction)):
+					stringFormattingDictionary['$WINS'] = playerStats.leaderboardData[value].wins
+					stringFormattingDictionary['$LOSSES'] = playerStats.leaderboardData[value].losses
+					stringFormattingDictionary['$DISPUTES'] = playerStats.leaderboardData[value].disputes
+					stringFormattingDictionary['$STREAK'] = playerStats.leaderboardData[value].streak
+					stringFormattingDictionary['$DROPS'] = playerStats.leaderboardData[value].drops
+					stringFormattingDictionary['$RANK'] = playerStats.leaderboardData[value].rank
+					stringFormattingDictionary['$LEVEL'] = playerStats.leaderboardData[value].rankLevel
+					stringFormattingDictionary['$WLRATIO'] = playerStats.leaderboardData[value].winLossRatio
+					 
+
+		return stringFormattingDictionary
+
+	def formatPreFormattedString(self, theString, stringFormattingDictionary):
+		for key, value in stringFormattingDictionary.items():
+			theString = theString.replace(str(key), str(value))
+		return theString
 
 	def createOutputList(self, playerStats):
 
@@ -699,11 +774,25 @@ class HandleCOHlogFile:
 		try:
 			team1 = ""
 			team2 = ""
-			for item in axisTeamList:
-				team1 += str(item.user.name) + str("<BR>") + "\n"
-			for item in alliesTeamList:
-				team2 += str(item.user.name) + str("<BR>") + "\n"
+			useOverlayPreFormat = bool(self.parameters.data.get('useOverlayPreFormat'))
+			if (useOverlayPreFormat):
+				for item in axisTeamList:
+					stringFormattingDictionary = self.populateStringFormattingDictionary(item)
+					preFormattedString = self.parameters.data.get('overlayStringPreFormat')
+					theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary)
+					team1 += str(theString) + str("<BR>") + "\n"
+				for item in alliesTeamList:
+					stringFormattingDictionary = self.populateStringFormattingDictionary(item)
+					preFormattedString = self.parameters.data.get('overlayStringPreFormat')
+					theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary)
+					team1 += str(theString) + str("<BR>") + "\n"
+			else:
 			
+				for item in axisTeamList:
+					team1 += str(item.user.name) + str("<BR>") + "\n"
+				for item in alliesTeamList:
+					team2 += str(item.user.name) + str("<BR>") + "\n"
+				
 			htmlOutput = OverlayTemplates().overlayhtml.format(team1, team2)
 			# create output overlay from template
 			with open("overlay.html" , 'w') as outfile:

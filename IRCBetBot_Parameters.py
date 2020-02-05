@@ -70,6 +70,12 @@ class parameters:
 
 		self.data['logPath'] = ""
 		self.data['temprecReplayPath'] = ""
+
+		self.data['useOverlayPreFormat'] = False
+		self.data['overlayStringPreFormat'] = "$NAME : Rank $RANK : lvl $LEVEL"
+
+		self.data['useCustomPreFormat'] = False
+		self.data['customStringPreFormat'] = "$NAME : $COUNTRY : $FACTION : $MATCHTYPE Rank $RANK : lvl $LEVEL"
 		
 
 		#your personal steam number
@@ -127,6 +133,26 @@ class parameters:
 								self.data['channel'] = value['alias']
 		except Exception as e:
 			print(str(e))
+
+		self.stringFormattingDictionary = {}
+		self.stringFormattingDictionary['$NAME'] = None
+		self.stringFormattingDictionary['$FACTION'] = None
+		self.stringFormattingDictionary['$COUNTRY'] = None
+		self.stringFormattingDictionary['$TOTALWINS'] = None
+		self.stringFormattingDictionary['$TOTALLOSSES'] = None
+		self.stringFormattingDictionary['$TOTALWLRATIO'] = None
+
+		self.stringFormattingDictionary['$WINS'] = None
+		self.stringFormattingDictionary['$LOSSES'] = None
+		self.stringFormattingDictionary['$DISPUTES'] = None
+		self.stringFormattingDictionary['$STREAK'] = None
+		self.stringFormattingDictionary['$DROPS'] = None
+		self.stringFormattingDictionary['$RANK'] = None
+		self.stringFormattingDictionary['$LEVEL'] = None
+		self.stringFormattingDictionary['$WLRATIO'] = None
+
+		self.stringFormattingDictionary['$MATCHTYPE'] = None
+ 
 		
 	
 	def load(self):

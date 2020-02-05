@@ -69,6 +69,19 @@ class COHBotGUI:
 
         self.automaticTrigger = IntVar(value = int(bool(self.parameters.data.get('automaticTrigger'))))
 
+        self.useOverlayPreFormat = IntVar(value = int(bool(self.parameters.data.get('useOverlayPreFormat'))))
+
+        self.customOverlayPreFormatString = StringVar()
+        
+        self.useCustomPreFormat = IntVar(value = int(bool(self.parameters.data.get('useCustomPreFormat'))))
+
+        self.customChatOutputPreFormatString = StringVar()
+        
+
+        self.customOverlayEntry = None
+        self.customChatOutputEntry = None
+
+
         tk.Label(self.master, text="Twitch Channel").grid(row=0, sticky=tk.W)
         tk.Label(self.master, text="Bot Account Name").grid(row=1, sticky=tk.W)
         tk.Label(self.master, text="Bot oAuth Key").grid(row=2, sticky=tk.W)
@@ -190,35 +203,90 @@ class COHBotGUI:
             self.optionsMenu.title("Chat Display Options")
 
             self.f1 = tk.LabelFrame(self.optionsMenu, padx =5, pady=5)
-            self.f1.grid()
+            self.f1.grid(columnspan = 2)
             self.f2 = tk.LabelFrame(self.optionsMenu, text = "Player Info", padx =5, pady=5)
-            self.f2.grid()
+            self.f2.grid(sticky=tk.N+W+E+S)
+            self.globalInfo = tk.LabelFrame(self.optionsMenu, text = "Global Info", padx =5, pady=5)
+            self.globalInfo.grid()
             self.f3 = tk.LabelFrame(self.optionsMenu, text = "Match Types", padx =5, pady=5)
-            self.f3.grid()
+            self.f3.grid(sticky=tk.N+W+E)
             self.f4 = tk.LabelFrame(self.optionsMenu, text = "Faction Stats", padx =5, pady=5)
-            self.f4.grid()
+            self.f4.grid(sticky=tk.N+W+E)
             self.f5 = tk.LabelFrame(self.optionsMenu, text = "Auto Trigger", padx =5, pady=5)
-            self.f5.grid()            
+            self.f5.grid(sticky=tk.N+W+E)
+
+
+            self.f6 = tk.LabelFrame(self.optionsMenu, text = "Custom Format", padx =5, pady=5)
+            self.f6.grid(row = 1 , column =1, rowspan =2, sticky=tk.N+W+E+S)            
 
 
 
-            tk.Label(self.f1, text="Report Options").grid(sticky=tk.W)
+            tk.Label(self.f1, text="Report Options").grid(columnspan = 2)
+
+            self.checkUseCustomOverlayString = tk.Checkbutton(self.f6, text="Use Custom Overlay Pre-Format", variable=self.useOverlayPreFormat, command = self.toggleUseOverlayPreFormat)
+            self.checkUseCustomOverlayString.grid(sticky=tk.W)
+
+            self.customOverlayEntry = tk.Entry(self.f6, width = 70, textvariable = self.customOverlayPreFormatString, validate="focusout", validatecommand=self.saveCustomPreFormats)
+            self.customOverlayEntry.grid(sticky = tk.W)
+            if self.parameters.data.get('overlayStringPreFormat'):
+                self.customOverlayPreFormatString.set(self.parameters.data.get('overlayStringPreFormat'))
+            self.toggleUseOverlayPreFormat()
+
+
+
+
+            self.checkUseCustomChatOutput = tk.Checkbutton(self.f6, text="Use Custom Chat Output Pre-Format", variable=self.useCustomPreFormat, command = self.toggleUseCustomPreFormat)
+            self.checkUseCustomChatOutput.grid(sticky=tk.W)
+
+            self.customChatOutputEntry = tk.Entry(self.f6, width = 70, textvariable = self.customChatOutputPreFormatString, validate="focusout", validatecommand=self.saveCustomPreFormats)
+            self.customChatOutputEntry.grid(sticky = tk.W)
+            if self.parameters.data.get('customStringPreFormat'):
+                self.customChatOutputPreFormatString.set(self.parameters.data.get('customStringPreFormat'))
+            #self.toggleUseCustomPreFormat()
+
+            self.f7 = tk.LabelFrame(self.f6, text = "Custom Variables", padx= 5, pady=5)
+            self.f7.grid(sticky=tk.N+W+E)
+
+            self.stringFormatLabels = []
+            self.myLabelFrames = []
+            #create all custom variables from dictionary keys
+            columnNumber = 0
+            rowNumber = 0
+            for key, value in self.parameters.stringFormattingDictionary.items():
+
+                myLabelFrame = tk.LabelFrame(self.f7, padx =5, pady=5)
+                self.f7.columnconfigure(columnNumber, minsize = 100)
+                self.myLabelFrames.append(myLabelFrame)
+                myLabel = tk.Label(myLabelFrame, text=str(key))
+                myLabel.grid()
+                
+                myLabelFrame.grid(row = rowNumber,column = columnNumber, sticky = tk.N + W + E)
+                columnNumber += 1
+                if columnNumber > 3:
+                    rowNumber += 1
+                    columnNumber = 0
+                self.stringFormatLabels.append(myLabel)
+
+
+
+            
 
             
 
             self.checkOwn = tk.Checkbutton(self.f2, text="Show Own Stats", variable=self.showOwn, command = self.saveToggles)
             self.checkOwn.grid( sticky=tk.W)
-            self.checkWLRatio = tk.Checkbutton(self.f2, text="Country", variable=self.showUserCountry, command = self.saveToggles)
-            self.checkWLRatio.grid( sticky=tk.W)
             self.checkWLRatio = tk.Checkbutton(self.f2, text="Steam Profile", variable=self.showSteamProfile, command = self.saveToggles)
             self.checkWLRatio.grid( sticky=tk.W) 
-            self.checkTotalWins = tk.Checkbutton(self.f2, text="Total Wins", variable=self.showTotalWins, command = self.saveToggles)
+
+            self.checkWLRatio = tk.Checkbutton(self.globalInfo, text="Country", variable=self.showUserCountry, command = self.saveToggles)
+            self.checkWLRatio.grid( sticky=tk.W)
+            self.checkTotalWins = tk.Checkbutton(self.globalInfo, text="Total Wins", variable=self.showTotalWins, command = self.saveToggles)
             self.checkTotalWins.grid( sticky=tk.W)             
-            self.checkTotalLosses = tk.Checkbutton(self.f2, text="Total Losses", variable=self.showTotalLosses, command = self.saveToggles)
+            self.checkTotalLosses = tk.Checkbutton(self.globalInfo, text="Total Losses", variable=self.showTotalLosses, command = self.saveToggles)
             self.checkTotalLosses.grid( sticky=tk.W) 
-            self.checkTotalWLRatio = tk.Checkbutton(self.f2, text="Total W/L Ratio", variable=self.showTotalWLRatio, command = self.saveToggles)
+            self.checkTotalWLRatio = tk.Checkbutton(self.globalInfo, text="Total W/L Ratio", variable=self.showTotalWLRatio, command = self.saveToggles)
             self.checkTotalWLRatio.grid( sticky=tk.W) 
-            self.checkPlayedFactionOnly = tk.Checkbutton(self.f2, text="Played Faction ONLY", variable=self.showUserFactionOnly, command = self.saveToggles)
+            self.checkPlayedFactionOnly = tk.Checkbutton(self.globalInfo, text="Played Faction ONLY", variable=self.showUserFactionOnly, command = self.saveToggles)
             self.checkPlayedFactionOnly.grid( sticky=tk.W)
 
             #s1 = ttk.Separator(OptionMenu, orient=HORIZONTAL)
@@ -261,11 +329,53 @@ class COHBotGUI:
             self.checkAutomaticTrigger.grid( sticky=tk.W)
 
 
+            self.toggleUseCustomPreFormat() # setdisabled if custom format on first run
             self.automode() # setdisabled if auto on first run
         try:
             self.optionsMenu.focus()
         except Exception as e:
             logging.exception('Exception : ')
+
+    def saveCustomPreFormats(self):
+        if self.customOverlayEntry:
+            self.parameters.data['overlayStringPreFormat'] = self.customOverlayPreFormatString.get()
+        if self.customChatOutputEntry:
+            self.parameters.data['customStringPreFormat'] = self.customChatOutputPreFormatString.get()
+        self.parameters.save()
+        return True # must return true to a validate entry method
+
+    def toggleUseOverlayPreFormat(self):
+        if (bool(self.useOverlayPreFormat.get())):
+            self.customOverlayEntry.config(state = NORMAL)
+        else:
+            self.customOverlayEntry.config(state = DISABLED)
+        self.saveToggles()
+
+    
+    def toggleUseCustomPreFormat(self):
+        if (bool(self.useCustomPreFormat.get())):
+            self.customChatOutputEntry.config(state = NORMAL)
+            # must set use automatic mode toggle
+            self.automaticMode.set(1)
+            self.automode()
+            self.checkAutomaticMode.config(state = DISABLED)
+
+            for child in self.f4.winfo_children():
+                child.config(state= DISABLED)
+            for child in self.globalInfo.winfo_children():
+                child.config(state = DISABLED)
+        else:
+            self.customChatOutputEntry.config(state = DISABLED)
+            for child in self.f4.winfo_children():
+                child.config(state= NORMAL)
+            for child in self.globalInfo.winfo_children():
+                child.config(state = NORMAL)
+            self.checkAutomaticMode.config(state = NORMAL)              
+
+
+        self.saveToggles()
+
+
 
     def testStats(self):
         print("Testing Stats")
@@ -333,11 +443,16 @@ class COHBotGUI:
 
         self.parameters.data['automaticTrigger'] = bool(self.automaticTrigger.get())
 
+        self.parameters.data['useOverlayPreFormat'] = bool(self.useOverlayPreFormat.get())
+        self.parameters.data['useCustomPreFormat'] = bool(self.useCustomPreFormat.get())
+
+
         self.parameters.save()
         try:
             if self.thread:
                 self.thread.parameters = self.parameters
         except Exception as e:
+            print(str(e))
             logging.exception('Exception : ')
 
     
