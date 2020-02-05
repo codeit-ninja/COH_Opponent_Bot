@@ -108,7 +108,9 @@ class IRCClient(threading.Thread):
 
 		self.running = True
 		
-		# Start checking send buffer every 2 seconds.
+
+		# Start checking send buffer every 3 seconds.
+
 		self.CheckIRCSendBufferEveryThreeSeconds() # only call this once.	
 		
 
