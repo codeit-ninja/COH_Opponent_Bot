@@ -109,7 +109,7 @@ class IRCClient(threading.Thread):
 		self.running = True
 		
 		# Start checking send buffer every 2 seconds.
-		self.CheckIRCSendBufferEveryTwoSeconds() # only call this once.	
+		self.CheckIRCSendBufferEveryThreeSeconds() # only call this once.	
 		
 
 		self.irc.connect((self.server, self.port))

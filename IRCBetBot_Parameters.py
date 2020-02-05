@@ -127,6 +127,24 @@ class parameters:
 								self.data['channel'] = value['alias']
 		except Exception as e:
 			print(str(e))
+
+		stringFormatting = {}
+		stringFormatting['$NAME'] = None
+		stringFormatting['$FACTION'] = None
+		stringFormatting['$COUNTRY'] = None
+		stringFormatting['$TOTALWINS'] = None
+		stringFormatting['$TOTALLOSSES'] = None
+		stringFormatting['$TOTALWLRATIO'] = None
+
+		stringFormatting['$WINS'] = None
+		stringFormatting['$LOSSES'] = None
+		stringFormatting['$DISPUTES'] = None
+		stringFormatting['$STREAK'] = None
+		stringFormatting['$DROPS'] = None
+		stringFormatting['$RANK'] = None
+		stringFormatting['$LEVEL'] = None
+		stringFormatting['$WLRATIO'] = None
+ 
 		
 	
 	def load(self):
