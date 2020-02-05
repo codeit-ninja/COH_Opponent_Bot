@@ -39,7 +39,7 @@ Automatic Trigger checks the game every 10 seconds and will trigger the opponent
 
 TO USE THE OVERLAY IN OBS:
 create a new source of type browser.
-point the browser at local file overlay.html in the programs base directory.
+point the browser at local file overlay.html in the programs base directory. (if overlay.html doesn't exist, run the program once and press test, this will create one)
 expand the source to overlay/cover the entire preview screen.
 teams can be custom formatted using the overlaystyle.css file that will be created in the same directory.
 
