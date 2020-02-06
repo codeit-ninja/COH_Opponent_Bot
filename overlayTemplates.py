@@ -37,6 +37,8 @@ h1 {
 
 
 .team1 {
+	position : relative;
+	top: -20px; /* This will move it 20px up */
 	color: white;
 	float: left;
 	margin-right: 5px;
@@ -45,13 +47,16 @@ h1 {
 	}
 
 .team2 {
+	position: relative;
+	top: -20px; /* This will move it 20px up */
 	color: white;
 	float: right;
 	margin-left: 5px;
 	margin-right: 300px;
 	background-color: rgba(0, 0, 0, 0.8);
-	
 }
+
+
 
 
     """
