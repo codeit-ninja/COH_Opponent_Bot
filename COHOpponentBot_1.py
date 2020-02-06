@@ -828,6 +828,9 @@ class HandleCOHlogFile:
 			team1List = []
 			team2List = []
 
+			#by default player team is allies unless the player is steam number is present in the axisTeamList
+			team1List = alliesTeamList
+			team2List = axisTeamList
 
 			for item in axisTeamList:
 				print("axisTeamList : " + str(item.user.steamNumber))
@@ -836,10 +839,6 @@ class HandleCOHlogFile:
 					print ("Player team is AXIS")
 					team1List = axisTeamList
 					team2List = alliesTeamList
-				else:
-					print("Player team is ALLIES")
-					team1List = alliesTeamList
-					team2List = axisTeamList
 
 			useOverlayPreFormat = bool(self.parameters.data.get('useOverlayPreFormat'))
 			if (useOverlayPreFormat):
