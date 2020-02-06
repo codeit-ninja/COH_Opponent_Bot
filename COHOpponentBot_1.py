@@ -650,7 +650,7 @@ class HandleCOHlogFile:
 			if fileExists:
 				imageOverlayFormattingDictionary['$FLAGICON'] = '<div id = "countryflagimg"><img src="{0}" height = "20"></div>'.format(countryIcon)
 			else:
-				imageOverlayFormattingDictionary['$FLAGICON'] = ""
+				imageOverlayFormattingDictionary['$FLAGICON'] = '<div id = "countryflagimg"><img height = "20"></div>'
 		if playerStats.user.faction:
 			factionIcon = "OverlayImages\\Armies\\" + str(playerStats.user.faction.name).lower() + ".png"
 			fileExists = os.path.isfile(factionIcon)
@@ -659,7 +659,7 @@ class HandleCOHlogFile:
 				imageOverlayFormattingDictionary['$FACTIONICON'] = '<div id = "factionflagimg"><img src="{0}" height = "30"></div>'.format(factionIcon)
 				print(imageOverlayFormattingDictionary.get('$FACTIONICON'))
 			else:
-				imageOverlayFormattingDictionary['$FACTIONICON'] = ""
+				imageOverlayFormattingDictionary['$FACTIONICON'] = '<div id = "factionflagimg"><img height = "30"></div>'
 		matchType = MatchType.BASIC
 		if (int(self.numberOfComputers) > 0):
 			matchType = MatchType.BASIC
@@ -689,7 +689,7 @@ class HandleCOHlogFile:
 						imageOverlayFormattingDictionary['$LEVELICON'] =  '<div id = "rankimg"><img src="{0}" height = "45"></div>'.format(levelIcon)
 						print(imageOverlayFormattingDictionary.get('$LEVELICON'))
 					else:
-						imageOverlayFormattingDictionary['$LEVELICON'] = ""
+						imageOverlayFormattingDictionary['$LEVELICON'] = '<div id = "rankimg"><img height = "45"></div>'
 		return imageOverlayFormattingDictionary
 
 	def formatPreFormattedString(self, theString, stringFormattingDictionary):
