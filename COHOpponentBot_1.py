@@ -642,10 +642,55 @@ class HandleCOHlogFile:
 
 		return stringFormattingDictionary
 
+	def populateImageFormattingDictionary(self, playerStats):
+		imageOverlayFormattingDictionary = self.parameters.imageOverlayFormattingDictionary
+		if playerStats.user.country:
+			countryIcon = "OverlayImages\\Flagssmall\\" + str(playerStats.user.country).lower() + ".png"
+			fileExists = os.path.isfile(countryIcon)
+			if fileExists:
+				imageOverlayFormattingDictionary['$FLAGICON'] = '<img src="{0}" height = "20">'.format(countryIcon)
+		if playerStats.user.faction:
+			factionIcon = "OverlayImages\\Armies\\" + str(playerStats.user.faction.name).lower() + ".png"
+			fileExists = os.path.isfile(factionIcon)
+			print(factionIcon)
+			if fileExists:
+				imageOverlayFormattingDictionary['$FACTIONICON'] = '<img src="{0}" height = "30">'.format(factionIcon)
+				print(imageOverlayFormattingDictionary.get('$FACTIONICON'))
+		matchType = MatchType.BASIC
+		if (int(self.numberOfComputers) > 0):
+			matchType = MatchType.BASIC
+		if (0 <= int(self.mapSize) <= 2) and (int(self.numberOfComputers) == 0):
+			matchType = MatchType.ONES
+		if (3 <= int(self.mapSize) <= 4) and (int(self.numberOfComputers) == 0):
+			matchType = MatchType.TWOS
+		if (5 <= int(self.mapSize) <= 6) and (int(self.numberOfComputers) == 0):
+			matchType = MatchType.THREES
+		for value in playerStats.leaderboardData:
+			if (str(playerStats.leaderboardData[value].matchType) == str(matchType)):
+				if (str(playerStats.leaderboardData[value].faction) == str(playerStats.user.faction)):
+					iconPrefix = ""
+					if str(playerStats.user.faction) == str(Faction.PE):
+						iconPrefix = "panzer_"
+					if str(playerStats.user.faction) == str(Faction.CW):
+						iconPrefix = "brit_"
+					if str(playerStats.user.faction) == str(Faction.US):
+						iconPrefix = "us_"
+					if str(playerStats.user.faction) == str(Faction.WM):
+						iconPrefix = "heer_"												
+					level = str(playerStats.leaderboardData[value].rankLevel)
+					levelIcon = "OverlayImages\\Ranks\\" + iconPrefix + level + ".png"
+					print("levelIcon : " + str(levelIcon))
+					fileExists = os.path.isfile(levelIcon)
+					if fileExists:
+						imageOverlayFormattingDictionary['$LEVELICON'] =  '<img src="{0}" height = "45">'.format(levelIcon)
+						print(imageOverlayFormattingDictionary.get('$LEVELICON'))
+		return imageOverlayFormattingDictionary
+
 	def formatPreFormattedString(self, theString, stringFormattingDictionary):
-		for key, value in stringFormattingDictionary.items():
-			theString = theString.replace(str(key), str(value))
-		return theString
+		# I'm dammed if I know how this regular expression works but it does.
+		pattern = re.compile(r'(?<!\w)(' + '|'.join(re.escape(key) for key in stringFormattingDictionary.keys()) + r')(?!\w)')
+		result = pattern.sub(lambda x: stringFormattingDictionary[x.group()], theString)
+		return result
 
 	def createOutputList(self, playerStats):
 
@@ -777,14 +822,22 @@ class HandleCOHlogFile:
 			useOverlayPreFormat = bool(self.parameters.data.get('useOverlayPreFormat'))
 			if (useOverlayPreFormat):
 				for item in axisTeamList:
-					stringFormattingDictionary = self.populateStringFormattingDictionary(item)
 					preFormattedString = self.parameters.data.get('overlayStringPreFormat')
+					# first substitute all the text in the preformat
+					stringFormattingDictionary = self.populateStringFormattingDictionary(item)
 					theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary)
+					# second substitue all the html images if used
+					stringFormattingDictionary = self.populateImageFormattingDictionary(item)
+					theString = self.formatPreFormattedString(theString, stringFormattingDictionary)
 					team1 += str(theString) + str("<BR>") + "\n"
 				for item in alliesTeamList:
-					stringFormattingDictionary = self.populateStringFormattingDictionary(item)
 					preFormattedString = self.parameters.data.get('overlayStringPreFormat')
+					# first substitute all the text in the preformat
+					stringFormattingDictionary = self.populateStringFormattingDictionary(item)
 					theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary)
+					# second substitue all the html images if used
+					stringFormattingDictionary = self.populateImageFormattingDictionary(item)
+					theString = self.formatPreFormattedString(theString, stringFormattingDictionary)
 					team2 += str(theString) + str("<BR>") + "\n"
 			else:
 			

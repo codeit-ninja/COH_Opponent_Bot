@@ -223,14 +223,7 @@ class COHBotGUI:
 
             tk.Label(self.f1, text="Report Options").grid(columnspan = 2)
 
-            self.checkUseCustomOverlayString = tk.Checkbutton(self.f6, text="Use Custom Overlay Pre-Format", variable=self.useOverlayPreFormat, command = self.toggleUseOverlayPreFormat)
-            self.checkUseCustomOverlayString.grid(sticky=tk.W)
 
-            self.customOverlayEntry = tk.Entry(self.f6, width = 70, textvariable = self.customOverlayPreFormatString, validate="focusout", validatecommand=self.saveCustomPreFormats)
-            self.customOverlayEntry.grid(sticky = tk.W)
-            if self.parameters.data.get('overlayStringPreFormat'):
-                self.customOverlayPreFormatString.set(self.parameters.data.get('overlayStringPreFormat'))
-            self.toggleUseOverlayPreFormat()
 
 
 
@@ -244,7 +237,7 @@ class COHBotGUI:
                 self.customChatOutputPreFormatString.set(self.parameters.data.get('customStringPreFormat'))
             #self.toggleUseCustomPreFormat()
 
-            self.f7 = tk.LabelFrame(self.f6, text = "Custom Variables", padx= 5, pady=5)
+            self.f7 = tk.LabelFrame(self.f6, text = "Custom Chat/Overlay Text Variables", padx= 5, pady=5)
             self.f7.grid(sticky=tk.N+W+E)
 
             self.stringFormatLabels = []
@@ -267,11 +260,35 @@ class COHBotGUI:
                     columnNumber = 0
                 self.stringFormatLabels.append(myLabel)
 
+            self.oii = tk.LabelFrame(self.f6, text = "Overlay Only Image Icons", padx= 5, pady=5)
+            self.oii.grid(sticky=tk.N+W+E)
 
+            #create all custom icon variables from dictionary keys
+            columnNumber = 0
+            rowNumber = 0
+            for key, value in self.parameters.imageOverlayFormattingDictionary.items():
 
-            
+                myLabelFrame = tk.LabelFrame(self.oii, padx =5, pady=5)
+                self.oii.columnconfigure(columnNumber, minsize = 100)
+                self.myLabelFrames.append(myLabelFrame)
+                myLabel = tk.Label(myLabelFrame, text=str(key))
+                myLabel.grid()
+                
+                myLabelFrame.grid(row = rowNumber,column = columnNumber, sticky = tk.N + W + E)
+                columnNumber += 1
+                if columnNumber > 3:
+                    rowNumber += 1
+                    columnNumber = 0
+                self.stringFormatLabels.append(myLabel)
 
-            
+            self.checkUseCustomOverlayString = tk.Checkbutton(self.f6, text="Use Custom Overlay Pre-Format", variable=self.useOverlayPreFormat, command = self.toggleUseOverlayPreFormat)
+            self.checkUseCustomOverlayString.grid(sticky=tk.W)
+
+            self.customOverlayEntry = tk.Entry(self.f6, width = 70, textvariable = self.customOverlayPreFormatString, validate="focusout", validatecommand=self.saveCustomPreFormats)
+            self.customOverlayEntry.grid(sticky = tk.W)
+            if self.parameters.data.get('overlayStringPreFormat'):
+                self.customOverlayPreFormatString.set(self.parameters.data.get('overlayStringPreFormat'))
+            self.toggleUseOverlayPreFormat()    
 
             self.checkOwn = tk.Checkbutton(self.f2, text="Show Own Stats", variable=self.showOwn, command = self.saveToggles)
             self.checkOwn.grid( sticky=tk.W)
