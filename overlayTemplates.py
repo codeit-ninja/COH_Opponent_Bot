@@ -8,15 +8,14 @@ class OverlayTemplates:
 <meta http-equiv="refresh" content="1">
 </head>
 <body>
-
-<h1 class = "team1">
+<div id="container">
+<div id = "team1">
 {0}
-</h1>
-
-<h1 class = "team2">
+</div>
+<div id = "team2">
 {1}
-</h1>
-
+</div>
+</div>
 <div style="clear: both;"></div>
 </body>
 </html> 
@@ -27,35 +26,55 @@ class OverlayTemplates:
 
 
 body {
-  background-color: transparent;
-}
-
-h1 {
-  color: navy;
-  font-size: 30px; 
+	background-color: transparent;
   }
+    
+#container{width:100%;
+	font-size: 30px; 
 
-
-.team1 {
-	position : relative;
-	top: -20px; /* This will move it 20px up */
-	color: white;
-	float: left;
-	margin-right: 5px;
-	margin-left: 300px;
-	background-color: rgba(0, 0, 0, 0.8);
-	}
-
-.team2 {
-	position: relative;
-	top: -20px; /* This will move it 20px up */
-	color: white;
-	float: right;
-	margin-left: 5px;
-	margin-right: 300px;
-	background-color: rgba(0, 0, 0, 0.8);
 }
 
+
+#countryflagimg{
+	display: inline;
+}
+
+#factionflagimg{
+	display: inline;
+}
+
+
+#rankimg {
+		position: relative;
+		top: 10px;
+		display: inline;
+}
+
+#team1 {
+
+	  position : absolute;
+	  top: -10px; /* This will move it px up */
+	  color: white;
+	  float: left;
+	  margin-left: 60%;
+	  background-color: rgba(0, 0, 0, 0.8);
+	  }
+  
+#team2 {
+
+	  position: relative;
+	  top: -10px; /* This will move it px up */
+	  color: white;
+	  float: right;
+	  margin-right: 60%;
+
+
+	  background-color: rgba(0, 0, 0, 0.8);
+  }
+  
+  
+
+    
 
 
 

@@ -648,13 +648,13 @@ class HandleCOHlogFile:
 			countryIcon = "OverlayImages\\Flagssmall\\" + str(playerStats.user.country).lower() + ".png"
 			fileExists = os.path.isfile(countryIcon)
 			if fileExists:
-				imageOverlayFormattingDictionary['$FLAGICON'] = '<img src="{0}" height = "20">'.format(countryIcon)
+				imageOverlayFormattingDictionary['$FLAGICON'] = '<div id = "countryflagimg"><img src="{0}" height = "20"></div>'.format(countryIcon)
 		if playerStats.user.faction:
 			factionIcon = "OverlayImages\\Armies\\" + str(playerStats.user.faction.name).lower() + ".png"
 			fileExists = os.path.isfile(factionIcon)
 			print(factionIcon)
 			if fileExists:
-				imageOverlayFormattingDictionary['$FACTIONICON'] = '<img src="{0}" height = "30">'.format(factionIcon)
+				imageOverlayFormattingDictionary['$FACTIONICON'] = '<div id = "factionflagimg"><img src="{0}" height = "30"></div>'.format(factionIcon)
 				print(imageOverlayFormattingDictionary.get('$FACTIONICON'))
 		matchType = MatchType.BASIC
 		if (int(self.numberOfComputers) > 0):
@@ -682,7 +682,7 @@ class HandleCOHlogFile:
 					print("levelIcon : " + str(levelIcon))
 					fileExists = os.path.isfile(levelIcon)
 					if fileExists:
-						imageOverlayFormattingDictionary['$LEVELICON'] =  '<img src="{0}" height = "45">'.format(levelIcon)
+						imageOverlayFormattingDictionary['$LEVELICON'] =  '<div id = "rankimg"><img src="{0}" height = "45"></div>'.format(levelIcon)
 						print(imageOverlayFormattingDictionary.get('$LEVELICON'))
 		return imageOverlayFormattingDictionary
 

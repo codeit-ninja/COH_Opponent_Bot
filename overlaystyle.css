@@ -2,30 +2,47 @@
 body {
 	background-color: transparent;
   }
-  
-  h1 {
-	color: navy;
+    
+#container{width:100%;
 	font-size: 30px; 
-	}
-  
-  
-  .team1 {
-	  position : relative;
-	  top: -20px; /* This will move it 20px up */
+
+}
+
+
+#countryflagimg{
+	display: inline;
+}
+
+#factionflagimg{
+	display: inline;
+}
+
+
+#rankimg {
+		position: relative;
+		top: 10px;
+		display: inline;
+}
+
+#team1 {
+
+	  position : absolute;
+	  top: -10px; /* This will move it px up */
 	  color: white;
 	  float: left;
-	  margin-right: 5px;
-	  margin-left: 300px;
+	  margin-left: 60%;
 	  background-color: rgba(0, 0, 0, 0.8);
 	  }
   
-  .team2 {
+#team2 {
+
 	  position: relative;
-	  top: -20px; /* This will move it 20px up */
+	  top: -10px; /* This will move it px up */
 	  color: white;
 	  float: right;
-	  margin-left: 5px;
-	  margin-right: 300px;
+	  margin-right: 60%;
+
+
 	  background-color: rgba(0, 0, 0, 0.8);
   }
   
