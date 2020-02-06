@@ -819,9 +819,19 @@ class HandleCOHlogFile:
 		try:
 			team1 = ""
 			team2 = ""
+			team1List = []
+			team2List = []
+			for item in axisTeamList:
+				if (str(self.parameters.data.get('steamNumber')) == str(item.user.steamNumber)):
+					team1List = axisTeamList
+					team2List = alliesTeamList
+				else:
+					team1List = alliesTeamList
+					team2List = axisTeamList
+
 			useOverlayPreFormat = bool(self.parameters.data.get('useOverlayPreFormat'))
 			if (useOverlayPreFormat):
-				for item in axisTeamList:
+				for item in team1List:
 					preFormattedString = self.parameters.data.get('overlayStringPreFormat')
 					# first substitute all the text in the preformat
 					stringFormattingDictionary = self.populateStringFormattingDictionary(item)
@@ -830,7 +840,7 @@ class HandleCOHlogFile:
 					stringFormattingDictionary = self.populateImageFormattingDictionary(item)
 					theString = self.formatPreFormattedString(theString, stringFormattingDictionary)
 					team1 += str(theString) + str("<BR>") + "\n"
-				for item in alliesTeamList:
+				for item in team2List:
 					preFormattedString = self.parameters.data.get('overlayStringPreFormat')
 					# first substitute all the text in the preformat
 					stringFormattingDictionary = self.populateStringFormattingDictionary(item)

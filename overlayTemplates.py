@@ -9,10 +9,10 @@ class OverlayTemplates:
 </head>
 <body>
 <div id="container">
-<div id = "team1">
+<div id = "playerTeam">
 {0}
 </div>
-<div id = "team2">
+<div id = "opponentTeam">
 {1}
 </div>
 </div>
@@ -50,7 +50,7 @@ body {
 		display: inline;
 }
 
-#team1 {
+#opponentTeam {
 
 	  position : absolute;
 	  top: -10px; /* This will move it px up */
@@ -60,7 +60,7 @@ body {
 	  background-color: rgba(0, 0, 0, 0.8);
 	  }
   
-#team2 {
+#playerTeam {
 
 	  position: relative;
 	  top: -10px; /* This will move it px up */
