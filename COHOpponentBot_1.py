@@ -677,7 +677,7 @@ class HandleCOHlogFile:
 						iconPrefix = "us_"
 					if str(playerStats.user.faction) == str(Faction.WM):
 						iconPrefix = "heer_"												
-					level = str(playerStats.leaderboardData[value].rankLevel)
+					level = str(playerStats.leaderboardData[value].rankLevel).zfill(2)
 					levelIcon = "OverlayImages\\Ranks\\" + iconPrefix + level + ".png"
 					print("levelIcon : " + str(levelIcon))
 					fileExists = os.path.isfile(levelIcon)
