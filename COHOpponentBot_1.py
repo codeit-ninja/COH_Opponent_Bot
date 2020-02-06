@@ -827,11 +827,17 @@ class HandleCOHlogFile:
 			team2 = ""
 			team1List = []
 			team2List = []
+
+
 			for item in axisTeamList:
+				print("axisTeamList : " + str(item.user.steamNumber))
+				print("player steamNumber : " + str(self.parameters.data.get('steamNumber')))
 				if (str(self.parameters.data.get('steamNumber')) == str(item.user.steamNumber)):
+					print ("Player team is AXIS")
 					team1List = axisTeamList
 					team2List = alliesTeamList
 				else:
+					print("Player team is ALLIES")
 					team1List = alliesTeamList
 					team2List = axisTeamList
 
@@ -857,9 +863,9 @@ class HandleCOHlogFile:
 					team2 += str(theString) + str("<BR>") + "\n"
 			else:
 			
-				for item in axisTeamList:
+				for item in team1List:
 					team1 += str(item.user.name) + str("<BR>") + "\n"
-				for item in alliesTeamList:
+				for item in team2List:
 					team2 += str(item.user.name) + str("<BR>") + "\n"
 				
 			htmlOutput = OverlayTemplates().overlayhtml.format(team1, team2)
