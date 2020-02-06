@@ -152,6 +152,11 @@ class parameters:
 		self.stringFormattingDictionary['$WLRATIO'] = None
 
 		self.stringFormattingDictionary['$MATCHTYPE'] = None
+
+		self.imageOverlayFormattingDictionary = {}
+		self.imageOverlayFormattingDictionary['$FLAGICON'] = None
+		self.imageOverlayFormattingDictionary['$$FACTIONICON'] = None
+		self.imageOverlayFormattingDictionary['$LEVELICON'] = None
  
 		
 	
