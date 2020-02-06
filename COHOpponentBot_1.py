@@ -630,14 +630,14 @@ class HandleCOHlogFile:
 		for value in playerStats.leaderboardData:
 			if (str(playerStats.leaderboardData[value].matchType) == str(matchType)):
 				if (str(playerStats.leaderboardData[value].faction) == str(playerStats.user.faction)):
-					stringFormattingDictionary['$WINS'] = playerStats.leaderboardData[value].wins
-					stringFormattingDictionary['$LOSSES'] = playerStats.leaderboardData[value].losses
-					stringFormattingDictionary['$DISPUTES'] = playerStats.leaderboardData[value].disputes
-					stringFormattingDictionary['$STREAK'] = playerStats.leaderboardData[value].streak
-					stringFormattingDictionary['$DROPS'] = playerStats.leaderboardData[value].drops
-					stringFormattingDictionary['$RANK'] = playerStats.leaderboardData[value].rank
-					stringFormattingDictionary['$LEVEL'] = playerStats.leaderboardData[value].rankLevel
-					stringFormattingDictionary['$WLRATIO'] = playerStats.leaderboardData[value].winLossRatio
+					stringFormattingDictionary['$WINS'] = str(playerStats.leaderboardData[value].wins)
+					stringFormattingDictionary['$LOSSES'] = str(playerStats.leaderboardData[value].losses)
+					stringFormattingDictionary['$DISPUTES'] = str(playerStats.leaderboardData[value].disputes)
+					stringFormattingDictionary['$STREAK'] = str(playerStats.leaderboardData[value].streak)
+					stringFormattingDictionary['$DROPS'] = str(playerStats.leaderboardData[value].drops)
+					stringFormattingDictionary['$RANK'] = str(playerStats.leaderboardData[value].rank)
+					stringFormattingDictionary['$LEVEL'] = str(playerStats.leaderboardData[value].rankLevel)
+					stringFormattingDictionary['$WLRATIO'] = str(playerStats.leaderboardData[value].winLossRatio)
 					 
 
 		return stringFormattingDictionary
