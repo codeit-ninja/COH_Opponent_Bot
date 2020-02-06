@@ -10,11 +10,11 @@ class OverlayTemplates:
 <body>
 
 <h1 class = "team1">
-{0}<br>
+{0}
 </h1>
 
 <h1 class = "team2">
-{1}<br>
+{1}
 </h1>
 
 <div style="clear: both;"></div>
@@ -24,27 +24,32 @@ class OverlayTemplates:
 
     overlaycss = """
 
+
+
 body {
   background-color: transparent;
 }
 
 h1 {
   color: navy;
-  font-size:2vw; 
+  font-size: 30px; 
   }
 
 
 .team1 {
 	color: white;
-	float: right;
-	margin-right: 20px;
-
+	float: left;
+	margin-right: 5px;
+	margin-left: 300px;
+	background-color: rgba(0, 0, 0, 0.8);
 	}
 
 .team2 {
 	color: white;
-	float: left;
-	margin-left: 20px;
+	float: right;
+	margin-left: 5px;
+	margin-right: 300px;
+	background-color: rgba(0, 0, 0, 0.8);
 	
 }
 
