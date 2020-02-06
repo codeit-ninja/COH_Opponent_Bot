@@ -24,11 +24,12 @@ On Windows you can compile a single executable using pyinstaller, the commands c
 
 # A precompiled windows 10 compatable executable can be downloaded :
 
-HERE : https://xcoins.co.uk/Misc/COHOpponentBot.rar
+HERE : https://github.com/XcomReborn/COH_Opponent_Bot/blob/master/dist/COHOpponentBot.rar
 
 To use the executable:
 
-1. Execute the main file (COHOpponentBotGUI.exe) by double clicking on the icon. (Windows 10)
+1. Download the rar file and unrar (unzip) it into a new folder.
+1. Execute the main file (COHOpponentBotGUI.exe) by double clicking on the icon.
 2. Check the information is correct, if not edit the fields using the buttons with your twitch user name, your Steam64ID*, and your company of heroes warning.log file location#
 3. Click Connect and Start Streaming on twitch the usual way.
 4. Any user typing "opponent" or "!opponent" or "!opp" or "opp" in chat will trigger the bot to find you opponents name, steam profile and coh1 1v1 stats.
