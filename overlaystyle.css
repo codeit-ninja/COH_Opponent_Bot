@@ -1,28 +1,34 @@
 
-
 body {
-  background-color: transparent;
-}
-
-h1 {
-  color: navy;
-  font-size:2vw; 
+	background-color: transparent;
   }
-
-
-.team1 {
-	color: white;
-	float: right;
-	margin-right: 20px;
-
+  
+  h1 {
+	color: navy;
+	font-size: 30px; 
 	}
-
-.team2 {
-	color: white;
-	float: left;
-	margin-left: 20px;
-	
-}
-
+  
+  
+  .team1 {
+	  position : relative;
+	  top: -20px; /* This will move it 20px up */
+	  color: white;
+	  float: left;
+	  margin-right: 5px;
+	  margin-left: 300px;
+	  background-color: rgba(0, 0, 0, 0.8);
+	  }
+  
+  .team2 {
+	  position: relative;
+	  top: -20px; /* This will move it 20px up */
+	  color: white;
+	  float: right;
+	  margin-left: 5px;
+	  margin-right: 300px;
+	  background-color: rgba(0, 0, 0, 0.8);
+  }
+  
+  
 
     
