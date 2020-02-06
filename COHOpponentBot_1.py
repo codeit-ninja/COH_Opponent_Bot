@@ -276,7 +276,7 @@ class IRC_Channel(threading.Thread):
 			if returnedList:
 				for item in returnedList:
 					self.parent.SendPrivateMessageToIRC(str(item))
-		if (message.lower() == "test") and ((userName == self.parameters.privatedata.get('adminUserName')) or (userName == self.parameters.data.get('channel'))):
+		if (message.lower() == "test") and ((str(userName).lower() == str(self.parameters.privatedata.get('adminUserName')).lower()) or (str(userName) == str(self.parameters.data.get('channel')).lower())):
 			self.parent.SendPrivateMessageToIRC("I'm here! Pls give me mod to prevent twitch from autobanning me for spam if I have to send a few messages quickly.")
 			self.parent.output.insert(END, "Oh hi again, I heard you in the " +self.channel[1:] + " channel.\n")
 
