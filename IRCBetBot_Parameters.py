@@ -71,10 +71,10 @@ class parameters:
 		self.data['logPath'] = ""
 		self.data['temprecReplayPath'] = ""
 
-		self.data['useOverlayPreFormat'] = False
+		self.data['useOverlayPreFormat'] = True
 		self.data['overlayStringPreFormat'] = "$FACTIONICON : $NAME : ($FLAGICON) Rank $RANK : $LEVELICON"
 
-		self.data['useCustomPreFormat'] = False
+		self.data['useCustomPreFormat'] = True
 		self.data['customStringPreFormat'] = "$NAME : $COUNTRY : $FACTION : $MATCHTYPE Rank $RANK : lvl $LEVEL"
 		
 
