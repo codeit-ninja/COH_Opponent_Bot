@@ -605,12 +605,12 @@ class HandleCOHlogFile:
 
 	def populateStringFormattingDictionary(self, playerStats):
 		stringFormattingDictionary = self.parameters.stringFormattingDictionary
-		stringFormattingDictionary['$NAME'] = playerStats.user.name
-		stringFormattingDictionary['$FACTION'] = playerStats.user.faction.name
-		stringFormattingDictionary['$COUNTRY'] = playerStats.user.country
-		stringFormattingDictionary['$TOTALWINS'] = playerStats.totalWins
-		stringFormattingDictionary['$TOTALLOSSES'] = playerStats.totalLosses
-		stringFormattingDictionary['$TOTALWLRATIO'] = playerStats.totalWLRatio
+		stringFormattingDictionary['$NAME'] = str(playerStats.user.name)
+		stringFormattingDictionary['$FACTION'] = str(playerStats.user.faction.name)
+		stringFormattingDictionary['$COUNTRY'] = str(playerStats.user.country)
+		stringFormattingDictionary['$TOTALWINS'] = str(playerStats.totalWins)
+		stringFormattingDictionary['$TOTALLOSSES'] = str(playerStats.totalLosses)
+		stringFormattingDictionary['$TOTALWLRATIO'] = str(playerStats.totalWLRatio)
 
 		matchType = MatchType.BASIC
 		if (int(self.numberOfComputers) > 0):
