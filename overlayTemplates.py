@@ -5,7 +5,7 @@ class OverlayTemplates:
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="overlaystyle.css">
-<meta http-equiv="refresh" content="1">
+<meta http-equiv="refresh" content="2">
 </head>
 <body>
 <div id="container">
