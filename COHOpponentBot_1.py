@@ -913,7 +913,7 @@ class playerStat:
 		self.leaderboardData = {}
 
 		self.totalWins = 0
-		self.totalLosses = 0
+		self.totalLosses = 0		
 		self.totalWLRatio = None
 
 
@@ -993,10 +993,12 @@ class playerStat:
 				print("problem with totallosses value : " + str(value) +" data : "+ str(self.leaderboardData[value].losses))
 				pass
 
+		self.totalWins = str(self.totalWins)
+		self.totalLosses = str(self.totalLosses)
 
 		try:
 			if (int(self.totalLosses) > 0):
-				self.totalWLRatio = round(int(self.totalWins)/int(self.totalLosses), 2)
+				self.totalWLRatio = str(round(int(self.totalWins)/int(self.totalLosses), 2))
 
 		except Exception as e:
 			logging.exception("In cohStat creating totalWLRatio")
