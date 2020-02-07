@@ -869,11 +869,11 @@ class HandleCOHlogFile:
 				
 			htmlOutput = OverlayTemplates().overlayhtml.format(team1, team2)
 			# create output overlay from template
-			with open("overlay.html" , 'w') as outfile:
+			with open("overlay.html" , 'w', encoding="utf-8") as outfile:
 				outfile.write(htmlOutput)
 			#check if css file exists and if not output the default template to folder
 			if not (os.path.isfile("overlaystyle.css")):
-				with open("overlaystyle.css" , 'w') as outfile:
+				with open("overlaystyle.css" , 'w' , encoding="utf-8") as outfile:
 					outfile.write(OverlayTemplates().overlaycss)
 		except Exception as e:
 			print(str(e))
