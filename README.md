@@ -74,6 +74,23 @@ typing:
 
 Will result in the bot displaying the selected statistic data in the twitch.tv chat.
 
+
+TO USE THE OVERLAY IN OBS:
+
+1. Create a new source of type browser.
+2. Set the size of the browser to the size of your stream output (eg: 1920 width x 1080 height)
+3. Tick the box for using local file.
+4. SETTING THE use custom frame rate tick box to true (on) and entering a frame rate of 1 in the FPS field will prevent the overlay from flickering.
+5. Use the file browse button to point the browser at local file overlay.html in the programs base directory. (if overlay.html doesn't exist, run the program once and press test, this will create one)
+6. If the created source doesn't fill the preview screen (it should if you set the resolution correctly) expand the source to overlay/cover the entire preview screen.
+7. Done.
+
+- The next time you get an opponent or type opp in chat or press the test button the overlay will show the opponents.
+- The overlay custom output preformat string can be set in the options by pressing the options button.
+- The overlay can be further customised if you alter the overlaystyle.css file manually file that will be created in the same directory as the overlay.html.
+
+
+
 Enjoy, 
 
 XeReborn aka Xcom.
