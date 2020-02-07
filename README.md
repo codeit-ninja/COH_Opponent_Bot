@@ -82,7 +82,7 @@ Prerequisite : https://obsproject.com/ (download from here, requires the browser
 1. Create a new source of type browser.
 2. Set the size of the browser to the size of your stream output (eg: 1920 width x 1080 height)
 3. Tick the box for using local file.
-4. SETTING THE use custom frame rate tick box to true (on) and entering a frame rate of 1 in the FPS field will prevent the overlay from flickering.
+4. Setting the use custom frame rate tick box to true (on) and entering a frame rate of 1 in the FPS field will prevent the overlay from flickering.
 5. Use the file browse button to point the browser at local file overlay.html in the programs base directory. (if overlay.html doesn't exist, run the program once and press test, this will create one)
 6. If the created source doesn't fill the preview screen (it should if you set the resolution correctly) expand the source to overlay/cover the entire preview screen.
 7. Done.
