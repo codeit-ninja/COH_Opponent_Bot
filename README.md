@@ -75,7 +75,7 @@ typing:
 Will result in the bot displaying the selected statistic data in the twitch.tv chat.
 
 
-TO USE THE OVERLAY IN OBS:
+# TO USE THE OVERLAY IN OBS:
 
 1. Create a new source of type browser.
 2. Set the size of the browser to the size of your stream output (eg: 1920 width x 1080 height)
