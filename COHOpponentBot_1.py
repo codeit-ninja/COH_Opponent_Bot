@@ -621,11 +621,20 @@ class HandleCOHlogFile:
 			matchType = MatchType.THREES
 
 		for x in range(len(playerStatList)):
-			logFileRanking = int(playerStatList[x].user.logFileRanking)
-			for value in playerStatList[x].leaderboardData:
-				if (str(playerStatList[x].leaderboardData[value].matchType) == str(matchType)):
-					if (str(playerStatList[x].leaderboardData[value].faction) == str(playerStatList[x].user.faction)):
-						rank = int(playerStatList[x].leaderboardData[value].rank)
+			logFileRanking = -1
+			try:
+				logFileRanking = int(playerStatList[x].user.logFileRanking)
+			except Exception as e:
+				print(str(e))
+			for key in playerStatList[x].leaderboardData:
+				if (str(playerStatList[x].leaderboardData[key].matchType) == str(matchType)):
+					if (str(playerStatList[x].leaderboardData[key].faction) == str(playerStatList[x].user.faction)):
+						rank = -1
+						try:
+							if playerStatList[x].leaderboardData[key].rank:
+								rank = int(playerStatList[x].leaderboardData[key].rank)
+						except Exception as e:
+							print(str(e))
 						if not ((logFileRanking-1) <= rank <= (logFileRanking+1)):
 							# reassign if not correct
 							# reloop and check for first correct value
@@ -633,7 +642,12 @@ class HandleCOHlogFile:
 							for y in range(len(playerStatList)):
 								for z in playerStatList[y].leaderboardData:
 									if (str(playerStatList[y].leaderboardData[z].matchType) == str(matchType)):
-										newrank = int(playerStatList[y].leaderboardData[z].rank)
+										newrank = -1
+										try:
+											if playerStatList[y].leaderboardData[z].rank:
+												newrank = int(playerStatList[y].leaderboardData[z].rank)
+										except Exception as e:
+											print(str(e))
 										if ((logFileRanking-1) <= newrank <= (logFileRanking+1)):
 											playerStatList[y].user.faction = playerStatList[y].leaderboardData[z].faction
 		return playerStatList
