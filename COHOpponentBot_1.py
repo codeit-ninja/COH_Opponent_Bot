@@ -519,7 +519,7 @@ class HandleCOHlogFile:
 		print("humans " + str(self.numberOfHumans) +"\n")
 		print("computers " + str(self.numberOfComputers) +"\n")
 		print("number of players " + str(numberOfPlayers) + "\n")
-		print("map size" + str(self.mapSize) + "\n")
+		print("map size " + str(self.mapSize) + "\n")
 		for item in playerList:
 			print("playerList : " + str(item))
 
@@ -566,6 +566,12 @@ class HandleCOHlogFile:
 		# Because factions are often reported incorrectly check the logFileRanking with the faction ranking for the mapsize if different attempt to reassign to a closer one
 		playerStatList = self.checkFactionsAreCorrect(playerStatList)
 
+
+		print("FULL playerStatList After Correction\n")
+		for item in playerStatList:
+			print(item)
+
+
 		axisTeam = []
 		alliesTeam = []
 
@@ -579,6 +585,8 @@ class HandleCOHlogFile:
 			if (str(item.user.faction) == str(Faction.WM)) or (str(item.user.faction)== str(Faction.PE)):
 				axisTeam.append(item)
 
+		print("players in allies team : " +str(len(alliesTeam)))
+		print("players in axis team : " + str(len(axisTeam)))
 
 		# output each player to file
 		if (self.parameters.data.get('outputPlayerOverlayFiles')):
@@ -663,7 +671,8 @@ class HandleCOHlogFile:
 	def populateStringFormattingDictionary(self, playerStats):
 		stringFormattingDictionary = self.parameters.stringFormattingDictionary
 		stringFormattingDictionary['$NAME'] = str(playerStats.user.name)
-		stringFormattingDictionary['$FACTION'] = str(playerStats.user.faction.name)
+		if type(playerStats.user.faction) is Faction:
+			stringFormattingDictionary['$FACTION'] = str(playerStats.user.faction.name)
 		stringFormattingDictionary['$COUNTRY'] = str(playerStats.user.country)
 		stringFormattingDictionary['$TOTALWINS'] = str(playerStats.totalWins)
 		stringFormattingDictionary['$TOTALLOSSES'] = str(playerStats.totalLosses)
@@ -709,8 +718,11 @@ class HandleCOHlogFile:
 			else:
 				imageOverlayFormattingDictionary['$FLAGICON'] = '<div id = "countryflagimg"><img height = "20"></div>'
 		if playerStats.user.faction:
-			factionIcon = "OverlayImages\\Armies\\" + str(playerStats.user.faction.name).lower() + ".png"
-			fileExists = os.path.isfile(factionIcon)
+			fileExists = False
+			factionIcon = ""
+			if type(playerStats.user.faction) is Faction:
+				factionIcon = "OverlayImages\\Armies\\" + str(playerStats.user.faction.name).lower() + ".png"
+				fileExists = os.path.isfile(factionIcon)
 			print(factionIcon)
 			if fileExists:
 				imageOverlayFormattingDictionary['$FACTIONICON'] = '<div id = "factionflagimg"><img src="{0}" height = "30"></div>'.format(factionIcon)
@@ -760,7 +772,8 @@ class HandleCOHlogFile:
 		output = ""
 		output += "Name : " + str(playerStats.user.name)
 		if(playerStats.user.faction):
-			output += " Faction : " + str(playerStats.user.faction.name)
+			if type(playerStats.user.faction) is Faction:
+				output += " Faction : " + str(playerStats.user.faction.name)
 		if (self.parameters.data.get('showUserCountry')):
 			output += " : (" + str(playerStats.user.country) + ")"
 
@@ -931,6 +944,7 @@ class HandleCOHlogFile:
 			# create output overlay from template
 			with open("overlay.html" , 'w', encoding="utf-8") as outfile:
 				outfile.write(htmlOutput)
+				print("Creating Overlay File\n")
 			#check if css file exists and if not output the default template to folder
 			if not (os.path.isfile("overlaystyle.css")):
 				with open("overlaystyle.css" , 'w' , encoding="utf-8") as outfile:
@@ -1092,8 +1106,8 @@ class MatchType(Enum):
 
 class factionResult:
 
-	def __init__(self, faction = '-1', matchType = '-1',name = '-1', nameShort = '-1',leaderboard_id = '-1', wins = '-1', losses = '-1', streak = '-1', disputes = '-1', drops = '-1', rank = '-1', rankLevel = '-1', lastMatch = '-1'):
-		self.faction = str(faction).replace("-1", "None") 
+	def __init__(self, faction = None, matchType = '-1',name = '-1', nameShort = '-1',leaderboard_id = '-1', wins = '-1', losses = '-1', streak = '-1', disputes = '-1', drops = '-1', rank = '-1', rankLevel = '-1', lastMatch = '-1'):
+		self.faction = faction 
 		self.matchType = str(matchType).replace("-1", "None")
 		self.name = name
 		self.nameShort = nameShort
@@ -1184,6 +1198,7 @@ class Player:
 		output += "steamProfileAddress : " + str(self.steamProfileAddress) + "\n"
 		output += "factionString : " + str(self.factionString) + "\n"
 		output += "faction : " + str(self.faction) + "\n"
+		output += "logFileRanking : " + str(self.logFileRanking) + "\n"
 		output += "slot : " + str(self.slot) + "\n"
 		return output
 
