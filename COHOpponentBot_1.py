@@ -639,17 +639,16 @@ class HandleCOHlogFile:
 							# reassign if not correct
 							# reloop and check for first correct value
 							# this will only happen if it wasn't correct first time
-							for y in range(len(playerStatList)):
-								for z in playerStatList[y].leaderboardData:
-									if (str(playerStatList[y].leaderboardData[z].matchType) == str(matchType)):
-										newrank = -1
-										try:
-											if playerStatList[y].leaderboardData[z].rank:
-												newrank = int(playerStatList[y].leaderboardData[z].rank)
-										except Exception as e:
-											print(str(e))
-										if ((logFileRanking-1) <= newrank <= (logFileRanking+1)):
-											playerStatList[y].user.faction = playerStatList[y].leaderboardData[z].faction
+							for z in playerStatList[x].leaderboardData:
+								if (str(playerStatList[x].leaderboardData[z].matchType) == str(matchType)):
+									newrank = -1
+									try:
+										if playerStatList[x].leaderboardData[z].rank:
+											newrank = int(playerStatList[x].leaderboardData[z].rank)
+									except Exception as e:
+										print(str(e))
+									if ((logFileRanking-1) <= newrank <= (logFileRanking+1)):
+										playerStatList[x].user.faction = playerStatList[x].leaderboardData[z].faction
 		return playerStatList
 
 	def createCustomOutput(self, playerStats):
