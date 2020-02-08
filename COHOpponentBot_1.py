@@ -402,15 +402,19 @@ class HandleCOHlogFile:
 				# dictionary containing player number linked to steamnumber
 				steamNumber = self.find_between(item, "steam/", "]")
 				slot = self.find_between(item , "slot =  " , ", ranking")
+				logFileRanking = self.find_between(item, "ranking =" , "\n")
+				logFileRanking = str(logFileRanking).strip()
+
 				# if slot does not exist in playerList then create player with new slot and steamNumber
 				slotExists = False
 				for i in range(len(playerList)):
 					if str(playerList[i].slot) == str(slot):
 						slotExists = True
 						playerList[i].steamNumber = steamNumber
+						playerList[i].logFileRanking = logFileRanking
 						print("the slot exists and I'm assigning steamNumber to it")
 				if (not slotExists):
-					thePlayer = Player(slot = slot, steamNumber=steamNumber)
+					thePlayer = Player(slot = slot, steamNumber=steamNumber, logFileRanking=logFileRanking)
 					playerList.append(thePlayer)
 					print("the slot does not exist and I'm creating a new player")
 
@@ -551,14 +555,23 @@ class HandleCOHlogFile:
 					playerStatList[x].user.faction = item.faction
 					playerStatList[x].user.factionString = item.factionString
 					playerStatList[x].user.slot = item.slot
+					playerStatList[x].user.logFileRanking = item.logFileRanking
 
 
 		print("FULL PLAYERSTATLIST\n")
 		for item in playerStatList:
 			print(item)
 
+
+		# Because factions are often reported incorrectly check the logFileRanking with the faction ranking for the mapsize if different attempt to reassign to a closer one
+		playerStatList = self.checkFactionsAreCorrect(playerStatList)
+
 		axisTeam = []
 		alliesTeam = []
+
+		#not sure if they need clearing but apparently the lists are sometimes persistent?
+		axisTeam.clear()
+		alliesTeam.clear()
 
 		for item in playerStatList:
 			if (str(item.user.faction) == str(Faction.US)) or (str(item.user.faction)== str(Faction.CW)):
@@ -593,6 +606,29 @@ class HandleCOHlogFile:
 			return self.data
 		else:
 			return None
+
+
+	def checkFactionsAreCorrect(self, playerStatList):
+		# check the faction ranks are +/- 1 of their expected value if not attempt to assign to rank that is +/- 1
+		matchType = MatchType.BASIC
+		if (int(self.numberOfComputers) > 0):
+			matchType = MatchType.BASIC
+		if (0 <= int(self.mapSize) <= 2) and (int(self.numberOfComputers) == 0):
+			matchType = MatchType.ONES
+		if (3 <= int(self.mapSize) <= 4) and (int(self.numberOfComputers) == 0):
+			matchType = MatchType.TWOS
+		if (5 <= int(self.mapSize) <= 6) and (int(self.numberOfComputers) == 0):
+			matchType = MatchType.THREES
+
+		for x in range(len(playerStatList)):
+			logFileRanking = int(playerStatList[x].user.logFileRanking)
+			for value in playerStatList[x].leaderboardData:
+				if (str(playerStatList[x].leaderboardData[value].matchType) == str(matchType)):
+					rank = int(playerStatList[x].leaderboardData[value].rank)
+					if ((logFileRanking-1) <= rank <= (logFileRanking+1)):
+						# reassign if not correct
+						playerStatList[x].user.faction = playerStatList[x].leaderboardData[value].faction
+		return playerStatList
 
 	def createCustomOutput(self, playerStats):
 		stringFormattingDictionary = self.populateStringFormattingDictionary(playerStats)
@@ -827,6 +863,9 @@ class HandleCOHlogFile:
 			team2 = ""
 			team1List = []
 			team2List = []
+
+			team1List.clear()
+			team2List.clear()
 
 			#by default player team is allies unless the player is steam number is present in the axisTeamList
 			team1List = alliesTeamList
@@ -1085,7 +1124,7 @@ class factionResult:
 
 class Player:
 
-	def __init__(self, profile_id = None, name = None, steamString = None, steamNumber = None, country = None, factionString = None, slot = None, faction = None):
+	def __init__(self, profile_id = None, name = None, steamString = None, steamNumber = None, country = None, factionString = None, slot = None, faction = None, logFileRanking = None):
 		self.profile_id = profile_id
 		self.name = name
 		self.steamString = steamString
@@ -1094,6 +1133,7 @@ class Player:
 		self.steamProfileAddress = None
 		self.factionString = factionString
 		self.faction = faction
+		self.logFileRanking = logFileRanking
 		self.slot = slot
 
 		if self.factionString == "axis":
