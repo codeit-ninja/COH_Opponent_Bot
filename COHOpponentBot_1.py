@@ -624,10 +624,18 @@ class HandleCOHlogFile:
 			logFileRanking = int(playerStatList[x].user.logFileRanking)
 			for value in playerStatList[x].leaderboardData:
 				if (str(playerStatList[x].leaderboardData[value].matchType) == str(matchType)):
-					rank = int(playerStatList[x].leaderboardData[value].rank)
-					if ((logFileRanking-1) <= rank <= (logFileRanking+1)):
-						# reassign if not correct
-						playerStatList[x].user.faction = playerStatList[x].leaderboardData[value].faction
+					if (str(playerStatList[x].leaderboardData[value].faction) == str(playerStatList[x].user.faction)):
+						rank = int(playerStatList[x].leaderboardData[value].rank)
+						if not ((logFileRanking-1) <= rank <= (logFileRanking+1)):
+							# reassign if not correct
+							# reloop and check for first correct value
+							# this will only happen if it wasn't correct first time
+							for y in range(len(playerStatList)):
+								for z in playerStatList[y].leaderboardData:
+									if (str(playerStatList[y].leaderboardData[z].matchType) == str(matchType)):
+										newrank = int(playerStatList[y].leaderboardData[z].rank)
+										if ((logFileRanking-1) <= newrank <= (logFileRanking+1)):
+											playerStatList[y].user.faction = playerStatList[y].leaderboardData[z].faction
 		return playerStatList
 
 	def createCustomOutput(self, playerStats):
