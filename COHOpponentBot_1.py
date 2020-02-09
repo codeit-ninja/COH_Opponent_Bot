@@ -719,40 +719,40 @@ class HandleCOHlogFile:
 			prefixDiv = '<div id = "textVariables">'
 			postfixDivClose = '</div>'
 		stringFormattingDictionary = self.parameters.stringFormattingDictionary
-		stringFormattingDictionary['$NAME'] =  prefixDiv + str(playerStats.user.name) + postfixDivClose
+		stringFormattingDictionary['$NAME$'] =  prefixDiv + str(playerStats.user.name) + postfixDivClose
 		if type(playerStats.user.faction) is Faction:
-			stringFormattingDictionary['$FACTION'] =  prefixDiv + str(playerStats.user.faction.name) + postfixDivClose
-		stringFormattingDictionary['$COUNTRY'] =  prefixDiv + str(playerStats.user.country) + postfixDivClose
-		stringFormattingDictionary['$TOTALWINS'] =  prefixDiv + str(playerStats.totalWins) + postfixDivClose
-		stringFormattingDictionary['$TOTALLOSSES'] =  prefixDiv + str(playerStats.totalLosses) + postfixDivClose
-		stringFormattingDictionary['$TOTALWLRATIO'] =  prefixDiv + str(playerStats.totalWLRatio) + postfixDivClose
+			stringFormattingDictionary['$FACTION$'] =  prefixDiv + str(playerStats.user.faction.name) + postfixDivClose
+		stringFormattingDictionary['$COUNTRY$'] =  prefixDiv + str(playerStats.user.country) + postfixDivClose
+		stringFormattingDictionary['$TOTALWINS$'] =  prefixDiv + str(playerStats.totalWins) + postfixDivClose
+		stringFormattingDictionary['$TOTALLOSSES$'] =  prefixDiv + str(playerStats.totalLosses) + postfixDivClose
+		stringFormattingDictionary['$TOTALWLRATIO$'] =  prefixDiv + str(playerStats.totalWLRatio) + postfixDivClose
 
 		matchType = MatchType.BASIC
 		if (int(self.numberOfComputers) > 0):
 			matchType = MatchType.BASIC
-			stringFormattingDictionary['$MATCHTYPE'] =  prefixDiv + "Basic" + postfixDivClose
+			stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + "Basic" + postfixDivClose
 		if (0 <= int(self.mapSize) <= 2) and (int(self.numberOfComputers) == 0):
 			matchType = MatchType.ONES
-			stringFormattingDictionary['$MATCHTYPE'] =  prefixDiv + "1v1" + postfixDivClose
+			stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + "1v1" + postfixDivClose
 		if (3 <= int(self.mapSize) <= 4) and (int(self.numberOfComputers) == 0):
 			matchType = MatchType.TWOS
-			stringFormattingDictionary['$MATCHTYPE'] =  prefixDiv + "2v2" + postfixDivClose
+			stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + "2v2" + postfixDivClose
 		if (5 <= int(self.mapSize) <= 6) and (int(self.numberOfComputers) == 0):
 			matchType = MatchType.THREES
-			stringFormattingDictionary['$MATCHTYPE'] =  prefixDiv + "3v3" + postfixDivClose
+			stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + "3v3" + postfixDivClose
 
 
 		for value in playerStats.leaderboardData:
 			if (str(playerStats.leaderboardData[value].matchType) == str(matchType)):
 				if (str(playerStats.leaderboardData[value].faction) == str(playerStats.user.faction)):
-					stringFormattingDictionary['$WINS'] =  prefixDiv + str(playerStats.leaderboardData[value].wins) + postfixDivClose
-					stringFormattingDictionary['$LOSSES'] =  prefixDiv + str(playerStats.leaderboardData[value].losses) + postfixDivClose
-					stringFormattingDictionary['$DISPUTES'] =  prefixDiv + str(playerStats.leaderboardData[value].disputes) + postfixDivClose
-					stringFormattingDictionary['$STREAK'] =  prefixDiv + str(playerStats.leaderboardData[value].streak) + postfixDivClose
-					stringFormattingDictionary['$DROPS'] =  prefixDiv + str(playerStats.leaderboardData[value].drops) + postfixDivClose
-					stringFormattingDictionary['$RANK'] =  prefixDiv + str(playerStats.leaderboardData[value].rank) + postfixDivClose
-					stringFormattingDictionary['$LEVEL'] =  prefixDiv + str(playerStats.leaderboardData[value].rankLevel) + postfixDivClose
-					stringFormattingDictionary['$WLRATIO'] =  prefixDiv + str(playerStats.leaderboardData[value].winLossRatio) + postfixDivClose
+					stringFormattingDictionary['$WINS$'] =  prefixDiv + str(playerStats.leaderboardData[value].wins) + postfixDivClose
+					stringFormattingDictionary['$LOSSES$'] =  prefixDiv + str(playerStats.leaderboardData[value].losses) + postfixDivClose
+					stringFormattingDictionary['$DISPUTES$'] =  prefixDiv + str(playerStats.leaderboardData[value].disputes) + postfixDivClose
+					stringFormattingDictionary['$STREAK$'] =  prefixDiv + str(playerStats.leaderboardData[value].streak) + postfixDivClose
+					stringFormattingDictionary['$DROPS$'] =  prefixDiv + str(playerStats.leaderboardData[value].drops) + postfixDivClose
+					stringFormattingDictionary['$RANK$'] =  prefixDiv + str(playerStats.leaderboardData[value].rank) + postfixDivClose
+					stringFormattingDictionary['$LEVEL$'] =  prefixDiv + str(playerStats.leaderboardData[value].rankLevel) + postfixDivClose
+					stringFormattingDictionary['$WLRATIO$'] =  prefixDiv + str(playerStats.leaderboardData[value].winLossRatio) + postfixDivClose
 					 
 
 		return stringFormattingDictionary
@@ -763,9 +763,9 @@ class HandleCOHlogFile:
 			countryIcon = "OverlayImages\\Flagssmall\\" + str(playerStats.user.country).lower() + ".png"
 			fileExists = os.path.isfile(countryIcon)
 			if fileExists:
-				imageOverlayFormattingDictionary['$FLAGICON'] = '<div id = "countryflagimg"><img src="{0}" height = "20"></div>'.format(countryIcon)
+				imageOverlayFormattingDictionary['$FLAGICON$'] = '<div id = "countryflagimg"><img src="{0}" height = "20"></div>'.format(countryIcon)
 			else:
-				imageOverlayFormattingDictionary['$FLAGICON'] = '<div id = "countryflagimg"><img height = "20"></div>'
+				imageOverlayFormattingDictionary['$FLAGICON$'] = '<div id = "countryflagimg"><img height = "20"></div>'
 		if playerStats.user.faction:
 			fileExists = False
 			factionIcon = ""
@@ -774,10 +774,10 @@ class HandleCOHlogFile:
 				fileExists = os.path.isfile(factionIcon)
 			print(factionIcon)
 			if fileExists:
-				imageOverlayFormattingDictionary['$FACTIONICON'] = '<div id = "factionflagimg"><img src="{0}" height = "30"></div>'.format(factionIcon)
-				print(imageOverlayFormattingDictionary.get('$FACTIONICON'))
+				imageOverlayFormattingDictionary['$FACTIONICON$'] = '<div id = "factionflagimg"><img src="{0}" height = "30"></div>'.format(factionIcon)
+				print(imageOverlayFormattingDictionary.get('$FACTIONICON$'))
 			else:
-				imageOverlayFormattingDictionary['$FACTIONICON'] = '<div id = "factionflagimg"><img height = "30"></div>'
+				imageOverlayFormattingDictionary['$FACTIONICON$'] = '<div id = "factionflagimg"><img height = "30"></div>'
 		matchType = MatchType.BASIC
 		if (int(self.numberOfComputers) > 0):
 			matchType = MatchType.BASIC
@@ -804,13 +804,36 @@ class HandleCOHlogFile:
 					print("levelIcon : " + str(levelIcon))
 					fileExists = os.path.isfile(levelIcon)
 					if fileExists:
-						imageOverlayFormattingDictionary['$LEVELICON'] =  '<div id = "rankimg"><img src="{0}" height = "45"></div>'.format(levelIcon)
-						print(imageOverlayFormattingDictionary.get('$LEVELICON'))
+						imageOverlayFormattingDictionary['$LEVELICON$'] =  '<div id = "rankimg"><img src="{0}" height = "45"></div>'.format(levelIcon)
+						print(imageOverlayFormattingDictionary.get('$LEVELICON$'))
 					else:
-						imageOverlayFormattingDictionary['$LEVELICON'] = '<div id = "rankimg"><img height = "45"></div>'
+						imageOverlayFormattingDictionary['$LEVELICON$'] = '<div id = "rankimg"><img height = "45"></div>'
 		return imageOverlayFormattingDictionary
 
-	def formatPreFormattedString(self, theString, stringFormattingDictionary):
+	def formatPreFormattedString(self, theString, stringFormattingDictionary, overlay = False):
+
+		if overlay:
+			prefixDiv = '<div id = "nonVariableText">'
+			postfixDiv = '</div>'
+
+			#compile a pattern for all the keys
+			pattern = re.compile(r'(' + '|'.join(re.escape(key) for key in stringFormattingDictionary.keys()) + r')')
+
+			print(pattern)
+			#split the string to include the dictionary keys
+			fullSplit = re.split(pattern, theString)
+			
+			print(fullSplit)
+			
+			#Then replace the Non key values with the postfix and prefix
+			for x in range(len(fullSplit)):
+				if not fullSplit[x] in stringFormattingDictionary.keys():
+					fullSplit[x] = prefixDiv + fullSplit[x] + postfixDiv
+
+			#This string can then be processed to replace the keys with their appropriate values
+			theString = "".join(fullSplit)
+
+
 		# I'm dammed if I know how this regular expression works but it does.
 		pattern = re.compile(r'(?<!\w)(' + '|'.join(re.escape(key) for key in stringFormattingDictionary.keys()) + r')(?!\w)')
 		result = pattern.sub(lambda x: stringFormattingDictionary[x.group()], theString)
@@ -968,19 +991,19 @@ class HandleCOHlogFile:
 					preFormattedString = self.parameters.data.get('overlayStringPreFormat')
 					# first substitute all the text in the preformat
 					stringFormattingDictionary = self.populateStringFormattingDictionary(item, overlay = True)
-					theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary)
+					#theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary, overlay = True)
 					# second substitue all the html images if used
-					stringFormattingDictionary = self.populateImageFormattingDictionary(item)
-					theString = self.formatPreFormattedString(theString, stringFormattingDictionary)
+					stringFormattingDictionary.update(self.populateImageFormattingDictionary(item))
+					theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary, overlay= True)
 					team1 += str(theString) + str("<BR>") + "\n"
 				for item in team2List:
 					preFormattedString = self.parameters.data.get('overlayStringPreFormat')
 					# first substitute all the text in the preformat
 					stringFormattingDictionary = self.populateStringFormattingDictionary(item, overlay = True)
-					theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary)
+					#theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary,overlay = True)
 					# second substitue all the html images if used
-					stringFormattingDictionary = self.populateImageFormattingDictionary(item)
-					theString = self.formatPreFormattedString(theString, stringFormattingDictionary)
+					stringFormattingDictionary.update(self.populateImageFormattingDictionary(item))
+					theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary, overlay= True)
 					team2 += str(theString) + str("<BR>") + "\n"
 			else:
 			

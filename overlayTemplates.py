@@ -25,6 +25,7 @@ class OverlayTemplates:
 
 
 
+
 body {
 	background-color: transparent;
   }
@@ -36,18 +37,15 @@ body {
 
 
 #countryflagimg{
+	position: relative;
 	display: inline;
+	top: -2px;
 }
 
 #factionflagimg{
+	position: relative;
 	display: inline;
 }
-
-#textVariables {
-	display: inline;
-}
-
-
 
 
 #rankimg {
@@ -56,13 +54,25 @@ body {
 		display: inline;
 }
 
+#textVariables {
+	position: relative;
+	display: inline;
+	top: -3px;
+}
+
+#nonVariableText{
+	position: relative;
+	display: inline;
+	top: -3px;
+}
+
 #opponentTeam {
 
 	  position : absolute;
 	  top: -10px; /* This will move it px up */
 	  color: white;
 	  float: left;
-	  margin-left: 60%;
+	  margin-left: 58%;
 	  background-color: rgba(0, 0, 0, 0.8);
 	  }
   
@@ -72,13 +82,11 @@ body {
 	  top: -10px; /* This will move it px up */
 	  color: white;
 	  float: right;
-	  margin-right: 60%;
+	  margin-right: 58%;
 
 
 	  background-color: rgba(0, 0, 0, 0.8);
   }
-  
-  
 
     
 

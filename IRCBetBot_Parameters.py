@@ -77,10 +77,10 @@ class parameters:
 		self.data['temprecReplayPath'] = ""
 
 		self.data['useOverlayPreFormat'] = True
-		self.data['overlayStringPreFormat'] = "$FACTIONICON : $NAME : ($FLAGICON) Rank $RANK : $LEVELICON"
+		self.data['overlayStringPreFormat'] = "$FACTIONICON$ : $NAME$ : ($FLAGICON$) Rank $RANK$ : $LEVELICON$"
 
 		self.data['useCustomPreFormat'] = True
-		self.data['customStringPreFormat'] = "$NAME : $COUNTRY : $FACTION : $MATCHTYPE Rank $RANK : lvl $LEVEL"
+		self.data['customStringPreFormat'] = "$NAME$ : $COUNTRY$ : $FACTION$ : $MATCHTYPE$ Rank $RANK$ : lvl $LEVEL$"
 		
 
 		#your personal steam number
@@ -140,28 +140,28 @@ class parameters:
 			print(str(e))
 
 		self.stringFormattingDictionary = {}
-		self.stringFormattingDictionary['$NAME'] = None
-		self.stringFormattingDictionary['$FACTION'] = None
-		self.stringFormattingDictionary['$COUNTRY'] = None
-		self.stringFormattingDictionary['$TOTALWINS'] = None
-		self.stringFormattingDictionary['$TOTALLOSSES'] = None
-		self.stringFormattingDictionary['$TOTALWLRATIO'] = None
+		self.stringFormattingDictionary['$NAME$'] = None
+		self.stringFormattingDictionary['$FACTION$'] = None
+		self.stringFormattingDictionary['$COUNTRY$'] = None
+		self.stringFormattingDictionary['$TOTALWINS$'] = None
+		self.stringFormattingDictionary['$TOTALLOSSES$'] = None
+		self.stringFormattingDictionary['$TOTALWLRATIO$'] = None
 
-		self.stringFormattingDictionary['$WINS'] = None
-		self.stringFormattingDictionary['$LOSSES'] = None
-		self.stringFormattingDictionary['$DISPUTES'] = None
-		self.stringFormattingDictionary['$STREAK'] = None
-		self.stringFormattingDictionary['$DROPS'] = None
-		self.stringFormattingDictionary['$RANK'] = None
-		self.stringFormattingDictionary['$LEVEL'] = None
-		self.stringFormattingDictionary['$WLRATIO'] = None
+		self.stringFormattingDictionary['$WINS$'] = None
+		self.stringFormattingDictionary['$LOSSES$'] = None
+		self.stringFormattingDictionary['$DISPUTES$'] = None
+		self.stringFormattingDictionary['$STREAK$'] = None
+		self.stringFormattingDictionary['$DROPS$'] = None
+		self.stringFormattingDictionary['$RANK$'] = None
+		self.stringFormattingDictionary['$LEVEL$'] = None
+		self.stringFormattingDictionary['$WLRATIO$'] = None
 
-		self.stringFormattingDictionary['$MATCHTYPE'] = None
+		self.stringFormattingDictionary['$MATCHTYPE$'] = None
 
 		self.imageOverlayFormattingDictionary = {}
-		self.imageOverlayFormattingDictionary['$FLAGICON'] = None
-		self.imageOverlayFormattingDictionary['$$FACTIONICON'] = None
-		self.imageOverlayFormattingDictionary['$LEVELICON'] = None
+		self.imageOverlayFormattingDictionary['$FLAGICON$'] = None
+		self.imageOverlayFormattingDictionary['$$FACTIONICON$'] = None
+		self.imageOverlayFormattingDictionary['$LEVELICON$'] = None
  
 		
 	
