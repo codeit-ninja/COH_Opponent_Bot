@@ -309,11 +309,12 @@ class StatsRequest:
 
 class FileMonitor (threading.Thread):
 
-	running = True
+	
 
 	def __init__(self, filePath, pollInterval, opponentBot):
 		Thread.__init__(self)
 		try:
+			self.running = True
 			self.opponentBot = opponentBot
 			self.fileIndex = 0
 			self.pollInterval = int(pollInterval)
@@ -322,6 +323,7 @@ class FileMonitor (threading.Thread):
 			self.fileIndex = 0
 			self.theFile = []
 			self.event = threading.Event()
+			self.startingMissonEvent = threading.Event()
 			with open(self.filePath, 'r') as f:
 				lines = f.readlines()
 			for line in lines: 
@@ -348,7 +350,7 @@ class FileMonitor (threading.Thread):
 					#Handle New Lines since load
 					#self.queue.put(lines[x])
 					if ("GAME -- Starting mission..." in lines[x]):
-						time.sleep(5) # allow an extra seconds for computer AI info to load if the game is a human vs ai game
+						self.startingMissonEvent.wait(timeout= 30) # allow extra seconds for computer AI info to load if the game is a human vs ai game
 						if (self.opponentBot):
 							#trigger the opponent command in the opponentbot thread
 							self.opponentBot.queue.put("OPPONENT")
@@ -362,7 +364,11 @@ class FileMonitor (threading.Thread):
     
 	def close(self):
 		self.running = False
-		self.event.set()
+		# break out of loops if waiting
+		if self.event:
+			self.event.set()
+		if self.startingMissonEvent:
+			self.startingMissonEvent.set()
 
 class HandleCOHlogFile:
 	
