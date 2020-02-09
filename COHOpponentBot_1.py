@@ -72,27 +72,6 @@ class IRCClient(threading.Thread):
 		self.port = self.parameters.privatedata.get('IRCport')
 		self.relicServerProxy = self.parameters.privatedata.get('relicServerProxy')
 	
-		# what to show in stat string constuct
-		self.showOwn = self.parameters.data.get('showOwn')
-
-		self.showBasic = self.parameters.data.get('showBasic')
-		self.show1v1 = self.parameters.data.get('show1v1')
-		self.show2v2 = self.parameters.data.get('show2v2')
-		self.show3v3 = self.parameters.data.get('show3v3')
-
-		self.showWins = self.parameters.data.get('showWins')
-		self.showLosses = self.parameters.data.get('showLosses')
-		self.showDisputes = self.parameters.data.get('showDisputes')
-		self.showStreak = self.parameters.data.get('showStreak')
-		self.showDrops = self.parameters.data.get('showDrops')
-		self.showRank = self.parameters.data.get('showRank')
-		self.showLevel = self.parameters.data.get('showLevel')
-		self.showLastPlayed = self.parameters.data.get('showLastPlayed')
-
-		self.showWLRatio = self.parameters.data.get('showWLRatio')
-
-		self.automaticTrigger = self.parameters.data.get('automaticTrigger')
-
 		#create IRC socket
 		try:
 			self.irc = socket.socket()
@@ -367,7 +346,7 @@ class FileMonitor (threading.Thread):
 						theSteamNumber = self.find_between(lines[x] ,"/steam/" , "]")
 						if (str(self.parameters.data.get('steamNumber')) == str(theSteamNumber)):
 							print("STREAMER WON\n")
-							if (self.parameters.data.get('WriteIWonLostInChat')):
+							if (self.parameters.data.get('writeIWonLostInChat')):
 								self.opponentBot.queue.put("IWON")
 							if (self.parameters.data.get('clearOverlayAfterGameOver')):
 								clearOverlay = True
@@ -376,7 +355,7 @@ class FileMonitor (threading.Thread):
 						theSteamNumber = self.find_between(lines[x] ,"/steam/" , "]")
 						if (str(self.parameters.data.get('steamNumber')) == str(theSteamNumber)):
 							print("STREAMER LOST\n")
-							if (self.parameters.data.get('WriteIWonLostInChat')):
+							if (self.parameters.data.get('writeIWonLostInChat')):
 								self.opponentBot.queue.put("ILOST")
 							if (self.parameters.data.get('clearOverlayAfterGameOver')):
 								clearOverlay = True

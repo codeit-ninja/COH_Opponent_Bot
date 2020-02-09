@@ -69,7 +69,7 @@ class parameters:
 		self.data['showOnlyDetectedFactionPlayed'] = True
 
 
-		self.data['WriteIWonLostInChat'] = True
+		self.data['writeIWonLostInChat'] = True
 
 		self.data['clearOverlayAfterGameOver'] = True
 

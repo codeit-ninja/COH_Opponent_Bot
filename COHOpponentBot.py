@@ -69,6 +69,11 @@ class COHBotGUI:
 
         self.automaticTrigger = IntVar(value = int(bool(self.parameters.data.get('automaticTrigger'))))
 
+        self.writeIWonLostInChat = IntVar(value = int(bool(self.parameters.data.get('writeIWonLostInChat'))))
+
+        self.clearOverlayAfterGameOver = IntVar(value = int(bool(self.parameters.data.get('clearOverlayAfterGameOver'))))
+
+
         self.useOverlayPreFormat = IntVar(value = int(bool(self.parameters.data.get('useOverlayPreFormat'))))
 
         self.customOverlayPreFormatString = StringVar()
@@ -344,8 +349,12 @@ class COHBotGUI:
 
             self.checkAutomaticTrigger = tk.Checkbutton(self.f5, text="Automatic Trigger", variable=self.automaticTrigger, command = self.automaticTriggerToggle)
             self.checkAutomaticTrigger.grid( sticky=tk.W)
+            self.checkWriteIWonLostInChat = tk.Checkbutton(self.f5, text="Win/Lose message in Chat", variable=self.writeIWonLostInChat, command = self.saveToggles)
+            self.checkWriteIWonLostInChat.grid( sticky=tk.W)
+            self.checkClearOverlayAfterGame = tk.Checkbutton(self.f5, text="Clear overlay after game over", variable=self.clearOverlayAfterGameOver, command = self.saveToggles)
+            self.checkClearOverlayAfterGame.grid( sticky=tk.W)            
 
-
+            self.automaticTriggerToggle() 
             self.toggleUseCustomPreFormat() # setdisabled if custom format on first run
             self.automode() # setdisabled if auto on first run
         try:
@@ -402,6 +411,8 @@ class COHBotGUI:
 
     def automaticTriggerToggle(self):
         if(bool(self.automaticTrigger.get())):
+            self.checkWriteIWonLostInChat.config(state = NORMAL)
+            self.checkClearOverlayAfterGame.config(state = NORMAL)            
             if (self.thread):
                 print("in automatic trigger toggle")
                 self.automaticFileMonitor = COHOpponentBot_1.FileMonitor(self.parameters.data.get('logPath'),self.parameters.data.get('filePollInterval'), self.thread)
@@ -410,6 +421,8 @@ class COHBotGUI:
             if (self.automaticFileMonitor):
                 print("trying to close automatic file monitor")
                 self.automaticFileMonitor.close()
+            self.checkWriteIWonLostInChat.config(state = DISABLED)
+            self.checkClearOverlayAfterGame.config(state = DISABLED)
         self.saveToggles()        
 
     def automode(self):
@@ -459,6 +472,10 @@ class COHBotGUI:
         self.parameters.data['showUserCountry'] = bool(self.showUserCountry.get())
 
         self.parameters.data['automaticTrigger'] = bool(self.automaticTrigger.get())
+
+        self.parameters.data['writeIWonLostInChat'] = bool(self.writeIWonLostInChat.get())
+
+        self.parameters.data['clearOverlayAfterGameOver'] = bool(self.clearOverlayAfterGameOver.get())
 
         self.parameters.data['useOverlayPreFormat'] = bool(self.useOverlayPreFormat.get())
         self.parameters.data['useCustomPreFormat'] = bool(self.useCustomPreFormat.get())
