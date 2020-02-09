@@ -162,6 +162,9 @@ class parameters:
 		self.imageOverlayFormattingDictionary['$FLAGICON$'] = None
 		self.imageOverlayFormattingDictionary['$$FACTIONICON$'] = None
 		self.imageOverlayFormattingDictionary['$LEVELICON$'] = None
+
+		#finally call load at end of Initialization
+		self.load()
  
 		
 	

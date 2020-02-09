@@ -49,7 +49,6 @@ class IRCClient(threading.Thread):
 		self.displayConsoleOut = consoleDisplayBool
 
 		self.parameters = parameters()
-		self.parameters.load()
 
 		self.adminUserName = self.parameters.privatedata.get('adminUserName')	# This username will be able to use admin commands, exit the program and bypass some limits.
 		
@@ -210,7 +209,6 @@ class IRC_Channel(threading.Thread):
 		self.queue = queue
 		self.channel = channel
 		self.parameters = parameters()
-		self.parameters.load()
 		self.myHandleCOHlogFile = None
 		
 	def run(self):
@@ -275,7 +273,6 @@ class IRC_Channel(threading.Thread):
 class StatsRequest:
 	def __init__(self, parameters):
 		self.parameters = parameters		
-		self.parameters.load()
 		
 	def returnStats(self, statnumber):
 		print ("got statnumber : " + str(statnumber))
@@ -393,7 +390,6 @@ class HandleCOHlogFile:
 	def __init__(self):
 
 		self.parameters = parameters()
-		self.parameters.load()
 		self.logPath = self.parameters.data['logPath']
 		self.data = []
 
