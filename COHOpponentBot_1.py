@@ -366,6 +366,7 @@ class FileMonitor (threading.Thread):
 						#Check if streamer won
 						theSteamNumber = self.find_between(lines[x] ,"/steam/" , "]")
 						if (str(self.parameters.data.get('steamNumber')) == str(theSteamNumber)):
+							print("STREAMER WON\n")
 							if (self.parameters.data.get('WriteIWonLostInChat')):
 								self.opponentBot.queue.put("IWON")
 							if (self.parameters.data.get('clearOverlayAfterGameOver')):
@@ -374,6 +375,7 @@ class FileMonitor (threading.Thread):
 						#Check if streamer lost
 						theSteamNumber = self.find_between(lines[x] ,"/steam/" , "]")
 						if (str(self.parameters.data.get('steamNumber')) == str(theSteamNumber)):
+							print("STREAMER LOST\n")
 							if (self.parameters.data.get('WriteIWonLostInChat')):
 								self.opponentBot.queue.put("ILOST")
 							if (self.parameters.data.get('clearOverlayAfterGameOver')):
