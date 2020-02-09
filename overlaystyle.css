@@ -27,6 +27,12 @@ body {
 		display: inline;
 }
 
+#textVariables {
+
+	display: inline;
+	top: 50px;
+}
+
 #opponentTeam {
 
 	  position : absolute;

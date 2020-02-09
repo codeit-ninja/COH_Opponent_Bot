@@ -43,6 +43,12 @@ body {
 	display: inline;
 }
 
+#textVariables {
+	display: inline;
+}
+
+
+
 
 #rankimg {
 		position: relative;

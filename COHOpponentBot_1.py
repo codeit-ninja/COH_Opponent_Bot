@@ -712,42 +712,47 @@ class HandleCOHlogFile:
 			outputList.append("Steam profile " + str(playerStats.user.steamProfileAddress))
 		return outputList
 
-	def populateStringFormattingDictionary(self, playerStats):
+	def populateStringFormattingDictionary(self, playerStats, overlay = False):
+		prefixDiv = ""
+		postfixDivClose = ""
+		if overlay:
+			prefixDiv = '<div id = "textVariables">'
+			postfixDivClose = '</div>'
 		stringFormattingDictionary = self.parameters.stringFormattingDictionary
-		stringFormattingDictionary['$NAME'] = str(playerStats.user.name)
+		stringFormattingDictionary['$NAME'] =  prefixDiv + str(playerStats.user.name) + postfixDivClose
 		if type(playerStats.user.faction) is Faction:
-			stringFormattingDictionary['$FACTION'] = str(playerStats.user.faction.name)
-		stringFormattingDictionary['$COUNTRY'] = str(playerStats.user.country)
-		stringFormattingDictionary['$TOTALWINS'] = str(playerStats.totalWins)
-		stringFormattingDictionary['$TOTALLOSSES'] = str(playerStats.totalLosses)
-		stringFormattingDictionary['$TOTALWLRATIO'] = str(playerStats.totalWLRatio)
+			stringFormattingDictionary['$FACTION'] =  prefixDiv + str(playerStats.user.faction.name) + postfixDivClose
+		stringFormattingDictionary['$COUNTRY'] =  prefixDiv + str(playerStats.user.country) + postfixDivClose
+		stringFormattingDictionary['$TOTALWINS'] =  prefixDiv + str(playerStats.totalWins) + postfixDivClose
+		stringFormattingDictionary['$TOTALLOSSES'] =  prefixDiv + str(playerStats.totalLosses) + postfixDivClose
+		stringFormattingDictionary['$TOTALWLRATIO'] =  prefixDiv + str(playerStats.totalWLRatio) + postfixDivClose
 
 		matchType = MatchType.BASIC
 		if (int(self.numberOfComputers) > 0):
 			matchType = MatchType.BASIC
-			stringFormattingDictionary['$MATCHTYPE'] = "Basic"
+			stringFormattingDictionary['$MATCHTYPE'] =  prefixDiv + "Basic" + postfixDivClose
 		if (0 <= int(self.mapSize) <= 2) and (int(self.numberOfComputers) == 0):
 			matchType = MatchType.ONES
-			stringFormattingDictionary['$MATCHTYPE'] = "1v1"
+			stringFormattingDictionary['$MATCHTYPE'] =  prefixDiv + "1v1" + postfixDivClose
 		if (3 <= int(self.mapSize) <= 4) and (int(self.numberOfComputers) == 0):
 			matchType = MatchType.TWOS
-			stringFormattingDictionary['$MATCHTYPE'] = "2v2"
+			stringFormattingDictionary['$MATCHTYPE'] =  prefixDiv + "2v2" + postfixDivClose
 		if (5 <= int(self.mapSize) <= 6) and (int(self.numberOfComputers) == 0):
 			matchType = MatchType.THREES
-			stringFormattingDictionary['$MATCHTYPE'] = "3v3"
+			stringFormattingDictionary['$MATCHTYPE'] =  prefixDiv + "3v3" + postfixDivClose
 
 
 		for value in playerStats.leaderboardData:
 			if (str(playerStats.leaderboardData[value].matchType) == str(matchType)):
 				if (str(playerStats.leaderboardData[value].faction) == str(playerStats.user.faction)):
-					stringFormattingDictionary['$WINS'] = str(playerStats.leaderboardData[value].wins)
-					stringFormattingDictionary['$LOSSES'] = str(playerStats.leaderboardData[value].losses)
-					stringFormattingDictionary['$DISPUTES'] = str(playerStats.leaderboardData[value].disputes)
-					stringFormattingDictionary['$STREAK'] = str(playerStats.leaderboardData[value].streak)
-					stringFormattingDictionary['$DROPS'] = str(playerStats.leaderboardData[value].drops)
-					stringFormattingDictionary['$RANK'] = str(playerStats.leaderboardData[value].rank)
-					stringFormattingDictionary['$LEVEL'] = str(playerStats.leaderboardData[value].rankLevel)
-					stringFormattingDictionary['$WLRATIO'] = str(playerStats.leaderboardData[value].winLossRatio)
+					stringFormattingDictionary['$WINS'] =  prefixDiv + str(playerStats.leaderboardData[value].wins) + postfixDivClose
+					stringFormattingDictionary['$LOSSES'] =  prefixDiv + str(playerStats.leaderboardData[value].losses) + postfixDivClose
+					stringFormattingDictionary['$DISPUTES'] =  prefixDiv + str(playerStats.leaderboardData[value].disputes) + postfixDivClose
+					stringFormattingDictionary['$STREAK'] =  prefixDiv + str(playerStats.leaderboardData[value].streak) + postfixDivClose
+					stringFormattingDictionary['$DROPS'] =  prefixDiv + str(playerStats.leaderboardData[value].drops) + postfixDivClose
+					stringFormattingDictionary['$RANK'] =  prefixDiv + str(playerStats.leaderboardData[value].rank) + postfixDivClose
+					stringFormattingDictionary['$LEVEL'] =  prefixDiv + str(playerStats.leaderboardData[value].rankLevel) + postfixDivClose
+					stringFormattingDictionary['$WLRATIO'] =  prefixDiv + str(playerStats.leaderboardData[value].winLossRatio) + postfixDivClose
 					 
 
 		return stringFormattingDictionary
@@ -962,7 +967,7 @@ class HandleCOHlogFile:
 				for item in team1List:
 					preFormattedString = self.parameters.data.get('overlayStringPreFormat')
 					# first substitute all the text in the preformat
-					stringFormattingDictionary = self.populateStringFormattingDictionary(item)
+					stringFormattingDictionary = self.populateStringFormattingDictionary(item, overlay = True)
 					theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary)
 					# second substitue all the html images if used
 					stringFormattingDictionary = self.populateImageFormattingDictionary(item)
@@ -971,7 +976,7 @@ class HandleCOHlogFile:
 				for item in team2List:
 					preFormattedString = self.parameters.data.get('overlayStringPreFormat')
 					# first substitute all the text in the preformat
-					stringFormattingDictionary = self.populateStringFormattingDictionary(item)
+					stringFormattingDictionary = self.populateStringFormattingDictionary(item, overlay = True)
 					theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary)
 					# second substitue all the html images if used
 					stringFormattingDictionary = self.populateImageFormattingDictionary(item)
