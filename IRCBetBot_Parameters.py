@@ -68,6 +68,11 @@ class parameters:
 
 		self.data['showOnlyDetectedFactionPlayed'] = True
 
+
+		self.data['WriteIWonLostInChat'] = True
+
+		self.data['clearOverlayAfterGameOver'] = True
+
 		self.data['logPath'] = ""
 		self.data['temprecReplayPath'] = ""
 

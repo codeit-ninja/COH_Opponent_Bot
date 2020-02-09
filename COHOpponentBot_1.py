@@ -244,6 +244,12 @@ class IRC_Channel(threading.Thread):
 				self.close()
 			if (line[0] == "OPPONENT"):
 				self.CheckForUserCommand("self","opp")
+			if (line[0] == "IWON"):
+				self.parent.SendPrivateMessageToIRC(str(self.parameters.data.get('channel')) +" won")
+			if (line[0] == "ILOST"):
+				self.parent.SendPrivateMessageToIRC(str(self.parameters.data.get('channel')) +" lost")
+			if (line[0] == "CLEAROVERLAY"):
+				HandleCOHlogFile().clearOverlayHTML()
 			if (len(line) >= 4) and ("PRIVMSG" == line[2]) and not ("jtv" in line[0]):
 				#call function to handle user message
 				self.UserMessage(line)
@@ -315,6 +321,7 @@ class FileMonitor (threading.Thread):
 		Thread.__init__(self)
 		try:
 			self.running = True
+			self.parameters = parameters()
 			self.opponentBot = opponentBot
 			self.fileIndex = 0
 			self.pollInterval = int(pollInterval)
@@ -342,6 +349,7 @@ class FileMonitor (threading.Thread):
 			print ("Started monitoring File : " + str(self.filePath) + "\n")
 			while self.running:
 				lines = []
+				clearOverlay = False
 				with open(self.filePath,'r') as f:
 					lines = f.readlines()
 					print("current File index = : " + str(self.fileIndex) + "\n")
@@ -354,6 +362,26 @@ class FileMonitor (threading.Thread):
 						if (self.opponentBot):
 							#trigger the opponent command in the opponentbot thread
 							self.opponentBot.queue.put("OPPONENT")
+					if ("Win notification" in lines[x]):
+						#Check if streamer won
+						theSteamNumber = self.find_between(lines[x] ,"/steam/" , "]")
+						if (str(self.parameters.data.get('steamNumber')) == str(theSteamNumber)):
+							if (self.parameters.data.get('WriteIWonLostInChat')):
+								self.opponentBot.queue.put("IWON")
+							if (self.parameters.data.get('clearOverlayAfterGameOver')):
+								clearOverlay = True
+					if ("Loss notification" in lines[x]):
+						#Check if streamer lost
+						theSteamNumber = self.find_between(lines[x] ,"/steam/" , "]")
+						if (str(self.parameters.data.get('steamNumber')) == str(theSteamNumber)):
+							if (self.parameters.data.get('WriteIWonLostInChat')):
+								self.opponentBot.queue.put("ILOST")
+							if (self.parameters.data.get('clearOverlayAfterGameOver')):
+								clearOverlay = True
+
+				if (self.parameters.data.get('clearOverlayAfterGameOver')):
+					if (clearOverlay):
+						self.opponentBot.queue.put("CLEAROVERLAY")
 				self.fileIndex = len(lines)
 				self.event = threading.Event()
 				self.event.wait(timeout = self.pollInterval)
@@ -369,6 +397,14 @@ class FileMonitor (threading.Thread):
 			self.event.set()
 		if self.startingMissonEvent:
 			self.startingMissonEvent.set()
+
+	def find_between(self, s, first, last ):
+		try:
+			start = s.index( first ) + len( first )
+			end = s.index( last, start )
+			return s[start:end]
+		except ValueError:
+			return ""
 
 class HandleCOHlogFile:
 	
