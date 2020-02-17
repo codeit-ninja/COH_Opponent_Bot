@@ -125,6 +125,7 @@ class COHBotGUI:
 
         if (self.parameters.data.get('botOAuthKey')):
             self.e3.insert(0, str(self.parameters.data.get('botOAuthKey')))
+        self.e3.config(show="*")
 
         self.e1.config(state = "disabled")
         self.e2.config(state = "disabled")
