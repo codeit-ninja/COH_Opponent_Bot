@@ -26,6 +26,7 @@ from queue import Queue # to talk to the threads
 import logging
 import re
 from overlayTemplates import OverlayTemplates
+import html
 
 
 #Because python floating point arthmatic is a nightmare
@@ -695,6 +696,8 @@ class HandleCOHlogFile:
 			postfixDivClose = '</div>'
 		stringFormattingDictionary = self.parameters.stringFormattingDictionary
 		stringFormattingDictionary['$NAME$'] =  prefixDiv + str(playerStats.user.name) + postfixDivClose
+		if overlay:
+			stringFormattingDictionary['$NAME$'] =  prefixDiv + str(html.escape(playerStats.user.name)) + postfixDivClose
 		if type(playerStats.user.faction) is Faction:
 			stringFormattingDictionary['$FACTION$'] =  prefixDiv + str(playerStats.user.faction.name) + postfixDivClose
 		stringFormattingDictionary['$COUNTRY$'] =  prefixDiv + str(playerStats.user.country) + postfixDivClose
