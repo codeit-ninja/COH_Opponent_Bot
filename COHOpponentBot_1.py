@@ -695,7 +695,10 @@ class HandleCOHlogFile:
 			prefixDiv = '<div id = "textVariables">'
 			postfixDivClose = '</div>'
 		stringFormattingDictionary = self.parameters.stringFormattingDictionary
-		stringFormattingDictionary['$NAME$'] =  prefixDiv + str(playerStats.user.name) + postfixDivClose
+		stringFormattingDictionary['$NAME$'] =  prefixDiv + str(playerStats.user.name) + postfixDivClose 
+		if (bool(re.match("""^[/\.]""" , playerStats.user.name))):
+			stringFormattingDictionary['$NAME$'] =  prefixDiv + str(playerStats.user.name.rjust(len(playerStats.user.name)+1)) + postfixDivClose 
+		# add 1 extra whitespace to username if it starts with . or / using rjust to prevent . and / twitch chat commands causing problems
 		if overlay:
 			stringFormattingDictionary['$NAME$'] =  prefixDiv + str(html.escape(playerStats.user.name)) + postfixDivClose
 		if type(playerStats.user.faction) is Faction:
