@@ -308,7 +308,7 @@ class FileMonitor (threading.Thread):
 			self.theFile = []
 			self.event = threading.Event()
 			self.startingMissonEvent = threading.Event()
-			with open(self.filePath, 'r') as f:
+			with open(self.filePath, 'r' , encoding='ISO-8859-1') as f:
 				lines = f.readlines()
 			for line in lines: 
 				self.theFile.append(line)
@@ -327,7 +327,7 @@ class FileMonitor (threading.Thread):
 			while self.running:
 				lines = []
 				clearOverlay = False
-				with open(self.filePath,'r') as f:
+				with open(self.filePath, 'r' , encoding='ISO-8859-1') as f:
 					lines = f.readlines()
 					print("current File index = : " + str(self.fileIndex) + "\n")
 					print ("file length = " + str(len(lines)) + "\n")
@@ -403,8 +403,8 @@ class HandleCOHlogFile:
 	
 	def loadLog(self):
 		print("In loadLog")
-		with open(self.logPath, encoding='ISO-8859-1') as file:
-			content = file.readlines()
+		with open(self.logPath, encoding='ISO-8859-1') as f:
+			content = f.readlines()
 		print(self.parameters.data['steamNumber'])
 		playerList = []
 		self.numberOfHumans = 0
