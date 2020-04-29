@@ -165,8 +165,8 @@ class COHBotGUI:
 
         #self.master.iconbitmap('coh.ico')
         self.consoleDisplayBool = IntVar()
-        checkButton1 = tk.Checkbutton(self.master, text="Display IRC raw chat output", variable=self.consoleDisplayBool, command = self.displayConsoleToggled)
-        checkButton1.grid(row=8, sticky=tk.W)
+        #checkButton1 = tk.Checkbutton(self.master, text="Display IRC raw chat output", variable=self.consoleDisplayBool, command = self.displayConsoleToggled)
+        #checkButton1.grid(row=8, sticky=tk.W)
 
         self.testButton = tk.Button(self.master, text = "Test Output", command = self.testStats )
         self.testButton.config(width = 10)
