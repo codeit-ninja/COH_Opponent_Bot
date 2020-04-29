@@ -77,7 +77,10 @@ class COHBotGUI:
 
         self.useOverlayPreFormat = IntVar(value = int(bool(self.parameters.data.get('useOverlayPreFormat'))))
 
-        self.customOverlayPreFormatString = StringVar()
+        self.mirrorLeftToRightOverlay = IntVar(value = int(bool(self.parameters.data.get('mirrorLeftToRightOverlay'))))
+
+        self.customOverlayPreFormatStringLeft = StringVar()
+        self.customOverlayPreFormatStringRight = StringVar()
         
         self.useCustomPreFormat = IntVar(value = int(bool(self.parameters.data.get('useCustomPreFormat'))))
 
@@ -239,7 +242,7 @@ class COHBotGUI:
             self.checkUseCustomChatOutput = tk.Checkbutton(self.f6, text="Use Custom Chat Output Pre-Format", variable=self.useCustomPreFormat, command = self.toggleUseCustomPreFormat)
             self.checkUseCustomChatOutput.grid(sticky=tk.W)
 
-            self.customChatOutputEntry = tk.Entry(self.f6, width = 70, textvariable = self.customChatOutputPreFormatString, validate="focusout", validatecommand=self.saveCustomPreFormats)
+            self.customChatOutputEntry = tk.Entry(self.f6, width = 70, textvariable = self.customChatOutputPreFormatString, validate="focusout", validatecommand=self.saveCustomChatPreFormat)
             self.customChatOutputEntry.grid(sticky = tk.W)
             if self.parameters.data.get('customStringPreFormat'):
                 self.customChatOutputPreFormatString.set(self.parameters.data.get('customStringPreFormat'))
@@ -292,10 +295,29 @@ class COHBotGUI:
             self.checkUseCustomOverlayString = tk.Checkbutton(self.f6, text="Use Custom Overlay Pre-Format", variable=self.useOverlayPreFormat, command = self.toggleUseOverlayPreFormat)
             self.checkUseCustomOverlayString.grid(sticky=tk.W)
 
-            self.customOverlayEntry = tk.Entry(self.f6, width = 70, textvariable = self.customOverlayPreFormatString, validate="focusout", validatecommand=self.saveCustomPreFormats)
-            self.customOverlayEntry.grid(sticky = tk.W)
-            if self.parameters.data.get('overlayStringPreFormat'):
-                self.customOverlayPreFormatString.set(self.parameters.data.get('overlayStringPreFormat'))
+            
+            
+
+            
+            self.customOverlayEntryLeft = tk.Entry(self.f6, width = 70, textvariable = self.customOverlayPreFormatStringLeft, validate="focusout", validatecommand=self.saveCustomOverlayPreFormatLeft)
+            
+            if self.parameters.data.get('overlayStringPreFormatLeft'):
+                self.customOverlayPreFormatStringLeft.set(self.parameters.data.get('overlayStringPreFormatLeft'))
+            
+            self.customOverlayEntryRight = tk.Entry(self.f6, width = 70, textvariable = self.customOverlayPreFormatStringRight, validate="focusout", validatecommand=self.saveCustomOverlayPreFormatRight)
+            if self.parameters.data.get('overlayStringPreFormatRight'):
+                self.customOverlayPreFormatStringRight.set(self.parameters.data.get('overlayStringPreFormatRight'))
+
+            self.checkUseMirrorOverlay = tk.Checkbutton(self.f6, text="Mirror Left/Right Overlay", variable=self.mirrorLeftToRightOverlay, command = self.toggleMirrorLeftRightOverlay)
+            
+            tk.Label(self.f6, text="Left").grid(sticky=tk.W)
+            self.customOverlayEntryLeft.grid(sticky = tk.W)
+
+            self.checkUseMirrorOverlay.grid(sticky =tk.W)
+
+            tk.Label(self.f6, text="Right").grid(sticky=tk.W)
+            self.customOverlayEntryRight.grid(sticky = tk.W)
+            
             self.toggleUseOverlayPreFormat()    
 
             self.checkOwn = tk.Checkbutton(self.f2, text="Show Own Stats", variable=self.showOwn, command = self.saveToggles)
@@ -366,19 +388,51 @@ class COHBotGUI:
         except Exception as e:
             logging.exception('Exception : ')
 
-    def saveCustomPreFormats(self):
-        if self.customOverlayEntry:
-            self.parameters.data['overlayStringPreFormat'] = self.customOverlayPreFormatString.get()
+    def toggleMirrorLeftRightOverlay(self):
+        if (bool(self.mirrorLeftToRightOverlay.get())):
+            self.customOverlayEntryRight.config(state = DISABLED)
+            #write in the left version mirror
+            leftString = self.customOverlayPreFormatStringLeft.get()
+            leftList = leftString.split()
+            leftList.reverse()
+            rightString = " ".join(leftList)
+            self.customOverlayPreFormatStringRight.set(rightString)
+            self.saveCustomOverlayPreFormatRight()
+        else:
+            if(bool(self.useOverlayPreFormat.get())):
+                self.customOverlayEntryRight.config(state = NORMAL)
+        self.saveToggles()
+
+
+    def saveCustomChatPreFormat(self):
         if self.customChatOutputEntry:
             self.parameters.data['customStringPreFormat'] = self.customChatOutputPreFormatString.get()
+        self.parameters.save()
+        return True # must return true to a validate entry method        
+
+
+    def saveCustomOverlayPreFormatLeft(self):
+        if self.customOverlayEntryLeft:
+            self.parameters.data['overlayStringPreFormatLeft'] = self.customOverlayPreFormatStringLeft.get()
+        self.parameters.save()
+        return True # must return true to a validate entry method
+
+    def saveCustomOverlayPreFormatRight(self):
+        if self.customOverlayEntryRight:
+            self.parameters.data['overlayStringPreFormatRight'] = self.customOverlayPreFormatStringRight.get()
         self.parameters.save()
         return True # must return true to a validate entry method
 
     def toggleUseOverlayPreFormat(self):
         if (bool(self.useOverlayPreFormat.get())):
-            self.customOverlayEntry.config(state = NORMAL)
+            self.customOverlayEntryLeft.config(state = NORMAL)
+            if (self.mirrorLeftToRightOverlay.get()):
+                self.customOverlayEntryRight.config(state = DISABLED)
+            else:
+                self.customOverlayEntryRight.config(state = NORMAL)
         else:
-            self.customOverlayEntry.config(state = DISABLED)
+            self.customOverlayEntryLeft.config(state = DISABLED)
+            self.customOverlayEntryRight.config(state = DISABLED)
         self.saveToggles()
 
     
@@ -467,6 +521,9 @@ class COHBotGUI:
         self.parameters.data['clearOverlayAfterGameOver'] = bool(self.clearOverlayAfterGameOver.get())
 
         self.parameters.data['useOverlayPreFormat'] = bool(self.useOverlayPreFormat.get())
+
+        self.parameters.data['mirrorLeftToRightOverlay'] = bool(self.mirrorLeftToRightOverlay.get())
+
         self.parameters.data['useCustomPreFormat'] = bool(self.useCustomPreFormat.get())
 
 

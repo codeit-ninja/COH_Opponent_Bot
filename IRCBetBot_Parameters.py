@@ -78,7 +78,9 @@ class parameters:
 		self.data['temprecReplayPath'] = ""
 
 		self.data['useOverlayPreFormat'] = True
-		self.data['overlayStringPreFormat'] = "$FACTIONICON$ : $NAME$ : ($FLAGICON$) Rank $RANK$ : $LEVELICON$"
+		self.data['overlayStringPreFormatLeft'] = "$NAME$ ($FLAGICON$) $LEVELICON$ #$RANK$ $FACTIONICON$"
+		self.data['mirrorLeftToRightOverlay'] = True
+		self.data['overlayStringPreFormatRight'] = "$FACTIONICON$ #$RANK$ $LEVELICON$ ($FLAGICON$) $NAME$"
 
 		self.data['useCustomPreFormat'] = True
 		self.data['customStringPreFormat'] = "$NAME$ : $COUNTRY$ : $FACTION$ : $MATCHTYPE$ Rank $RANK$ : lvl $LEVEL$"

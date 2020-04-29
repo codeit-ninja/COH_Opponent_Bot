@@ -846,7 +846,7 @@ class HandleCOHlogFile:
 			useOverlayPreFormat = bool(self.parameters.data.get('useOverlayPreFormat'))
 			if (useOverlayPreFormat):
 				for item in team1List:
-					preFormattedString = self.parameters.data.get('overlayStringPreFormat')
+					preFormattedString = self.parameters.data.get('overlayStringPreFormatLeft')
 					# first substitute all the text in the preformat
 					stringFormattingDictionary = self.populateStringFormattingDictionary(item, overlay = True)
 					#theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary, overlay = True)
@@ -855,7 +855,7 @@ class HandleCOHlogFile:
 					theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary, overlay= True)
 					team1 += str(theString) + str("<BR>") + "\n"
 				for item in team2List:
-					preFormattedString = self.parameters.data.get('overlayStringPreFormat')
+					preFormattedString = self.parameters.data.get('overlayStringPreFormatRight')
 					# first substitute all the text in the preformat
 					stringFormattingDictionary = self.populateStringFormattingDictionary(item, overlay = True)
 					#theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary,overlay = True)
