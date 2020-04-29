@@ -609,26 +609,17 @@ class HandleCOHlogFile:
 		print("players in axis team : " + str(len(axisTeam)))
 
 		# output each player to file
-		if (self.parameters.data.get('outputPlayerOverlayFiles')):
+		if (self.parameters.data.get('useOverlayPreFormat')):
 			self.saveOverlayHTML(axisTeam, alliesTeam)
-		
-		# check if using custom formatting
-		useCustomChatOutputFormat = self.parameters.data.get('useCustomPreFormat')
 
-		if (useCustomChatOutputFormat):
+		# output to chat if customoutput ticked
+		if (self.parameters.data.get('useCustomPreFormat')):		
 			for item in playerStatList:
 				if(item.user.steamNumber == self.parameters.data.get('steamNumber')):
 					if (self.parameters.data.get('showOwn')):
 						self.data = self.data + self.createCustomOutput(item)
 				else:
 					self.data = self.data + self.createCustomOutput(item)				
-		else:
-			for item in playerStatList:
-				if(item.user.steamNumber == self.parameters.data.get('steamNumber')):
-					if (self.parameters.data.get('showOwn')):
-						self.data = self.data + self.createOutputList(item)
-				else:
-					self.data = self.data + self.createOutputList(item)
 				
 		if self.data:
 			return self.data
@@ -819,120 +810,6 @@ class HandleCOHlogFile:
 		pattern = re.compile(r'(?<!\w)(' + '|'.join(re.escape(key) for key in stringFormattingDictionary.keys()) + r')(?!\w)')
 		result = pattern.sub(lambda x: stringFormattingDictionary[x.group()], theString)
 		return result
-
-	def createOutputList(self, playerStats):
-
-		output = ""
-		output += "Name : " + str(playerStats.user.name)
-		if(playerStats.user.faction):
-			if type(playerStats.user.faction) is Faction:
-				output += " Faction : " + str(playerStats.user.faction.name)
-		if (self.parameters.data.get('showUserCountry')):
-			output += " : (" + str(playerStats.user.country) + ")"
-
-		if (self.parameters.data.get('showTotalWins')):
-			output += " : Total Wins " + str(playerStats.totalWins)
-
-		if (self.parameters.data.get('showTotalLosses')):
-			output += " : Total Losses " + str(playerStats.totalLosses)
-
-		if (self.parameters.data.get('showTotalWLRatio')):
-			output += " : Total W/L Ratio " + str(playerStats.totalWLRatio)
-
-		# The comparison of Enums in the next block of code has to be converted to str first or it will not compare properly, this is a bug in python and took me ages to find. turns  out without the str conversion they didn't compare correctly
-
-		if ((self.parameters.data.get('showBasic')) or (bool(self.parameters.data.get('automaticMode')) and (int(self.numberOfComputers) > 0))):
-			output += " : Basic :-"
-			for value in playerStats.leaderboardData:
-				if (str(playerStats.leaderboardData[value].matchType) == str(MatchType.BASIC)):
-					if self.parameters.data.get('showOnlyDetectedFactionPlayed') and (playerStats.user.faction != None):
-						if (str(playerStats.leaderboardData[value].faction) == str(playerStats.user.faction)):
-							output += self.getFactionString(playerStats.leaderboardData[value])
-							break
-					else:
-						output += self.getFactionString(playerStats.leaderboardData[value])
-
-		if ((self.parameters.data.get('show1v1')) or ((bool(self.parameters.data.get('automaticMode')) and (0 <= int(self.mapSize) <= 2)) and (int(self.numberOfComputers) == 0))):
-			output += " : 1v1 :-"
-			for value in playerStats.leaderboardData:
-				if (str(playerStats.leaderboardData[value].matchType) == str(MatchType.ONES)):
-					if self.parameters.data.get('showOnlyDetectedFactionPlayed') and (playerStats.user.faction != None):
-						if (str(playerStats.leaderboardData[value].faction) == str(playerStats.user.faction)):
-							output += self.getFactionString(playerStats.leaderboardData[value])
-							break
-					else:
-						output += self.getFactionString(playerStats.leaderboardData[value])				
-
-		if ((self.parameters.data.get('show2v2')) or ((bool(self.parameters.data.get('automaticMode')) and (3 <= int(self.mapSize) <= 4)) and (int(self.numberOfComputers) == 0))):
-			output += " : 2v2 :-"
-			for value in playerStats.leaderboardData:	
-				if (str(playerStats.leaderboardData[value].matchType) == str(MatchType.TWOS)):
-					if self.parameters.data.get('showOnlyDetectedFactionPlayed') and (playerStats.user.faction != None):
-						if (str(playerStats.leaderboardData[value].faction) == str(playerStats.user.faction)):
-							output += self.getFactionString(playerStats.leaderboardData[value])
-							break
-					else:
-						output += self.getFactionString(playerStats.leaderboardData[value])
-
-		if ((self.parameters.data.get('show3v3')) or ((bool(self.parameters.data.get('automaticMode')) and (5 <= int(self.mapSize) <= 6)) and (int(self.numberOfComputers) == 0))):
-			output += " : 3v3 :-"
-			for value in playerStats.leaderboardData:
-				if (str(playerStats.leaderboardData[value].matchType) == str(MatchType.THREES)):
-					if self.parameters.data.get('showOnlyDetectedFactionPlayed') and (playerStats.user.faction != None):
-						if (str(playerStats.leaderboardData[value].faction) == str(playerStats.user.faction)):
-							output += self.getFactionString(playerStats.leaderboardData[value])
-							break
-					else:
-						output += self.getFactionString(playerStats.leaderboardData[value])
-
-
-		# removed this because it was creating confusion
-		#if (self.parameters.data.get('outputPlayerOverlayFiles')):
-		#	self.savePlayer(playerStats)
-
-		outputList = list(self.split_by_n(output, 500))
-		if (self.parameters.data.get('showSteamProfile')):
-			outputList.append("Steam profile " + str(playerStats.user.steamProfileAddress))
-
-		#print("output list " + str (outputList))
-
-		return outputList
-
-	def getFactionString(self, factionData):
-
-		#print("Building FactionString")
-		output = ""
-		
-		try:
-			if (factionData.nameShort):
-				output += ":- " + str(factionData.nameShort)
-			if (self.parameters.data.get('showWins')):
-				output += " : Wins " + str(factionData.wins)
-			if (self.parameters.data.get('showLosses')):
-				output += " : Losses " + str(factionData.losses)
-			if (self.parameters.data.get('showDisputes')):
-				output += " : Disputes " + str(factionData.disputes)					
-			if (self.parameters.data.get('showStreak')):
-				output += " : Streak " + str(factionData.streak)
-			if (self.parameters.data.get('showDrops')):
-				output += " : Drops " + str(factionData.drops)
-			if (self.parameters.data.get('showRank')):
-				output += " : Rank " + str(factionData.rank)
-			if (self.parameters.data.get('showLevel')):
-				output += " : LvL " + str(factionData.rankLevel)
-			if (self.parameters.data.get('showLastPlayed')):
-				output += " : Last Played " + str(factionData.lastTime)
-			if (self.parameters.data.get('showWLRatio')):
-				output += " : W/L Ratio " + str(factionData.winLossRatio)
-			output += " -"
-		except Exception as e:
-			logging.exception("In getFactionString")
-			print(str(e))
-
-		print("FactionString output : " + str(output))
-
-		return output
-
 
 	def savePlayer(self, playerStats):
 		try:

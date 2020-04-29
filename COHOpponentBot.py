@@ -40,32 +40,33 @@ class COHBotGUI:
 
         self.showOwn = IntVar(value = int(bool(self.parameters.data.get('showOwn'))))
 
-        self.automaticMode = IntVar(value = int(bool(self.parameters.data.get('automaticMode'))))
+        #self.automaticMode = IntVar(value = int(bool(self.parameters.data.get('automaticMode'))))
 
-        self.showTotalWins = IntVar(value = int(bool(self.parameters.data.get('showTotalWins'))))
-        self.showTotalLosses = IntVar(value = int(bool(self.parameters.data.get('showTotalLosses'))))
-        self.showTotalWLRatio = IntVar(value = int(bool(self.parameters.data.get('showTotalWLRatio'))))
+        #self.showTotalWins = IntVar(value = int(bool(self.parameters.data.get('showTotalWins'))))
+        #self.showTotalLosses = IntVar(value = int(bool(self.parameters.data.get('showTotalLosses'))))
+        #self.showTotalWLRatio = IntVar(value = int(bool(self.parameters.data.get('showTotalWLRatio'))))
 
-        self.showUserFactionOnly = IntVar(value = int(bool(self.parameters.data.get('showOnlyDetectedFactionPlayed'))))
+        #self.showUserFactionOnly = IntVar(value = int(bool(self.parameters.data.get('showOnlyDetectedFactionPlayed'))))
         
-        self.showBasic = IntVar(value = int(bool(self.parameters.data.get('showBasic'))))
-        self.show1v1 = IntVar(value = int(bool(self.parameters.data.get('show1v1'))))
-        self.show2v2 = IntVar(value = int(bool(self.parameters.data.get('show2v2'))))
-        self.show3v3 = IntVar(value = int(bool(self.parameters.data.get('show3v3'))))
+        #self.showBasic = IntVar(value = int(bool(self.parameters.data.get('showBasic'))))
+        #self.show1v1 = IntVar(value = int(bool(self.parameters.data.get('show1v1'))))
+        #self.show2v2 = IntVar(value = int(bool(self.parameters.data.get('show2v2'))))
+        #self.show3v3 = IntVar(value = int(bool(self.parameters.data.get('show3v3'))))
         
-        self.showWins = IntVar(value = int(bool(self.parameters.data.get('showWins'))))
-        self.showLosses = IntVar(value = int(bool(self.parameters.data.get('showLosses'))))
-        self.showDisputes = IntVar(value = int(bool(self.parameters.data.get('showDisputes'))))
-        self.showStreak = IntVar(value = int(bool(self.parameters.data.get('showStreak'))))
-        self.showDrops = IntVar(value = int(bool(self.parameters.data.get('showDrops'))))
-        self.showRank = IntVar(value = int(bool(self.parameters.data.get('showRank'))))
-        self.showLevel = IntVar(value = int(bool(self.parameters.data.get('showLevel'))))
-        self.showLastPlayed = IntVar(value = int(bool(self.parameters.data.get('showLastPlayed'))))
+        #self.showWins = IntVar(value = int(bool(self.parameters.data.get('showWins'))))
+        #self.showLosses = IntVar(value = int(bool(self.parameters.data.get('showLosses'))))
+        #self.showDisputes = IntVar(value = int(bool(self.parameters.data.get('showDisputes'))))
+        #self.showStreak = IntVar(value = int(bool(self.parameters.data.get('showStreak'))))
+        #self.showDrops = IntVar(value = int(bool(self.parameters.data.get('showDrops'))))
+        #self.showRank = IntVar(value = int(bool(self.parameters.data.get('showRank'))))
+        #self.showLevel = IntVar(value = int(bool(self.parameters.data.get('showLevel'))))
+        #self.showLastPlayed = IntVar(value = int(bool(self.parameters.data.get('showLastPlayed'))))
         
-        self.showWLRatio = IntVar(value = int(bool(self.parameters.data.get('showWLRatio'))))
+        #self.showWLRatio = IntVar(value = int(bool(self.parameters.data.get('showWLRatio'))))
 
         self.showSteamProfile = IntVar(value = int(bool(self.parameters.data.get('showSteamProfile'))))
-        self.showUserCountry = IntVar(value = int(bool(self.parameters.data.get('showUserCountry'))))
+        
+        #self.showUserCountry = IntVar(value = int(bool(self.parameters.data.get('showUserCountry'))))
 
         self.automaticTrigger = IntVar(value = int(bool(self.parameters.data.get('automaticTrigger'))))
 
@@ -209,29 +210,25 @@ class COHBotGUI:
             self.optionsMenu.title("Chat Display Options")
 
             self.f1 = tk.LabelFrame(self.optionsMenu, padx =5, pady=5)
-            self.f1.grid(columnspan = 2)
+            self.f1.grid()
             self.f2 = tk.LabelFrame(self.optionsMenu, text = "Player Info", padx =5, pady=5)
             self.f2.grid(sticky=tk.N+W+E+S)
-            self.globalInfo = tk.LabelFrame(self.optionsMenu, text = "Global Info", padx =5, pady=5)
-            self.globalInfo.grid()
-            self.f3 = tk.LabelFrame(self.optionsMenu, text = "Match Types", padx =5, pady=5)
-            self.f3.grid(sticky=tk.N+W+E)
-            self.f4 = tk.LabelFrame(self.optionsMenu, text = "Faction Stats", padx =5, pady=5)
-            self.f4.grid(sticky=tk.N+W+E)
+            #self.globalInfo = tk.LabelFrame(self.optionsMenu, text = "Global Info", padx =5, pady=5)
+            #self.globalInfo.grid()
+            #self.f3 = tk.LabelFrame(self.optionsMenu, text = "Match Types", padx =5, pady=5)
+            #self.f3.grid(sticky=tk.N+W+E)
+            #self.f4 = tk.LabelFrame(self.optionsMenu, text = "Faction Stats", padx =5, pady=5)
+            #self.f4.grid(sticky=tk.N+W+E)
             self.f5 = tk.LabelFrame(self.optionsMenu, text = "Auto Trigger", padx =5, pady=5)
             self.f5.grid(sticky=tk.N+W+E)
 
 
             self.f6 = tk.LabelFrame(self.optionsMenu, text = "Custom Format", padx =5, pady=5)
-            self.f6.grid(row = 1 , column =1, rowspan =2, sticky=tk.N+W+E+S)            
+            self.f6.grid( sticky=tk.N+W+E+S) # column =1, rowspan =2,            
 
 
 
-            tk.Label(self.f1, text="Report Options").grid(columnspan = 2)
-
-
-
-
+            tk.Label(self.f1, text="Report Options").grid()
 
 
             self.checkUseCustomChatOutput = tk.Checkbutton(self.f6, text="Use Custom Chat Output Pre-Format", variable=self.useCustomPreFormat, command = self.toggleUseCustomPreFormat)
@@ -301,52 +298,52 @@ class COHBotGUI:
             self.checkWLRatio = tk.Checkbutton(self.f2, text="Steam Profile", variable=self.showSteamProfile, command = self.saveToggles)
             self.checkWLRatio.grid( sticky=tk.W) 
 
-            self.checkWLRatio = tk.Checkbutton(self.globalInfo, text="Country", variable=self.showUserCountry, command = self.saveToggles)
-            self.checkWLRatio.grid( sticky=tk.W)
-            self.checkTotalWins = tk.Checkbutton(self.globalInfo, text="Total Wins", variable=self.showTotalWins, command = self.saveToggles)
-            self.checkTotalWins.grid( sticky=tk.W)             
-            self.checkTotalLosses = tk.Checkbutton(self.globalInfo, text="Total Losses", variable=self.showTotalLosses, command = self.saveToggles)
-            self.checkTotalLosses.grid( sticky=tk.W) 
-            self.checkTotalWLRatio = tk.Checkbutton(self.globalInfo, text="Total W/L Ratio", variable=self.showTotalWLRatio, command = self.saveToggles)
-            self.checkTotalWLRatio.grid( sticky=tk.W) 
-            self.checkPlayedFactionOnly = tk.Checkbutton(self.globalInfo, text="Played Faction ONLY", variable=self.showUserFactionOnly, command = self.saveToggles)
-            self.checkPlayedFactionOnly.grid( sticky=tk.W)
+            #self.checkWLRatio = tk.Checkbutton(self.globalInfo, text="Country", variable=self.showUserCountry, command = self.saveToggles)
+            #self.checkWLRatio.grid( sticky=tk.W)
+            #self.checkTotalWins = tk.Checkbutton(self.globalInfo, text="Total Wins", variable=self.showTotalWins, command = self.saveToggles)
+            #self.checkTotalWins.grid( sticky=tk.W)             
+            #self.checkTotalLosses = tk.Checkbutton(self.globalInfo, text="Total Losses", variable=self.showTotalLosses, command = self.saveToggles)
+            #self.checkTotalLosses.grid( sticky=tk.W) 
+            #self.checkTotalWLRatio = tk.Checkbutton(self.globalInfo, text="Total W/L Ratio", variable=self.showTotalWLRatio, command = self.saveToggles)
+            #self.checkTotalWLRatio.grid( sticky=tk.W) 
+            #self.checkPlayedFactionOnly = tk.Checkbutton(self.globalInfo, text="Played Faction ONLY", variable=self.showUserFactionOnly, command = self.saveToggles)
+            #self.checkPlayedFactionOnly.grid( sticky=tk.W)
 
             #s1 = ttk.Separator(OptionMenu, orient=HORIZONTAL)
             #s1.grid()
-            self.checkAutomaticMode = tk.Checkbutton(self.f3, text="AUTOMATIC MODE", variable=self.automaticMode, command = self.automode)
-            self.checkAutomaticMode.grid( sticky=tk.W)
 
-            self.checkBasic = tk.Checkbutton(self.f3, text="Basic Matches", variable=self.showBasic, command = self.saveToggles)
-            self.checkBasic.grid( sticky=tk.W)
-            self.check1v1 = tk.Checkbutton(self.f3, text="1v1 Matches", variable=self.show1v1, command = self.saveToggles)
-            self.check1v1.grid( sticky=tk.W)
-            self.check2v2 = tk.Checkbutton(self.f3, text="2v2 Matches", variable=self.show2v2, command = self.saveToggles)
-            self.check2v2.grid( sticky=tk.W)
-            self.check3v3 = tk.Checkbutton(self.f3, text="3v3 Matches", variable=self.show3v3, command = self.saveToggles)
-            self.check3v3.grid( sticky=tk.W)
+            #self.checkAutomaticMode = tk.Checkbutton(self.f3, text="AUTOMATIC MODE", variable=self.automaticMode, command = self.automode)
+            #self.checkAutomaticMode.grid( sticky=tk.W)
+            #self.checkBasic = tk.Checkbutton(self.f3, text="Basic Matches", variable=self.showBasic, command = self.saveToggles)
+            #self.checkBasic.grid( sticky=tk.W)
+            #self.check1v1 = tk.Checkbutton(self.f3, text="1v1 Matches", variable=self.show1v1, command = self.saveToggles)
+            #self.check1v1.grid( sticky=tk.W)
+            #self.check2v2 = tk.Checkbutton(self.f3, text="2v2 Matches", variable=self.show2v2, command = self.saveToggles)
+            #self.check2v2.grid( sticky=tk.W)
+            #self.check3v3 = tk.Checkbutton(self.f3, text="3v3 Matches", variable=self.show3v3, command = self.saveToggles)
+            #self.check3v3.grid( sticky=tk.W)
             #s2 = ttk.Separator(OptionMenu, orient=HORIZONTAL)
             #s2.grid()
             #self.frame1 = tk.Frame(self.master, text = "faction stats")
             #self.frame1.grid()
-            self.checkWins = tk.Checkbutton(self.f4, text="Wins", variable=self.showWins, command = self.saveToggles)
-            self.checkWins.grid( sticky=tk.W)
-            self.checkLosses = tk.Checkbutton(self.f4, text="Losses", variable=self.showLosses, command = self.saveToggles)
-            self.checkLosses.grid( sticky=tk.W)
-            self.checkDisputes = tk.Checkbutton(self.f4, text="Disputes", variable=self.showDisputes, command = self.saveToggles)
-            self.checkDisputes.grid( sticky=tk.W)
-            self.checkStreak = tk.Checkbutton(self.f4, text="Streak", variable=self.showStreak, command = self.saveToggles)
-            self.checkStreak.grid( sticky=tk.W)
-            self.checkDrops = tk.Checkbutton(self.f4, text="Drops", variable=self.showDrops, command = self.saveToggles)
-            self.checkDrops.grid( sticky=tk.W)
-            self.checkRank = tk.Checkbutton(self.f4, text="Rank", variable=self.showRank, command = self.saveToggles)
-            self.checkRank.grid( sticky=tk.W)
-            self.checkLevel = tk.Checkbutton(self.f4, text="Level", variable=self.showLevel, command = self.saveToggles)
-            self.checkLevel.grid( sticky=tk.W)
-            self.checkLastPlayed = tk.Checkbutton(self.f4, text="Last Played", variable=self.showLastPlayed, command = self.saveToggles)
-            self.checkLastPlayed.grid( sticky=tk.W)
-            self.checkWLRatio = tk.Checkbutton(self.f4, text="W/L Ratio", variable=self.showWLRatio, command = self.saveToggles)
-            self.checkWLRatio.grid( sticky=tk.W)
+            #self.checkWins = tk.Checkbutton(self.f4, text="Wins", variable=self.showWins, command = self.saveToggles)
+            #self.checkWins.grid( sticky=tk.W)
+            #self.checkLosses = tk.Checkbutton(self.f4, text="Losses", variable=self.showLosses, command = self.saveToggles)
+            #self.checkLosses.grid( sticky=tk.W)
+            #self.checkDisputes = tk.Checkbutton(self.f4, text="Disputes", variable=self.showDisputes, command = self.saveToggles)
+            #self.checkDisputes.grid( sticky=tk.W)
+            #self.checkStreak = tk.Checkbutton(self.f4, text="Streak", variable=self.showStreak, command = self.saveToggles)
+            #self.checkStreak.grid( sticky=tk.W)
+            #self.checkDrops = tk.Checkbutton(self.f4, text="Drops", variable=self.showDrops, command = self.saveToggles)
+            #self.checkDrops.grid( sticky=tk.W)
+            #self.checkRank = tk.Checkbutton(self.f4, text="Rank", variable=self.showRank, command = self.saveToggles)
+            #self.checkRank.grid( sticky=tk.W)
+            #self.checkLevel = tk.Checkbutton(self.f4, text="Level", variable=self.showLevel, command = self.saveToggles)
+            #self.checkLevel.grid( sticky=tk.W)
+            #self.checkLastPlayed = tk.Checkbutton(self.f4, text="Last Played", variable=self.showLastPlayed, command = self.saveToggles)
+            #self.checkLastPlayed.grid( sticky=tk.W)
+            #self.checkWLRatio = tk.Checkbutton(self.f4, text="W/L Ratio", variable=self.showWLRatio, command = self.saveToggles)
+            #self.checkWLRatio.grid( sticky=tk.W)
 
             self.checkAutomaticTrigger = tk.Checkbutton(self.f5, text="Automatic Trigger", variable=self.automaticTrigger, command = self.automaticTriggerToggle)
             self.checkAutomaticTrigger.grid( sticky=tk.W)
@@ -357,7 +354,8 @@ class COHBotGUI:
 
             self.automaticTriggerToggle() 
             self.toggleUseCustomPreFormat() # setdisabled if custom format on first run
-            self.automode() # setdisabled if auto on first run
+            self.toggleUseOverlayPreFormat()
+            #self.automode() # setdisabled if auto on first run
         try:
             self.optionsMenu.focus()
         except Exception as e:
@@ -382,24 +380,26 @@ class COHBotGUI:
     def toggleUseCustomPreFormat(self):
         if (bool(self.useCustomPreFormat.get())):
             self.customChatOutputEntry.config(state = NORMAL)
-            # must set use automatic mode toggle
-            self.automaticMode.set(1)
-            self.automode()
-            self.checkAutomaticMode.config(state = DISABLED)
-
-            for child in self.f4.winfo_children():
-                child.config(state= DISABLED)
-            for child in self.globalInfo.winfo_children():
-                child.config(state = DISABLED)
         else:
             self.customChatOutputEntry.config(state = DISABLED)
-            for child in self.f4.winfo_children():
-                child.config(state= NORMAL)
-            for child in self.globalInfo.winfo_children():
-                child.config(state = NORMAL)
-            self.checkAutomaticMode.config(state = NORMAL)              
+        #if (bool(self.useCustomPreFormat.get())):
+            #self.customChatOutputEntry.config(state = NORMAL)
+            # must set use automatic mode toggle
+            #self.automaticMode.set(1)
+            #self.automode()
+            #self.checkAutomaticMode.config(state = DISABLED)
 
-
+            #for child in self.f4.winfo_children():
+            #    child.config(state= DISABLED)
+            #for child in self.globalInfo.winfo_children():
+            #    child.config(state = DISABLED)
+        #else:
+            #self.customChatOutputEntry.config(state = DISABLED)
+            #for child in self.f4.winfo_children():
+            #    child.config(state= NORMAL)
+            #for child in self.globalInfo.winfo_children():
+            #    child.config(state = NORMAL)
+            #self.checkAutomaticMode.config(state = NORMAL)              
         self.saveToggles()
 
 
@@ -426,51 +426,34 @@ class COHBotGUI:
             self.checkClearOverlayAfterGame.config(state = DISABLED)
         self.saveToggles()        
 
-    def automode(self):
-        if (bool(self.automaticMode.get())):
-            self.checkBasic.deselect()
-            self.checkBasic.config(state = DISABLED)
-            self.check1v1.deselect()
-            self.check1v1.config(state = DISABLED)
-            self.check2v2.deselect()
-            self.check2v2.config(state = DISABLED)
-            self.check3v3.deselect()
-            self.check3v3.config(state = DISABLED)
-        else:
-            self.checkBasic.config(state = NORMAL)
-            self.check1v1.config(state = NORMAL)
-            self.check2v2.config(state = NORMAL)
-            self.check3v3.config(state = NORMAL)
-        self.saveToggles()
-
     def saveToggles(self):
         self.parameters.data['showOwn'] = bool(self.showOwn.get())
 
-        self.parameters.data['automaticMode'] = bool(self.automaticMode.get())
-        self.parameters.data['showTotalWins'] = bool(self.showTotalWins.get())
-        self.parameters.data['showTotalLosses'] = bool(self.showTotalLosses.get())
-        self.parameters.data['showTotalWLRatio'] = bool(self.showTotalWLRatio.get())
+        #self.parameters.data['automaticMode'] = bool(self.automaticMode.get())
+        #self.parameters.data['showTotalWins'] = bool(self.showTotalWins.get())
+        #self.parameters.data['showTotalLosses'] = bool(self.showTotalLosses.get())
+        #self.parameters.data['showTotalWLRatio'] = bool(self.showTotalWLRatio.get())
 
-        self.parameters.data['showOnlyDetectedFactionPlayed'] = bool(self.showUserFactionOnly.get())
+        #self.parameters.data['showOnlyDetectedFactionPlayed'] = bool(self.showUserFactionOnly.get())
 
-        self.parameters.data['showBasic'] = bool(self.showBasic.get())
-        self.parameters.data['show1v1'] = bool(self.show1v1.get())
-        self.parameters.data['show2v2'] = bool(self.show2v2.get())
-        self.parameters.data['show3v3'] = bool(self.show3v3.get())
+        #self.parameters.data['showBasic'] = bool(self.showBasic.get())
+        #self.parameters.data['show1v1'] = bool(self.show1v1.get())
+        #self.parameters.data['show2v2'] = bool(self.show2v2.get())
+        #self.parameters.data['show3v3'] = bool(self.show3v3.get())
         
-        self.parameters.data['showWins'] = bool(self.showWins.get())
-        self.parameters.data['showLosses'] = bool(self.showLosses.get())
-        self.parameters.data['showDisputes'] = bool(self.showDisputes.get())
-        self.parameters.data['showStreak'] = bool(self.showStreak.get())
-        self.parameters.data['showDrops'] = bool(self.showDrops.get())
-        self.parameters.data['showRank'] = bool(self.showRank.get())
-        self.parameters.data['showLevel'] = bool(self.showLevel.get())
-        self.parameters.data['showLastPlayed'] = bool(self.showLastPlayed.get())
+        #self.parameters.data['showWins'] = bool(self.showWins.get())
+        #self.parameters.data['showLosses'] = bool(self.showLosses.get())
+        #self.parameters.data['showDisputes'] = bool(self.showDisputes.get())
+        #self.parameters.data['showStreak'] = bool(self.showStreak.get())
+        #self.parameters.data['showDrops'] = bool(self.showDrops.get())
+        #self.parameters.data['showRank'] = bool(self.showRank.get())
+        #self.parameters.data['showLevel'] = bool(self.showLevel.get())
+        #self.parameters.data['showLastPlayed'] = bool(self.showLastPlayed.get())
         
-        self.parameters.data['showWLRatio'] = bool(self.showWLRatio.get())
+        #self.parameters.data['showWLRatio'] = bool(self.showWLRatio.get())
 
         self.parameters.data['showSteamProfile'] = bool(self.showSteamProfile.get())
-        self.parameters.data['showUserCountry'] = bool(self.showUserCountry.get())
+        #self.parameters.data['showUserCountry'] = bool(self.showUserCountry.get())
 
         self.parameters.data['automaticTrigger'] = bool(self.automaticTrigger.get())
 

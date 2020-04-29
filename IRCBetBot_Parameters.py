@@ -35,38 +35,39 @@ class parameters:
 
 		self.data['showOwn'] = False
 
-		self.data['showTotalWins'] = False
-		self.data['showTotalLosses'] = False
-		self.data['showTotalWLRatio'] = False
+		#self.data['showTotalWins'] = False
+		#self.data['showTotalLosses'] = False
+		#self.data['showTotalWLRatio'] = False
 
-		self.data['automaticMode'] = True
+		#self.data['automaticMode'] = True
 
 		self.data['filePollInterval'] = 10
 
-		self.data['showBasic'] = False
-		self.data['show1v1'] = True
-		self.data['show2v2'] = False
-		self.data['show3v3'] = False
+		#self.data['showBasic'] = False
+		#self.data['show1v1'] = True
+		#self.data['show2v2'] = False
+		#self.data['show3v3'] = False
 
-		self.data['showWins'] = False
-		self.data['showLosses'] = False
-		self.data['showDisputes'] = False
-		self.data['showStreak'] = False
-		self.data['showDrops'] = False
-		self.data['showRank'] = True
-		self.data['showLevel'] = True
-		self.data['showLastPlayed'] = False
+		#self.data['showWins'] = False
+		#self.data['showLosses'] = False
+		#self.data['showDisputes'] = False
+		#self.data['showStreak'] = False
+		#self.data['showDrops'] = False
+		#self.data['showRank'] = True
+		#self.data['showLevel'] = True
+		#self.data['showLastPlayed'] = False
 
-		self.data['showWLRatio'] = False
+		#self.data['showWLRatio'] = False
 
-		self.data['showUserCountry'] = True
+		#self.data['showUserCountry'] = True
+
 		self.data['showSteamProfile'] = True
 
-		self.data['automaticTrigger'] = False
+		self.data['automaticTrigger'] = True
 
-		self.data['outputPlayerOverlayFiles'] = True
+		#self.data['outputPlayerOverlayFiles'] = True
 
-		self.data['showOnlyDetectedFactionPlayed'] = True
+		#self.data['showOnlyDetectedFactionPlayed'] = True
 
 
 		self.data['writeIWonLostInChat'] = True
@@ -160,7 +161,7 @@ class parameters:
 
 		self.imageOverlayFormattingDictionary = {}
 		self.imageOverlayFormattingDictionary['$FLAGICON$'] = None
-		self.imageOverlayFormattingDictionary['$$FACTIONICON$'] = None
+		self.imageOverlayFormattingDictionary['$FACTIONICON$'] = None
 		self.imageOverlayFormattingDictionary['$LEVELICON$'] = None
 
 		#finally call load at end of Initialization
