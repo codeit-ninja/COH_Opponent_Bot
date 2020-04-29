@@ -173,15 +173,20 @@ class COHBotGUI:
         self.testButton.grid(row =8, column=2 ,sticky=tk.E)
         self.testButton.config(state = DISABLED)
 
+        self.clearOverlayButton = tk.Button(self.master, text = "Clear Overlay", command = COHOpponentBot_1.HandleCOHlogFile().clearOverlayHTML)
+        self.clearOverlayButton.config(width = 10)
+        self.clearOverlayButton.grid(row = 9, column=2, sticky=tk.E)
 
-        tk.Label(self.master, text="Console Output:").grid(row=9, sticky=tk.W)
+
+
+        tk.Label(self.master, text="Console Output:").grid(row=10, sticky=tk.W)
         # create a Text widget
         self.txt = tk.Text(self.master)
-        self.txt.grid(row=10, columnspan=3, sticky="nsew", padx=2, pady=2)
+        self.txt.grid(row=11, columnspan=3, sticky="nsew", padx=2, pady=2)
 
         # create a Scrollbar and associate it with txt
         scrollb = ttk.Scrollbar(self.master, command=self.txt.yview)
-        scrollb.grid(row=8, column=4, sticky='nsew')
+        scrollb.grid(row=11, column=4, sticky='nsew')
         self.txt['yscrollcommand'] = scrollb.set
 
         # import icon base64 data from separate icon.py file
