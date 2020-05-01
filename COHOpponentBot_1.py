@@ -645,29 +645,30 @@ class HandleCOHlogFile:
 				logFileRanking = int(playerStatList[x].user.logFileRanking)
 			except Exception as e:
 				print(str(e))
-			for key in playerStatList[x].leaderboardData:
-				if (str(playerStatList[x].leaderboardData[key].matchType) == str(matchType)):
-					if (str(playerStatList[x].leaderboardData[key].faction) == str(playerStatList[x].user.faction)):
-						rank = -1
-						try:
-							if playerStatList[x].leaderboardData[key].rank:
-								rank = int(playerStatList[x].leaderboardData[key].rank)
-						except Exception as e:
-							print(str(e))
-						if not ((logFileRanking-1) <= rank <= (logFileRanking+1)):
-							# reassign if not correct
-							# reloop and check for first correct value
-							# this will only happen if it wasn't correct first time
-							for z in playerStatList[x].leaderboardData:
-								if (str(playerStatList[x].leaderboardData[z].matchType) == str(matchType)):
-									newrank = -1
-									try:
-										if playerStatList[x].leaderboardData[z].rank:
-											newrank = int(playerStatList[x].leaderboardData[z].rank)
-									except Exception as e:
-										print(str(e))
-									if ((logFileRanking-1) <= newrank <= (logFileRanking+1)):
-										playerStatList[x].user.faction = playerStatList[x].leaderboardData[z].faction
+			if logFileRanking != -1:
+				for key in playerStatList[x].leaderboardData:
+					if (str(playerStatList[x].leaderboardData[key].matchType) == str(matchType)):
+						if (str(playerStatList[x].leaderboardData[key].faction) == str(playerStatList[x].user.faction)):
+							rank = -1
+							try:
+								if playerStatList[x].leaderboardData[key].rank:
+									rank = int(playerStatList[x].leaderboardData[key].rank)
+							except Exception as e:
+								print(str(e))
+							if not ((logFileRanking-1) <= rank <= (logFileRanking+1)):
+								# reassign if not correct
+								# reloop and check for first correct value
+								# this will only happen if it wasn't correct first time
+								for z in playerStatList[x].leaderboardData:
+									if (str(playerStatList[x].leaderboardData[z].matchType) == str(matchType)):
+										newrank = -1
+										try:
+											if playerStatList[x].leaderboardData[z].rank:
+												newrank = int(playerStatList[x].leaderboardData[z].rank)
+										except Exception as e:
+											print(str(e))
+										if ((logFileRanking-1) <= newrank <= (logFileRanking+1)):
+											playerStatList[x].user.faction = playerStatList[x].leaderboardData[z].faction
 		return playerStatList
 
 	def createCustomOutput(self, playerStats):
