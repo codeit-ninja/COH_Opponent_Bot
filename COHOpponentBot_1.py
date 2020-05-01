@@ -685,7 +685,8 @@ class HandleCOHlogFile:
 		if overlay:
 			prefixDiv = '<div id = "textVariables">'
 			postfixDivClose = '</div>'
-		stringFormattingDictionary = self.parameters.stringFormattingDictionary
+		stringFormattingDictionary = dict(self.parameters.stringFormattingDictionary)
+		#stringFormattingDictionary = {} # create a new dictionary
 		stringFormattingDictionary['$NAME$'] =  prefixDiv + str(playerStats.user.name) + postfixDivClose 
 		if (bool(re.match("""^[/\.]""" , playerStats.user.name))):
 			stringFormattingDictionary['$NAME$'] =  prefixDiv + str(playerStats.user.name.rjust(len(playerStats.user.name)+1)) + postfixDivClose 
@@ -713,10 +714,16 @@ class HandleCOHlogFile:
 			matchType = MatchType.THREES
 			stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + "3v3" + postfixDivClose
 
+		print("BEFORE CREATING stringFormattingDictionary")
+		print("prefixDiv : " + prefixDiv)
+		print("postfixDivClose : " + postfixDivClose)
 
 		for value in playerStats.leaderboardData:
 			if (str(playerStats.leaderboardData[value].matchType) == str(matchType)):
 				if (str(playerStats.leaderboardData[value].faction) == str(playerStats.user.faction)):
+					print("INSIDE LOOP stringFormattingDictionary")
+					print("prefixDiv : " + prefixDiv)
+					print("postfixDivClose : " + postfixDivClose)					
 					stringFormattingDictionary['$WINS$'] =  prefixDiv + str(playerStats.leaderboardData[value].wins) + postfixDivClose
 					stringFormattingDictionary['$LOSSES$'] =  prefixDiv + str(playerStats.leaderboardData[value].losses) + postfixDivClose
 					stringFormattingDictionary['$DISPUTES$'] =  prefixDiv + str(playerStats.leaderboardData[value].disputes) + postfixDivClose
