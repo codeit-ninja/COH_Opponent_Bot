@@ -1,6 +1,6 @@
 class OverlayTemplates:
 
-    overlayhtml = """
+	overlayhtml = """
  <!DOCTYPE html>
 <html>
 <head>
@@ -20,9 +20,9 @@ class OverlayTemplates:
 <div style="clear: both;"></div>
 </body>
 </html> 
-    """
+	"""
 
-    overlaycss = """
+	overlaycss = """
 
 
 
@@ -38,7 +38,7 @@ html {
 	padding: 0px;
 }
   
-    
+	
 #container{width:100%;
 	position: relative;
 	top: -7px;
@@ -107,8 +107,8 @@ html {
 	  margin-right: 58%;
 	  background-color: rgba(0, 0, 0, 0.8);
   }
-    
+	
 
 
 
-    """
+	"""

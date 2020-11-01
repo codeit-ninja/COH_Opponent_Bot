@@ -27,6 +27,10 @@ import logging
 import re
 from overlayTemplates import OverlayTemplates
 import html
+import ctypes
+from mem_edit import Process
+import mem_edit
+import binascii
 
 
 #Because python floating point arthmatic is a nightmare
@@ -357,6 +361,9 @@ class FileMonitor (threading.Thread):
 								self.opponentBot.queue.put("ILOST")
 							if (self.parameters.data.get('clearOverlayAfterGameOver')):
 								clearOverlay = True
+					if ('GAME -- Ending mission (Game over)' in lines[x]):
+						if (self.parameters.data.get('clearOverlayAfterGameOver')):
+								clearOverlay = True
 
 				if (self.parameters.data.get('clearOverlayAfterGameOver')):
 					if (clearOverlay):
@@ -368,7 +375,7 @@ class FileMonitor (threading.Thread):
 		except Exception as e:
 			logging.exception("In FileMonitor run")
 			print(str(e))
-    
+	
 	def close(self):
 		self.running = False
 		# break out of loops if waiting
@@ -393,204 +400,105 @@ class HandleCOHlogFile:
 		self.parameters = parameters()
 		self.logPath = self.parameters.data['logPath']
 		self.data = []
-
 		self.numberOfHumans = 0
 		self.numberOfComputers = 0
+		self.easyCPUCount = 0
+		self.normalCPUCount = 0
+		self.hardCPUCount = 0
+		self.expertCPUCount = 0
 
-		self.mapSize = -1
+		self.numberOfPlayers = 0
+		self.numberOfSlots = 0
+		self.mapSize = 0
 
-
+		self.matchType = MatchType.BASIC
 	
 	def loadLog(self):
 		print("In loadLog")
 		with open(self.logPath, encoding='ISO-8859-1') as f:
 			content = f.readlines()
 		print(self.parameters.data['steamNumber'])
-		playerList = []
-		self.numberOfHumans = 0
-		self.numberOfComputers = 0
-		eazyCPUCount = 0
-		normalCPUCount = 0
-		hardCPUCount = 0
-		expertCPUCount = 0
-		self.mapSize = 0
-
+		steamNumberList = []
 
 		for item in content:
+			if ('detected successful game start' in item):
+				steamNumberList.clear()
+
 			if ("match started") in item.lower():
 				print (item)
 				# dictionary containing player number linked to steamnumber
 				steamNumber = self.find_between(item, "steam/", "]")
-				slot = self.find_between(item , "slot =  " , ", ranking")
-				logFileRanking = self.find_between(item, "ranking =" , "\n")
-				logFileRanking = str(logFileRanking).strip()
-
-				# if slot does not exist in playerList then create player with new slot and steamNumber
-				slotExists = False
-				for i in range(len(playerList)):
-					if str(playerList[i].slot) == str(slot):
-						slotExists = True
-						playerList[i].steamNumber = steamNumber
-						playerList[i].logFileRanking = logFileRanking
-						print("the slot exists and I'm assigning steamNumber to it")
-				if (not slotExists):
-					thePlayer = Player(slot = slot, steamNumber=steamNumber, logFileRanking=logFileRanking)
-					playerList.append(thePlayer)
-					print("the slot does not exist and I'm creating a new player")
-
-
-			# set the number of players
-			if ("Setting player" in item):
-					theSlotNumber = self.find_between(item, "player (", ")")
-					print ("The slot number : " + str(theSlotNumber))
-
-					# if slot does not exist in playerList then create player with new slot number
-					slotExists = False
-					for i in range(len(playerList)):
-						if str(playerList[i].slot) == str(theSlotNumber):
-							slotExists = True
-
-					factionString = self.find_between(item , "race to: " , "\n")
-					print("factionString : " + str(factionString))
-
-					if (slotExists):		
-						for x in range (len(playerList)):
-							if (str(theSlotNumber) == str(playerList[x].slot)):
-
-								if factionString == "allies_commonwealth":
-									playerList[x].faction = Faction.CW
-									playerList[x].factionString = factionString
-									print("Setting faction to CW")
-
-								if factionString == "allies":
-									playerList[x].faction = Faction.US
-									playerList[x].factionString = factionString							
-									print("Setting faction to US")
-
-								if factionString == "axis_panzer_elite":
-									playerList[x].faction = Faction.PE
-									playerList[x].factionString = factionString								
-									print("Setting faction to PE")
-
-								if factionString == "axis":
-									playerList[x].faction = Faction.WM
-									playerList[x].factionString = factionString
-									print("Setting faction to WM")
-					else:
-						if factionString == "allies_commonwealth":
-							player = Player(slot=theSlotNumber, faction = Faction.CW, factionString=factionString)
-							playerList.append(player)
-							print("Setting faction to CW")
-
-						if factionString == "allies":
-							player = Player(slot=theSlotNumber, faction = Faction.US, factionString=factionString)
-							playerList.append(player)									
-							print("Setting faction to US")
-
-						if factionString == "axis_panzer_elite":
-							player = Player(slot=theSlotNumber, faction = Faction.PE, factionString=factionString)
-							playerList.append(player)									
-							print("Setting faction to PE")
-
-						if factionString == "axis":
-							player = Player(slot=theSlotNumber, faction = Faction.WM, factionString=factionString)
-							playerList.append(player)
-							print("Setting faction to WM")
-
-
+				steamNumberList.append(steamNumber)
 
 			if ("GAME -- ***") in item:
+				self.numberOfHumans = 0
+				self.numberOfComputers = 0
+				self.easyCPUCount = 0
+				self.normalCPUCount = 0
+				self.hardCPUCount = 0
+				self.expertCPUCount = 0
+				
 				# need to reverse the string to get the humans bit out uniquely or other strings in the line can interfere with the parsing
 				reverseString = item[::-1]
 				self.numberOfHumans = self.find_between(reverseString, "snamuH " , "(")
 				#print("humans  = " + str(self.numberOfHumans) + "\n")
 				self.numberOfComputers = self.find_between(item, "Humans, ", " Computers")
 			if ("PerformanceRecorder::StartRecording") in item:
+					self.mapSize = 0
 					self.mapSize = self.find_between(item, "game size " , "\n")
+			
+			if ("Player CPU - Expert" in item):
+				self.expertCPUCount += 1
+			if ("Player CPU - Hard" in item):
+				self.hardCPUCount += 1
+			if ("Player CPU - Normal" in item):
+				self.normalCPUCount += 1
+			if ("Player CPU - Easy" in item):
+				self.easyCPUCount += 1
+
 			# clear the steam number list if a new game is found in the file
 			if ("AutoMatchForm - Starting game") in item:
-				eazyCPUCount = 0
-				normalCPUCount = 0
-				hardCPUCount = 0
-				expertCPUCount = 0
-				self.numberOfHumans = 0
-				self.numberOfComputers = 0
-				self.mapSize = 0
-				playerList.clear()
+				steamNumberList.clear()
+
 				print("CLEARING PLAYER LIST\n")
-			if ("Player CPU - Expert" in item):
-				expertCPUCount += 1
-			if ("Player CPU - Hard" in item):
-				hardCPUCount += 1
-			if ("Player CPU - Normal" in item):
-				normalCPUCount += 1
-			if ("Player CPU - Easy" in item):
-				eazyCPUCount += 1
-		
-		# default backup player numbers - not used if file human and computers are legit numbers
-		numberOfPlayers = len(playerList)
+			
+		#self.numberOfHumans = len(steamNumberList)
+		appMemReader = ApplicationMemoryReader()
+		playerList = appMemReader.getFactions()
+		#contains all players including computers and empty Slots with no userName
+		self.numberOfSlots = len(playerList)
 
-
-		try:
-			numberOfPlayers = int(float(self.numberOfHumans)) + int(float(self.numberOfComputers)) # the float then int removes change of value error
-		except Exception as e:
-			logging.exception("In loadlog 1")
-			print (str(e))
-		print("humans " + str(self.numberOfHumans) +"\n")
-		print("computers " + str(self.numberOfComputers) +"\n")
-		print("number of players " + str(numberOfPlayers) + "\n")
-		print("map size " + str(self.mapSize) + "\n")
+		#remove players from list where they have no name eg: slots
 		for item in playerList:
-			print("playerList : " + str(item))
+			if (item.name == ""):
+				playerList.remove(item)
 
-		try:
-			if (int(self.numberOfComputers) > 0):
-				self.data.append("Game with " + str(self.numberOfComputers) + " computer AI, ("+str(eazyCPUCount)+") Easy, ("+str(normalCPUCount)+") Normal, ("+str(hardCPUCount)+") Hard, ("+str(expertCPUCount)+") Expert.")
-		except Exception as e:
-			logging.exception("In loadlog 2")
-			print(str(e))
+		self.numberOfPlayers = len(playerList)
 		
-		playerStatList = []
-
-		if (playerList):
-			for player in playerList:
+		if (steamNumberList):
+			for item in steamNumberList:
+				# get playerStats for each human player
 				myStatRequest = StatsRequest(self.parameters)
-				try:
-					statNumber = int(player.steamNumber)
-					if statNumber != -1:
-						returnedStat = myStatRequest.returnStats(statNumber)
-						playerStatList.append(returnedStat)
-				except Exception as e:
-					print(str(e))
-	
-		#
-		#replayReader = ReplayReader()
-		# not using replay reader anymore due to temp.rec file not being written to until the game is over.
-		#
-
-		# assign faction values to the players
-		for item in playerList:
-			for x in range(len(playerStatList)):
-				if(str(item.steamNumber) == str(playerStatList[x].user.steamNumber)):
-					playerStatList[x].user.faction = item.faction
-					playerStatList[x].user.factionString = item.factionString
-					playerStatList[x].user.slot = item.slot
-					playerStatList[x].user.logFileRanking = item.logFileRanking
-
+				playerStats = myStatRequest.returnStats(item)
+				for player in playerList:
+					# if the 
+					if (player.name == playerStats.alias):
+						player.stats = playerStats
 
 		print("FULL PLAYERSTATLIST\n")
-		for item in playerStatList:
+		for item in playerList:
 			print(item)
 
-
-		# Because factions are often reported incorrectly check the logFileRanking with the faction ranking for the mapsize if different attempt to reassign to a closer one
-		playerStatList = self.checkFactionsAreCorrect(playerStatList)
-
-
-		print("FULL playerStatList After Correction\n")
-		for item in playerStatList:
-			print(item)
-
+		#set the current MatchType
+		self.matchType = MatchType.BASIC
+		if (int(self.numberOfComputers) > 0):
+			self.matchType = MatchType.BASIC
+		if (0 <= int(self.mapSize) <= 2) and (int(self.numberOfComputers) == 0):
+			self.matchType = MatchType.ONES
+		if (3 <= int(self.mapSize) <= 4) and (int(self.numberOfComputers) == 0):
+			self.matchType = MatchType.TWOS
+		if (5 <= int(self.mapSize) <= 6) and (int(self.numberOfComputers) == 0):
+			self.matchType = MatchType.THREES		
 
 		axisTeam = []
 		alliesTeam = []
@@ -599,10 +507,10 @@ class HandleCOHlogFile:
 		axisTeam.clear()
 		alliesTeam.clear()
 
-		for item in playerStatList:
-			if (str(item.user.faction) == str(Faction.US)) or (str(item.user.faction)== str(Faction.CW)):
+		for item in playerList:
+			if (str(item.faction) == str(Faction.US)) or (str(item.faction)== str(Faction.CW)):
 				alliesTeam.append(item)
-			if (str(item.user.faction) == str(Faction.WM)) or (str(item.user.faction)== str(Faction.PE)):
+			if (str(item.faction) == str(Faction.WM)) or (str(item.faction)== str(Faction.PE)):
 				axisTeam.append(item)
 
 		print("players in allies team : " +str(len(alliesTeam)))
@@ -613,13 +521,17 @@ class HandleCOHlogFile:
 			self.saveOverlayHTML(axisTeam, alliesTeam)
 
 		# output to chat if customoutput ticked
-		if (self.parameters.data.get('useCustomPreFormat')):		
-			for item in playerStatList:
-				if(item.user.steamNumber == self.parameters.data.get('steamNumber')):
-					if (self.parameters.data.get('showOwn')):
-						self.data = self.data + self.createCustomOutput(item)
-				else:
-					self.data = self.data + self.createCustomOutput(item)				
+		if (self.parameters.data.get('useCustomPreFormat')):	
+			if (int(self.numberOfComputers) > 0):
+				self.data.append("Game with " + str(self.numberOfComputers) + " computer AI, ("+str(self.easyCPUCount)+") Easy, ("+str(self.normalCPUCount)+") Normal, ("+str(self.hardCPUCount)+") Hard, ("+str(self.expertCPUCount)+") Expert.")	
+			for item in playerList:
+				#check if item has stats if not it is a computer
+				if item.stats:
+					if(item.stats.steamNumber == self.parameters.data.get('steamNumber')):
+						if (self.parameters.data.get('showOwn')):
+							self.data = self.data + self.createCustomOutput(item)
+					else:
+						self.data = self.data + self.createCustomOutput(item)				
 				
 		if self.data:
 			return self.data
@@ -627,60 +539,16 @@ class HandleCOHlogFile:
 			return None
 
 
-	def checkFactionsAreCorrect(self, playerStatList):
-		# check the faction ranks are +/- 1 of their expected value if not attempt to assign to rank that is +/- 1
-		matchType = MatchType.BASIC
-		if (int(self.numberOfComputers) > 0):
-			matchType = MatchType.BASIC
-		if (0 <= int(self.mapSize) <= 2) and (int(self.numberOfComputers) == 0):
-			matchType = MatchType.ONES
-		if (3 <= int(self.mapSize) <= 4) and (int(self.numberOfComputers) == 0):
-			matchType = MatchType.TWOS
-		if (5 <= int(self.mapSize) <= 6) and (int(self.numberOfComputers) == 0):
-			matchType = MatchType.THREES
-
-		for x in range(len(playerStatList)):
-			logFileRanking = -1
-			try:
-				logFileRanking = int(playerStatList[x].user.logFileRanking)
-			except Exception as e:
-				print(str(e))
-			if logFileRanking != -1:
-				for key in playerStatList[x].leaderboardData:
-					if (str(playerStatList[x].leaderboardData[key].matchType) == str(matchType)):
-						if (str(playerStatList[x].leaderboardData[key].faction) == str(playerStatList[x].user.faction)):
-							rank = -1
-							try:
-								if playerStatList[x].leaderboardData[key].rank:
-									rank = int(playerStatList[x].leaderboardData[key].rank)
-							except Exception as e:
-								print(str(e))
-							if not ((logFileRanking-1) <= rank <= (logFileRanking+1)):
-								# reassign if not correct
-								# reloop and check for first correct value
-								# this will only happen if it wasn't correct first time
-								for z in playerStatList[x].leaderboardData:
-									if (str(playerStatList[x].leaderboardData[z].matchType) == str(matchType)):
-										newrank = -1
-										try:
-											if playerStatList[x].leaderboardData[z].rank:
-												newrank = int(playerStatList[x].leaderboardData[z].rank)
-										except Exception as e:
-											print(str(e))
-										if ((logFileRanking-1) <= newrank <= (logFileRanking+1)):
-											playerStatList[x].user.faction = playerStatList[x].leaderboardData[z].faction
-		return playerStatList
-
-	def createCustomOutput(self, playerStats):
-		stringFormattingDictionary = self.populateStringFormattingDictionary(playerStats)
+	def createCustomOutput(self, player):
+		stringFormattingDictionary = self.populateStringFormattingDictionary(player)
 		customPreFormattedOutputString = self.parameters.data.get('customStringPreFormat')
 		theString = self.formatPreFormattedString(customPreFormattedOutputString, stringFormattingDictionary)
 		outputList = list(self.split_by_n(theString, 500))
 		if (self.parameters.data.get('showSteamProfile')):
-			outputList.append("Steam profile " + str(playerStats.user.steamProfileAddress))
+			outputList.append("Steam profile " + str(player.stats.steamProfileAddress))
 		return outputList
 
-	def populateStringFormattingDictionary(self, playerStats, overlay = False):
+	def populateStringFormattingDictionary(self, player, overlay = False):
 		prefixDiv = ""
 		postfixDivClose = ""
 		if overlay:
@@ -688,106 +556,102 @@ class HandleCOHlogFile:
 			postfixDivClose = '</div>'
 		stringFormattingDictionary = dict(self.parameters.stringFormattingDictionary)
 		#stringFormattingDictionary = {} # create a new dictionary
-		stringFormattingDictionary['$NAME$'] =  prefixDiv + str(playerStats.user.name) + postfixDivClose 
-		if (bool(re.match("""^[/\.]""" , playerStats.user.name))):
-			stringFormattingDictionary['$NAME$'] =  prefixDiv + str(playerStats.user.name.rjust(len(playerStats.user.name)+1)) + postfixDivClose 
+		stringFormattingDictionary['$NAME$'] =  prefixDiv + str(player.name) + postfixDivClose 
+		if (bool(re.match("""^[/\.]""" , player.name))):
+			stringFormattingDictionary['$NAME$'] =  prefixDiv + str(player.name.rjust(len(player.name)+1)) + postfixDivClose 
 		# add 1 extra whitespace to username if it starts with . or / using rjust to prevent . and / twitch chat commands causing problems
 		if overlay:
-			stringFormattingDictionary['$NAME$'] =  prefixDiv + str(html.escape(playerStats.user.name)) + postfixDivClose
-		if type(playerStats.user.faction) is Faction:
-			stringFormattingDictionary['$FACTION$'] =  prefixDiv + str(playerStats.user.faction.name) + postfixDivClose
-		stringFormattingDictionary['$COUNTRY$'] =  prefixDiv + str(playerStats.user.country) + postfixDivClose
-		stringFormattingDictionary['$TOTALWINS$'] =  prefixDiv + str(playerStats.totalWins) + postfixDivClose
-		stringFormattingDictionary['$TOTALLOSSES$'] =  prefixDiv + str(playerStats.totalLosses) + postfixDivClose
-		stringFormattingDictionary['$TOTALWLRATIO$'] =  prefixDiv + str(playerStats.totalWLRatio) + postfixDivClose
+			stringFormattingDictionary['$NAME$'] =  prefixDiv + str(html.escape(player.name)) + postfixDivClose
+		if type(player.faction) is Faction:
+			stringFormattingDictionary['$FACTION$'] =  prefixDiv + str(player.faction.name) + postfixDivClose
 
-		matchType = MatchType.BASIC
-		if (int(self.numberOfComputers) > 0):
-			matchType = MatchType.BASIC
+		if (self.matchType == MatchType.BASIC):
 			stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + "Basic" + postfixDivClose
-		if (0 <= int(self.mapSize) <= 2) and (int(self.numberOfComputers) == 0):
-			matchType = MatchType.ONES
+		if (self.matchType == MatchType.ONES):
 			stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + "1v1" + postfixDivClose
-		if (3 <= int(self.mapSize) <= 4) and (int(self.numberOfComputers) == 0):
-			matchType = MatchType.TWOS
+		if (self.matchType == MatchType.TWOS):
 			stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + "2v2" + postfixDivClose
-		if (5 <= int(self.mapSize) <= 6) and (int(self.numberOfComputers) == 0):
-			matchType = MatchType.THREES
+		if (self.matchType == MatchType.THREES):
 			stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + "3v3" + postfixDivClose
 
-		print("BEFORE CREATING stringFormattingDictionary")
-		print("prefixDiv : " + prefixDiv)
-		print("postfixDivClose : " + postfixDivClose)
+		# if a computer it will have no stats
+		if player.stats:
+			stringFormattingDictionary['$COUNTRY$'] =  prefixDiv + str(player.stats.country) + postfixDivClose
+			stringFormattingDictionary['$TOTALWINS$'] =  prefixDiv + str(player.stats.totalWins) + postfixDivClose
+			stringFormattingDictionary['$TOTALLOSSES$'] =  prefixDiv + str(player.stats.totalLosses) + postfixDivClose
+			stringFormattingDictionary['$TOTALWLRATIO$'] =  prefixDiv + str(player.stats.totalWLRatio) + postfixDivClose
 
-		for value in playerStats.leaderboardData:
-			if (str(playerStats.leaderboardData[value].matchType) == str(matchType)):
-				if (str(playerStats.leaderboardData[value].faction) == str(playerStats.user.faction)):
-					print("INSIDE LOOP stringFormattingDictionary")
-					print("prefixDiv : " + prefixDiv)
-					print("postfixDivClose : " + postfixDivClose)					
-					stringFormattingDictionary['$WINS$'] =  prefixDiv + str(playerStats.leaderboardData[value].wins) + postfixDivClose
-					stringFormattingDictionary['$LOSSES$'] =  prefixDiv + str(playerStats.leaderboardData[value].losses) + postfixDivClose
-					stringFormattingDictionary['$DISPUTES$'] =  prefixDiv + str(playerStats.leaderboardData[value].disputes) + postfixDivClose
-					stringFormattingDictionary['$STREAK$'] =  prefixDiv + str(playerStats.leaderboardData[value].streak) + postfixDivClose
-					stringFormattingDictionary['$DROPS$'] =  prefixDiv + str(playerStats.leaderboardData[value].drops) + postfixDivClose
-					stringFormattingDictionary['$RANK$'] =  prefixDiv + str(playerStats.leaderboardData[value].rank) + postfixDivClose
-					stringFormattingDictionary['$LEVEL$'] =  prefixDiv + str(playerStats.leaderboardData[value].rankLevel) + postfixDivClose
-					stringFormattingDictionary['$WLRATIO$'] =  prefixDiv + str(playerStats.leaderboardData[value].winLossRatio) + postfixDivClose
+			for value in player.stats.leaderboardData:
+				if (str(player.stats.leaderboardData[value].matchType) == str(self.matchType)):
+					if (str(player.stats.leaderboardData[value].faction) == str(player.faction)):
+				
+						stringFormattingDictionary['$WINS$'] =  prefixDiv + str(player.stats.leaderboardData[value].wins) + postfixDivClose
+						stringFormattingDictionary['$LOSSES$'] =  prefixDiv + str(player.stats.leaderboardData[value].losses) + postfixDivClose
+						stringFormattingDictionary['$DISPUTES$'] =  prefixDiv + str(player.stats.leaderboardData[value].disputes) + postfixDivClose
+						stringFormattingDictionary['$STREAK$'] =  prefixDiv + str(player.stats.leaderboardData[value].streak) + postfixDivClose
+						stringFormattingDictionary['$DROPS$'] =  prefixDiv + str(player.stats.leaderboardData[value].drops) + postfixDivClose
+						stringFormattingDictionary['$RANK$'] =  prefixDiv + str(player.stats.leaderboardData[value].rank) + postfixDivClose
+						stringFormattingDictionary['$LEVEL$'] =  prefixDiv + str(player.stats.leaderboardData[value].rankLevel) + postfixDivClose
+						stringFormattingDictionary['$WLRATIO$'] =  prefixDiv + str(player.stats.leaderboardData[value].winLossRatio) + postfixDivClose
 					 
 
 		return stringFormattingDictionary
 
-	def populateImageFormattingDictionary(self, playerStats):
+	def populateImageFormattingDictionary(self, player):
 		imageOverlayFormattingDictionary = self.parameters.imageOverlayFormattingDictionary
-		if playerStats.user.country:
-			countryIcon = "OverlayImages\\Flagssmall\\" + str(playerStats.user.country).lower() + ".png"
-			fileExists = os.path.isfile(countryIcon)
-			if fileExists:
-				imageOverlayFormattingDictionary['$FLAGICON$'] = '<div id = "countryflagimg"><img src="{0}" height = "20"></div>'.format(countryIcon)
-			else:
-				imageOverlayFormattingDictionary['$FLAGICON$'] = '<div id = "countryflagimg"><img height = "20"></div>'
-		if playerStats.user.faction:
+		
+		#faction icons
+		if player.faction:
 			fileExists = False
 			factionIcon = ""
-			if type(playerStats.user.faction) is Faction:
-				factionIcon = "OverlayImages\\Armies\\" + str(playerStats.user.faction.name).lower() + ".png"
+			if type(player.faction) is Faction:
+				factionIcon = "OverlayImages\\Armies\\" + str(player.faction.name).lower() + ".png"
 				fileExists = os.path.isfile(factionIcon)
 			print(factionIcon)
 			if fileExists:
 				imageOverlayFormattingDictionary['$FACTIONICON$'] = '<div id = "factionflagimg"><img src="{0}" height = "30"></div>'.format(factionIcon)
 				print(imageOverlayFormattingDictionary.get('$FACTIONICON$'))
 			else:
-				imageOverlayFormattingDictionary['$FACTIONICON$'] = '<div id = "factionflagimg"><img height = "30"></div>'
-		matchType = MatchType.BASIC
-		if (int(self.numberOfComputers) > 0):
-			matchType = MatchType.BASIC
-		if (0 <= int(self.mapSize) <= 2) and (int(self.numberOfComputers) == 0):
-			matchType = MatchType.ONES
-		if (3 <= int(self.mapSize) <= 4) and (int(self.numberOfComputers) == 0):
-			matchType = MatchType.TWOS
-		if (5 <= int(self.mapSize) <= 6) and (int(self.numberOfComputers) == 0):
-			matchType = MatchType.THREES
-		for value in playerStats.leaderboardData:
-			if (str(playerStats.leaderboardData[value].matchType) == str(matchType)):
-				if (str(playerStats.leaderboardData[value].faction) == str(playerStats.user.faction)):
-					iconPrefix = ""
-					if str(playerStats.user.faction) == str(Faction.PE):
-						iconPrefix = "panzer_"
-					if str(playerStats.user.faction) == str(Faction.CW):
-						iconPrefix = "brit_"
-					if str(playerStats.user.faction) == str(Faction.US):
-						iconPrefix = "us_"
-					if str(playerStats.user.faction) == str(Faction.WM):
-						iconPrefix = "heer_"												
-					level = str(playerStats.leaderboardData[value].rankLevel).zfill(2)
-					levelIcon = "OverlayImages\\Ranks\\" + iconPrefix + level + ".png"
-					print("levelIcon : " + str(levelIcon))
-					fileExists = os.path.isfile(levelIcon)
-					if fileExists:
-						imageOverlayFormattingDictionary['$LEVELICON$'] =  '<div id = "rankimg"><img src="{0}" height = "45"></div>'.format(levelIcon)
-						print(imageOverlayFormattingDictionary.get('$LEVELICON$'))
-					else:
-						imageOverlayFormattingDictionary['$LEVELICON$'] = '<div id = "rankimg"><img height = "45"></div>'
+				imageOverlayFormattingDictionary['$FACTIONICON$'] = '<div id = "factionflagimg"><img height = "30"></div>'		
+
+		# if a computer it will have no stats therefore no country flag or rank
+		if player.stats:
+			if player.stats.country:
+				countryIcon = "OverlayImages\\Flagssmall\\" + str(player.stats.country).lower() + ".png"
+				fileExists = os.path.isfile(countryIcon)
+				if fileExists:
+					imageOverlayFormattingDictionary['$FLAGICON$'] = '<div id = "countryflagimg"><img src="{0}" height = "20"></div>'.format(countryIcon)
+				else:
+					imageOverlayFormattingDictionary['$FLAGICON$'] = '<div id = "countryflagimg"><img height = "20"></div>'
+
+			#rank icons
+			for value in player.stats.leaderboardData:
+				if (str(player.stats.leaderboardData[value].matchType) == str(self.matchType)):
+					if (str(player.stats.leaderboardData[value].faction) == str(player.faction)):
+						iconPrefix = ""
+						if str(player.faction) == str(Faction.PE):
+							iconPrefix = "panzer_"
+						if str(player.faction) == str(Faction.CW):
+							iconPrefix = "brit_"
+						if str(player.faction) == str(Faction.US):
+							iconPrefix = "us_"
+						if str(player.faction) == str(Faction.WM):
+							iconPrefix = "heer_"												
+						level = str(player.stats.leaderboardData[value].rankLevel).zfill(2)
+						levelIcon = "OverlayImages\\Ranks\\" + iconPrefix + level + ".png"
+						print("levelIcon : " + str(levelIcon))
+						fileExists = os.path.isfile(levelIcon)
+						if fileExists:
+							imageOverlayFormattingDictionary['$LEVELICON$'] =  '<div id = "rankimg"><img src="{0}" height = "45"></div>'.format(levelIcon)
+							print(imageOverlayFormattingDictionary.get('$LEVELICON$'))
+						else:
+							imageOverlayFormattingDictionary['$LEVELICON$'] = '<div id = "rankimg"><img height = "45"></div>'
+		else:
+			#default no image
+			imageOverlayFormattingDictionary['$FLAGICON$'] = '<div id = "countryflagimg"><img height = "20"></div>'
+			imageOverlayFormattingDictionary['$LEVELICON$'] = '<div id = "rankimg"><img height = "45"></div>'
+
+
 		return imageOverlayFormattingDictionary
 
 	def formatPreFormattedString(self, theString, stringFormattingDictionary, overlay = False):
@@ -819,16 +683,6 @@ class HandleCOHlogFile:
 		result = pattern.sub(lambda x: stringFormattingDictionary[x.group()], theString)
 		return result
 
-	def savePlayer(self, playerStats):
-		try:
-			playerNumber = "player" + str(playerStats.user.slot) + ".txt"
-			with open(playerNumber , 'w') as outfile:
-				outfile.write(str("{0}".format(str(playerStats.user.name))))
-		except Exception as e:
-			logging.exception("In savePlayer")
-			print("Problem in save")
-			print(str(e))
-
 	def saveOverlayHTML(self, axisTeamList, alliesTeamList):
 		try:
 			team1 = ""
@@ -844,12 +698,11 @@ class HandleCOHlogFile:
 			team2List = axisTeamList
 
 			for item in axisTeamList:
-				print("axisTeamList : " + str(item.user.steamNumber))
-				print("player steamNumber : " + str(self.parameters.data.get('steamNumber')))
-				if (str(self.parameters.data.get('steamNumber')) == str(item.user.steamNumber)):
-					print ("Player team is AXIS")
-					team1List = axisTeamList
-					team2List = alliesTeamList
+				if item.stats:
+					if (str(self.parameters.data.get('steamNumber')) == str(item.stats.steamNumber)):
+						print ("Player team is AXIS")
+						team1List = axisTeamList
+						team2List = alliesTeamList
 
 			useOverlayPreFormat = bool(self.parameters.data.get('useOverlayPreFormat'))
 			if (useOverlayPreFormat):
@@ -874,9 +727,9 @@ class HandleCOHlogFile:
 			else:
 			
 				for item in team1List:
-					team1 += str(item.user.name) + str("<BR>") + "\n"
+					team1 += str(item.name) + str("<BR>") + "\n"
 				for item in team2List:
-					team2 += str(item.user.name) + str("<BR>") + "\n"
+					team2 += str(item.name) + str("<BR>") + "\n"
 				
 			htmlOutput = OverlayTemplates().overlayhtml.format(team1, team2)
 			# create output overlay from template
@@ -917,18 +770,21 @@ class HandleCOHlogFile:
 class playerStat:
 
 	def __init__(self, statdata, steamNumber):
-		self.user = Player()
-		#self.basic = { } 
-		#self.ones = { }
-		#self.twos = { }
-		#self.threes = { }
+
+		# steamNumber is required in addition to statData to compare the steamNumber to the internal profiles that can contain other profile info
 		self.leaderboardData = {}
 
 		self.totalWins = 0
 		self.totalLosses = 0		
 		self.totalWLRatio = None
 
-
+		self.steamNumber = steamNumber
+		self.profile_id = None
+		self.alias = None
+		self.country = None
+		self.steamString = None
+		self.steamProfileAddress = None
+		
 		statString = "/steam/"+str(steamNumber)
 
 		if (statdata['result']['message'] == "SUCCESS"):
@@ -937,7 +793,10 @@ class playerStat:
 				for item in statdata['statGroups']:
 					for value in item['members']:
 						if (value.get('name') == statString):
-							self.user = Player(profile_id = value.get('profile_id'), name = value.get('alias'), steamString = value.get('name'), country = value.get('country'))
+							self.profile_id = value.get('profile_id')
+							self.alias = value.get('alias')
+							self.steamString = value.get('name')
+							self.country = value.get('country')
 			if statdata.get('leaderboardStats'):
 				#print(json.dumps(statdata, indent=4, sort_keys= True))
 				# following number compare to leaderboard_id
@@ -1015,12 +874,25 @@ class playerStat:
 		except Exception as e:
 			logging.exception("In cohStat creating totalWLRatio")
 			print(str(e))
-	
+
+		if self.steamString:
+			self.steamNumber = str(self.steamString).replace("/steam/", "")
+			self.steamProfileAddress = "https://steamcommunity.com/profiles/" + str(self.steamNumber)
+
+
 	
 	def __str__(self):
-		output = str(self.user)
+
+		output = ""
 		for value in self.leaderboardData:
 			output += str(self.leaderboardData[value])
+
+		output += "steamNumber : " + str(self.steamNumber) + "\n"
+		output += "profile_id : " + str(self.profile_id) + "\n"
+		output += "alias : " + str(self.alias) + "\n"
+		output += "country : " + str(self.country) + "\n"
+		output += "steamString : " + str(self.steamString) + "\n"
+		output += "steamProfileAddress : " + str(self.steamProfileAddress) + "\n"
 
 		output += "Totals\n"
 		output += "Wins : " + str(self.totalWins) + "\n"
@@ -1097,17 +969,11 @@ class factionResult:
 
 class Player:
 
-	def __init__(self, profile_id = None, name = None, steamString = None, steamNumber = None, country = None, factionString = None, slot = None, faction = None, logFileRanking = None):
-		self.profile_id = profile_id
+	def __init__(self, name = None, factionString = None, faction = None):
 		self.name = name
-		self.steamString = steamString
-		self.steamNumber = steamNumber
-		self.country = country
-		self.steamProfileAddress = None
 		self.factionString = factionString
 		self.faction = faction
-		self.logFileRanking = logFileRanking
-		self.slot = slot
+		self.stats = None # This will be None for computers but point to a playerStat Object for players
 
 		if self.factionString == "axis":
 			self.faction = Faction.WM
@@ -1117,84 +983,62 @@ class Player:
 			self.faction = Faction.CW
 		if self.factionString == "axis_panzer_elite":
 			self.faction = Faction.PE
-
-		try:
-			if self.steamString:
-				self.steamNumber = str(self.steamString).replace("/steam/", "")
-			self.steamProfileAddress = "https://steamcommunity.com/profiles/" + str(self.steamNumber)
-		except Exception as e:
-			logging.exception("In Player creating steamProfileAddress")
-			print(str(e))
-
 	
 	def __str__(self):
-		output = "profile_id : " + str(self.profile_id) + "\n"
-		output += "name : " + str(self.name) + "\n"
-		output += "steamString : " + str(self.steamString) + "\n"
-		output += "steamNumber : " + str(self.steamNumber) + "\n"
-		output += "country : " + str(self.country) + "\n"
-		output += "steamProfileAddress : " + str(self.steamProfileAddress) + "\n"
+		output = "name : " + str(self.name) + "\n"
 		output += "factionString : " + str(self.factionString) + "\n"
 		output += "faction : " + str(self.faction) + "\n"
-		output += "logFileRanking : " + str(self.logFileRanking) + "\n"
-		output += "slot : " + str(self.slot) + "\n"
+		output += "stats : \n " + str(self.stats) + "\n"
 		return output
 
 	def __repr__(self):
 		return str(self)
 
-#
-# The replay reader class gets the faction and username from the replay file. this works but sadly the temp.rec replay isn't written until the game is over so it isn't useful for this opponent bot.
-#
-class ReplayReader:
-	def __init__(self, replayFilePath = None):
-		
-		self.parameters = parameters()
-		self.listOfPlayers = []
-		self.filePath = ""
 
-		if (replayFilePath):
-			self.filePath = replayFilePath
-		else:
-			self.filePath = self.parameters.data.get('temprecReplayPath')
+class ApplicationMemoryReader():
+	def __init__(self):
+		pass
+	def getFactions(self):
+		# look for COH__REC inside application memory
+		buff = bytes(b"COH__REC")
+		pid = Process.get_pid_by_name('RelicCOH.exe')
+		print("searchCString : " + str(buff))
+		print("pid of RelicCOH.exe: " + str(pid))
+		playerList = []
+		if (pid):
+			with Process.open_process(pid) as p:
+				addrs = p.search_all_memory(buff)
+				try:
+					assert(len(addrs) == 1)
+					#asset that an address exists or throw an exception
+					print("Address : " + str(addrs) + "\n")
+					print("Address : " + str(hex(addrs[0])) + "\n")
 
-		if (os.path.isfile(self.filePath)):
-			with open(self.filePath, "rb") as binary_file:
-				data = binary_file.read()
-				binary_file.seek(4)
-				cohrecString = binary_file.read(8)
-				print(cohrecString)
-				dataarray = bytearray(binary_file.read(32))
-				print(str(dataarray.decode()))
-				binary_file.seek(76)
-				relicChunky = binary_file.read(12)
-				print(relicChunky.decode())
+					#read an abitrary number of bytes from the COH__REC memory location 4000 should do this will cover the replay header and extras
+					data_dump = p.read_memory(addrs[0], (ctypes.c_byte * 4000)())
+					data_dump = bytearray(data_dump)
+					#do a regular expression match to find all occurances of DATAINFO in the data_dump
+					matchobject = re.finditer(b'DATAINFO', data_dump)
+					for item in matchobject:
+						#for each start index found read the username and faction and put them in a list
+						indexOfDATAINFO = int(item.start())
+						print(data_dump.find(b'DATAINFO'))
+						usernamelength = p.read_memory(addrs[0] + indexOfDATAINFO + 28, (ctypes.c_byte * 4)())
+						print(int.from_bytes(usernamelength, byteorder='little', signed=False))
+						usernamelength = int.from_bytes(usernamelength, byteorder='little', signed=False)
+						username = p.read_memory(addrs[0] + indexOfDATAINFO + 28 + 4, (ctypes.c_byte * (usernamelength*2))())
+						print(bytearray(username).decode('utf-16le'))
+						lengthOfFactionString = p.read_memory(addrs[0] + indexOfDATAINFO + 32 + 8 + (usernamelength*2), (ctypes.c_byte * 4)())
+						lengthOfFactionString = int.from_bytes(lengthOfFactionString, byteorder='little', signed=False)
+						print (lengthOfFactionString)
+						factionString = p.read_memory(addrs[0] + indexOfDATAINFO + 32 + 8 + (usernamelength*2) + 4, (ctypes.c_byte * (lengthOfFactionString))())
+						print(bytearray(factionString).decode('ascii'))
+						playerList.append(Player(name=bytearray(username).decode('utf-16le'),factionString=bytearray(factionString).decode('ascii')))
+							
+				except Exception as e:
+					print("Problem finding memory : " + str(e))
+		return playerList
 
-
-				self.indexOfDATAINFO = 0
-
-				while True:
-					self.indexOfDATAINFO = data.find('DATAINFO'.encode(), self.indexOfDATAINFO + 8)
-					if self.indexOfDATAINFO == -1:
-						break
-					print(self.indexOfDATAINFO)
-					#print(str(data.find('DATAINFO'.encode())))
-					binary_file.seek(self.indexOfDATAINFO + 28)
-					lenghtOfString  = int.from_bytes(binary_file.read(4), byteorder = 'little')
-					print(lenghtOfString)
-					binary_file.seek(self.indexOfDATAINFO + 32)
-					userNameByteArray = binary_file.read(lenghtOfString*2)
-					userName = userNameByteArray.decode(encoding="utf-16")
-					print(userName)
-
-					binary_file.seek(self.indexOfDATAINFO + 32 + lenghtOfString*2 + 8)
-					lengthOfFaction = int.from_bytes(binary_file.read(4), byteorder = 'little')
-					print(lengthOfFaction)
-					factionName = binary_file.read(lengthOfFaction).decode()
-					print(factionName)
-					self.listOfPlayers.append(Player(name=userName, factionString=factionName))
-
-				print(self.listOfPlayers)		
 
 # to use this file without the GUI be sure to have the parameters file in the same directory and uncomment below
 #myIRC = IRCClient()
