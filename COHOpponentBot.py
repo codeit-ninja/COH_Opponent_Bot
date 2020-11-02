@@ -539,6 +539,8 @@ class COHBotGUI:
 		print(self.master.filename)
 		if(self.master.filename != ""):
 			self.parameters.data['logPath'] = self.master.filename.replace("/",'\\')
+			self.parameters.data['logPath'] = self.master.filename.replace("￦",'\\')
+			self.parameters.data['logPath'] = self.master.filename.replace("¥",'\\')
 			self.e5.config(state = NORMAL)
 			self.e5.delete(0, tk.END)
 			logpath = self.parameters.data.get('logPath')
