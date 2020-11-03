@@ -96,6 +96,7 @@ html {
 	  float: left;
 	  margin-left: 58%;
 	  background-color: rgba(0, 0, 0, 0.8);
+	  text-align: left;
 	  }
   
 #playerTeam {
@@ -106,6 +107,7 @@ html {
 	  float: right;
 	  margin-right: 58%;
 	  background-color: rgba(0, 0, 0, 0.8);
+	  text-align: right;
   }
 	
 
