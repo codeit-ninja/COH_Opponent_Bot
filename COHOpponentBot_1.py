@@ -411,6 +411,7 @@ class HandleCOHlogFile:
 		self.numberOfSlots = 0
 		self.mapSize = 0
 
+		#self.isReplay = False
 		self.matchType = MatchType.BASIC
 	
 	def loadLog(self):
@@ -430,7 +431,11 @@ class HandleCOHlogFile:
 				steamNumber = self.find_between(item, "steam/", "]")
 				steamNumberList.append(steamNumber)
 
-			if ("GAME -- ***") in item:
+			#if("GAME -- Beginning playback") in item:
+			#	self.isReplay = True
+
+			if (("GAME -- ***") in item):
+				#self.isReplay = False
 				self.numberOfHumans = 0
 				self.numberOfComputers = 0
 				self.easyCPUCount = 0
@@ -581,6 +586,17 @@ class HandleCOHlogFile:
 			stringFormattingDictionary['$TOTALLOSSES$'] =  prefixDiv + str(player.stats.totalLosses) + postfixDivClose
 			stringFormattingDictionary['$TOTALWLRATIO$'] =  prefixDiv + str(player.stats.totalWLRatio) + postfixDivClose
 
+
+			#set default null values for all parameters in dictionary
+			stringFormattingDictionary['$WINS$'] =  prefixDiv + "" + postfixDivClose
+			stringFormattingDictionary['$LOSSES$'] =  prefixDiv + "" + postfixDivClose
+			stringFormattingDictionary['$DISPUTES$'] =  prefixDiv + "" + postfixDivClose
+			stringFormattingDictionary['$STREAK$'] =  prefixDiv + "" + postfixDivClose
+			stringFormattingDictionary['$DROPS$'] =  prefixDiv + "" + postfixDivClose
+			stringFormattingDictionary['$RANK$'] =  prefixDiv + "" + postfixDivClose
+			stringFormattingDictionary['$LEVEL$'] =  prefixDiv + "" + postfixDivClose
+			stringFormattingDictionary['$WLRATIO$'] =  prefixDiv + "" + postfixDivClose			
+
 			for value in player.stats.leaderboardData:
 				if (str(player.stats.leaderboardData[value].matchType) == str(self.matchType)):
 					if (str(player.stats.leaderboardData[value].faction) == str(player.faction)):
@@ -616,6 +632,10 @@ class HandleCOHlogFile:
 
 		# if a computer it will have no stats therefore no country flag or rank
 		if player.stats:
+			# set default values for flags and faction rank
+			imageOverlayFormattingDictionary['$FLAGICON$'] = '<div id = "countryflagimg"></div>'
+			imageOverlayFormattingDictionary['$LEVELICON$'] = '<div id = "rankimg"></div>'
+
 			if player.stats.country:
 				countryIcon = "OverlayImages\\Flagssmall\\" + str(player.stats.country).lower() + ".png"
 				fileExists = os.path.isfile(countryIcon)
@@ -718,6 +738,7 @@ class HandleCOHlogFile:
 				for item in team2List:
 					preFormattedString = self.parameters.data.get('overlayStringPreFormatRight')
 					# first substitute all the text in the preformat
+					stringFormattingDictionary.clear()
 					stringFormattingDictionary = self.populateStringFormattingDictionary(item, overlay = True)
 					#theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary,overlay = True)
 					# second substitue all the html images if used
