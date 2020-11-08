@@ -538,9 +538,9 @@ class COHBotGUI:
 		self.master.filename =  tk.filedialog.askopenfilename(initialdir = "/",title = "Select warning.log file",filetypes = (("log file","*.log"),("all files","*.*")))
 		print(self.master.filename)
 		if(self.master.filename != ""):
-			self.parameters.data['logPath'] = self.master.filename.replace("/",'\\')
-			self.parameters.data['logPath'] = self.master.filename.replace("￦",'\\')
-			self.parameters.data['logPath'] = self.master.filename.replace("¥",'\\')
+			pattern = re.compile("\u20A9|\uFFE6|\u00A5|\uFFE5") # replaces both Won sign varients for korean language and Yen symbol for Japanese language paths
+			theFilename = re.sub(pattern, "/", self.master.filename)
+			self.parameters.data['logPath'] = theFilename.replace("/",'\\')
 			self.e5.config(state = NORMAL)
 			self.e5.delete(0, tk.END)
 			logpath = self.parameters.data.get('logPath')
