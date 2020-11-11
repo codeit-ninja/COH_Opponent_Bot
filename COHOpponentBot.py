@@ -20,6 +20,8 @@ from icon import Icon
 import logging # For logging information and warnings about opperation errors
 
 
+
+
 class COHBotGUI:
 
 	def __init__(self):
@@ -49,6 +51,10 @@ class COHBotGUI:
 		self.customOverlayPreFormatStringRight = StringVar()
 		self.useCustomPreFormat = IntVar(value = int(bool(self.parameters.data.get('useCustomPreFormat'))))
 		self.customChatOutputPreFormatString = StringVar()
+		self.logErrorsToFile = IntVar(value = int(bool(self.parameters.data.get('logErrorsToFile'))))
+
+		#Start or stop logging based on the self.logErrorsToFile variable
+		self.toggleLogErrorsToFile()
 		
 
 		self.customOverlayEntry = None
@@ -188,7 +194,11 @@ class COHBotGUI:
 
 
 			self.f6 = tk.LabelFrame(self.optionsMenu, text = "Custom Format", padx =5, pady=5)
-			self.f6.grid( sticky=tk.N+W+E+S) # column =1, rowspan =2,            
+			self.f6.grid( sticky=tk.N+W+E+S) # column =1, rowspan =2,     
+
+
+			self.lblframeMisc = tk.LabelFrame(self.optionsMenu, text = "Misc", padx =5, pady=5)
+			self.lblframeMisc.grid( sticky = tk.N+W+E+S)   
 
 
 
@@ -292,10 +302,26 @@ class COHBotGUI:
 			self.toggleUseCustomPreFormat() # setdisabled if custom format on first run
 			self.toggleUseOverlayPreFormat()
 			#self.automode() # setdisabled if auto on first run
+			#Misc tickbox
+			self.checkLogErrorToFile = tk.Checkbutton(self.lblframeMisc, text="Log Errors To File", variable=self.logErrorsToFile, command = self.toggleLogErrorsToFile)
+			self.checkLogErrorToFile.grid(sticky=tk.W)
+
 		try:
 			self.optionsMenu.focus()
 		except Exception as e:
 			logging.exception('Exception : ')
+
+	def toggleLogErrorsToFile(self):
+		# work in progress
+		if (bool(self.logErrorsToFile.get())):
+			logging.info("Logging Started")
+			logging.info(VersionNumber)
+			logging.getLogger().setLevel(level=logging.CRITICAL)
+		else:
+			logging.info("Stopping Logging")
+			logging.getLogger().setLevel(level=logging.NOTSET)
+
+		self.saveToggles()
 
 	def toggleMirrorLeftRightOverlay(self):
 		if (bool(self.mirrorLeftToRightOverlay.get())):
@@ -355,7 +381,7 @@ class COHBotGUI:
 
 
 	def testStats(self):
-		print("Testing Stats")
+		logging.info("Testing Stats")
 		if (self.thread):
 			self.thread.queue.put('OPPONENT')
 
@@ -365,12 +391,12 @@ class COHBotGUI:
 			self.checkWriteIWonLostInChat.config(state = NORMAL)
 			self.checkClearOverlayAfterGame.config(state = NORMAL)            
 			if (self.thread):
-				print("in automatic trigger toggle")
+				logging.info("in automatic trigger toggle")
 				self.automaticFileMonitor = COHOpponentBot_1.FileMonitor(self.parameters.data.get('logPath'),self.parameters.data.get('filePollInterval'), self.thread)
 				self.automaticFileMonitor.start()
 		else:
 			if (self.automaticFileMonitor):
-				print("trying to close automatic file monitor")
+				logging.info("trying to close automatic file monitor")
 				self.automaticFileMonitor.close()
 			self.checkWriteIWonLostInChat.config(state = DISABLED)
 			self.checkClearOverlayAfterGame.config(state = DISABLED)
@@ -393,13 +419,15 @@ class COHBotGUI:
 
 		self.parameters.data['useCustomPreFormat'] = bool(self.useCustomPreFormat.get())
 
+		self.parameters.data['logErrorsToFile'] = bool(self.logErrorsToFile.get())
+
 
 		self.parameters.save()
 		try:
 			if self.thread:
 				self.thread.parameters = self.parameters
 		except Exception as e:
-			print(str(e))
+			logging.error(str(e))
 			logging.exception('Exception : ')
 
 	
@@ -407,12 +435,6 @@ class COHBotGUI:
 		self.optionsMenu.destroy()
 		self.optionsMenu = None
 
-	def displayConsoleToggled(self):
-		try:
-			print(bool(self.consoleDisplayBool.get()))
-			self.thread.displayConsoleOut = bool(self.consoleDisplayBool.get())
-		except Exception as e:
-			logging.exception('Exception : ')
 
 	def disableEverything(self):
 		self.b1.config(state = DISABLED)
@@ -536,7 +558,7 @@ class COHBotGUI:
 	def locateWarningLog(self):
 		self.disableEverything()
 		self.master.filename =  tk.filedialog.askopenfilename(initialdir = "/",title = "Select warning.log file",filetypes = (("log file","*.log"),("all files","*.*")))
-		print(self.master.filename)
+		logging.info("File Path : " + str(self.master.filename))
 		if(self.master.filename != ""):
 			pattern = re.compile("\u20A9|\uFFE6|\u00A5|\uFFE5") # replaces both Won sign varients for korean language and Yen symbol for Japanese language paths
 			theFilename = re.sub(pattern, "/", self.master.filename)
@@ -588,26 +610,29 @@ class COHBotGUI:
 
 
 	def on_closing(self):
-		print("closing")
+		logging.info("In on_closing program (Closing)")
 		try:
 			if(self.thread):
 				self.thread.close()
 			if(self.automaticFileMonitor):
 				self.automaticFileMonitor.close()
 				self.automaticFileMonitor.event.set()
+			# handle Closing error output file if it exists
+			#if self.errorFile:
+			#	self.errorFile.close()
 		except Exception as e:
 			logging.exception('Exception : ')
 		while (threading.active_count() > 1):
 			pass
-		print("exiting main thread")
+		logging.info("Exiting main thread")
 		sys.exit()
 
 
 # Program Entry Starts here
 # Default error logging log file location:
-logging.basicConfig(format='%(asctime)s (%(threadName)-10s) [%(levelname)s] %(message)s', filename= 'IRCOpponent_Temp_ERROR.log',filemode = "w", level=logging.DEBUG)
-logging.info("Logging Started")
-logging.info(VersionNumber)
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
+logging.basicConfig(format='%(asctime)s (%(threadName)-10s) [%(levelname)s] %(message)s', filename= 'COH_Opponent_Bot.log',filemode = "w", level=logging.NOTSET)
 
 
 COHOpponentBot_1.HandleCOHlogFile().clearOverlayHTML()

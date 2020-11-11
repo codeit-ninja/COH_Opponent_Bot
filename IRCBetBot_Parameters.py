@@ -1,3 +1,4 @@
+import logging
 # This file contains parameters kept separate from the main files due to their sensitive nature.
 try:
 	import ctypes.wintypes # for finding the windows home directory will throw error on linux
@@ -10,7 +11,7 @@ import requests
 import urllib.request # more for loadings jsons from urls
 import string
 import sys
-import logging
+
 
 class parameters:
 	
@@ -34,6 +35,8 @@ class parameters:
 		self.data['botOAuthKey'] = ""
 
 		self.data['showOwn'] = False
+
+		self.data['logErrorsToFile'] = False
 
 		self.data['filePollInterval'] = 10
 
@@ -71,28 +74,27 @@ class parameters:
 			buf= ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
 			ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
 			
-			logPath = buf.value + "\\My Games\\Company of Heroes Relaunch\\warnings.log"
+			logPath = buf.value + "\\My Games\\Company of Heroes Relaunch\\warnings.log" #
 			self.data['logPath'] = logPath
 			# attempt to extract users steamNumber from logfile
 			if (os.path.isfile(logPath)):
-				print("the logPath file was found")
+				logging.info("the logPath file was found")
 				try:
 					with open(self.data['logPath'], encoding='ISO-8859-1') as file:
 						content = file.readlines()
 					for item in content:
 						if ("RLINK -- Found profile:") in item:
 							steamNumber = self.find_between(item, "steam/", "\n")
-							#print("Steam Number from Log : " + str(steamNumber))
 							self.data['steamNumber'] = steamNumber
 				except Exception as e:
-					print(str(e))
+					logging.error(str(e))
 		except Exception as e:
-			print(str(e))
+			logging.error(str(e))
 
 		try:
 			self.data['temprecReplayPath'] = self.data.get('logPath').replace("warnings.log" , "playback\\temp.rec")
 		except Exception as e:
-			print(str(e))
+			logging.error(str(e))
 		
 		
 		#attempt to get userName from steamNumber
@@ -104,14 +106,14 @@ class parameters:
 			statdata = json.loads(response.decode('utf-8'))
 			#print(statdata)
 			if (statdata['result']['message'] == "SUCCESS"):
-				print ("statdata load succeeded")
+				logging.info ("statdata load succeeded")
 				if statdata['statGroups'][0]['members'][0]['alias']:
 					for item in statdata['statGroups']:
 						for value in item['members']:
 							if (value['name'] == statString):
 								self.data['channel'] = value['alias']
 		except Exception as e:
-			print(str(e))
+			logging.error(str(e))
 
 		self.stringFormattingDictionary = {}
 		self.stringFormattingDictionary['$NAME$'] = None
@@ -150,12 +152,12 @@ class parameters:
 					success = self.checkDataIntegrity(data)
 					if success:
 						self.data = data
-						print("data loaded sucessfully")
+						logging.info("data loaded sucessfully")
 					else:
-						print("data not loaded")
+						logging.info("data not loaded")
 		except Exception as e:
-			print("Problem in load")
-			print(str(e))
+			logging.error("Problem in load")
+			logging.error(str(e))
 
 	def checkDataIntegrity(self, data):
 		success = True
@@ -171,8 +173,8 @@ class parameters:
 			with open('data.json' , 'w') as outfile:
 				json.dump(self.data, outfile)
 		except Exception as e:
-			print("Problem in save")
-			print(str(e))
+			logging.error("Problem in save")
+			logging.error(str(e))
 			
 	def find_between(self, s, first, last ):
 		try:

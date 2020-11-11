@@ -80,9 +80,9 @@ class IRCClient(threading.Thread):
 		try:
 			self.irc = socket.socket()
 		except Exception as e:
-			print("A problem occurred trying to connect")
-			logging.exception("In IRCClient")
-			print(str(e))
+			logging.error("A problem occurred trying to connect")
+			logging.error("In IRCClient")
+			logging.error(str(e))
 			self.irc.close()
 			sys.exit(0)
 		
@@ -144,13 +144,13 @@ class IRCClient(threading.Thread):
 					# send copy of recieved line to channel thread
 					line=str.rstrip(line)
 					line=str.split(line)
-					print (str(line).encode('utf8'))
+					logging.info (str(line).encode('utf8'))
 					if (self.displayConsoleOut):
 						try:
 							self.output.insert(END, "".join(line) + "\n")
 						except Exception as e:
-							logging.exception("In run")
-							print(str(e))
+							logging.error("In run")
+							logging.error(str(e))
 
 					if (len(line) >= 3) and ("JOIN" == line[1]) and (":"+self.nick.lower()+"!"+self.nick.lower()+"@"+self.nick.lower()+".tmi.twitch.tv" == line[0]):
 						#cancel auto closing the thread
@@ -170,13 +170,13 @@ class IRCClient(threading.Thread):
 	def close(self):
 		self.queue.put("EXITTHREAD")
 		self.running = False
-		print("in close in thread")
+		logging.info("in close in thread")
 		try:
 			# send closing message immediately
 			self.irc.send(("PRIVMSG " + self.channel + " :" + str("closing opponent bot") + "\r\n").encode('utf8'))
 		except Exception as e:
-			logging.exception("In close")
-			print(str(e))
+			logging.error("In close")
+			logging.error(str(e))
 			
 	def AssurePathExists(self, path):
 		dir = os.path.dirname(path)
@@ -198,9 +198,9 @@ class IRCClient(threading.Thread):
 			try:
 				self.irc.send(("PRIVMSG " + self.channel + " :" + str(self.ircMessageBuffer.popleft()) + "\r\n").encode('utf8'))
 			except Exception as e:
-				print("IRC send error:")
-				logging.exception("In IRCSendCalledEveryTwoSeconds")
-				print(str(e))
+				logging.error("IRC send error:")
+				logging.error("In IRCSendCalledEveryThreeSeconds")
+				logging.error(str(e))
 	#above is called by the timer every three seconds and checks for items in buffer to be sent, if there is one it'll send it
 
 
@@ -246,7 +246,7 @@ class IRC_Channel(threading.Thread):
 		msgMessage = " ".join(line [4:])
 		msgMessage = msgMessage[1:]
 		messageString = str(msgUserName) + " : " + str(msgMessage)
-		print (str(messageString).encode('utf8'))
+		logging.info (str(messageString).encode('utf8'))
 
 		#Check for UserCommands
 		self.CheckForUserCommand(msgUserName, msgMessage)
@@ -270,7 +270,7 @@ class IRC_Channel(threading.Thread):
 
 	def close(self):
 		self.running = False
-		print("Closing Channel " + str(self.channel) + " thread.")
+		logging.info("Closing Channel " + str(self.channel) + " thread.")
 
 
 
@@ -280,7 +280,7 @@ class StatsRequest:
 		self.parameters = parameters		
 		
 	def returnStats(self, statnumber):
-		print ("got statnumber : " + str(statnumber))
+		logging.info ("got statnumber : " + str(statnumber))
 		#statString = "/steam/" + str(statnumber)
 		if (not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None)):
 			ssl._create_default_https_context = ssl._create_unverified_context
@@ -288,7 +288,7 @@ class StatsRequest:
 		statdata = json.loads(response.decode('utf-8'))
 		#print(json.dumps(statdata, indent=4, sort_keys= True))
 		if (statdata['result']['message'] == "SUCCESS"):
-			print ("statdata load succeeded")
+			logging.info ("statdata load succeeded")
 			playerStats = playerStat(statdata, statnumber)
 			#print("playerStats : " + str(playerStats))
 
@@ -318,16 +318,16 @@ class FileMonitor (threading.Thread):
 				self.theFile.append(line)
 				#self.queue.put(line)
 			#print(str(self.theFile))
-			print("Initialzing with file length : " + str(len(self.theFile)) + "\n")
+			logging.info("Initialzing with file length : " + str(len(self.theFile)) + "\n")
 			self.fileIndex = len(self.theFile)
 			self.theFile = None
 		except Exception as e:
-			logging.exception("In FileMonitor __init__")
-			print(str(e))
+			logging.error("In FileMonitor __init__")
+			logging.error(str(e))
 
 	def run(self):
 		try:
-			print ("Started monitoring File : " + str(self.filePath) + "\n")
+			logging.info ("Started monitoring File : " + str(self.filePath) + "\n")
 			while self.running:
 				lines = []
 				clearOverlay = False
@@ -347,7 +347,7 @@ class FileMonitor (threading.Thread):
 						#Check if streamer won
 						theSteamNumber = self.find_between(lines[x] ,"/steam/" , "]")
 						if (str(self.parameters.data.get('steamNumber')) == str(theSteamNumber)):
-							print("STREAMER WON\n")
+							logging.info("STREAMER WON\n")
 							if (self.parameters.data.get('writeIWonLostInChat')):
 								self.opponentBot.queue.put("IWON")
 							if (self.parameters.data.get('clearOverlayAfterGameOver')):
@@ -356,7 +356,7 @@ class FileMonitor (threading.Thread):
 						#Check if streamer lost
 						theSteamNumber = self.find_between(lines[x] ,"/steam/" , "]")
 						if (str(self.parameters.data.get('steamNumber')) == str(theSteamNumber)):
-							print("STREAMER LOST\n")
+							logging.info("STREAMER LOST\n")
 							if (self.parameters.data.get('writeIWonLostInChat')):
 								self.opponentBot.queue.put("ILOST")
 							if (self.parameters.data.get('clearOverlayAfterGameOver')):
@@ -371,10 +371,10 @@ class FileMonitor (threading.Thread):
 				self.fileIndex = len(lines)
 				self.event = threading.Event()
 				self.event.wait(timeout = self.pollInterval)
-			print ("File Monitoring Ended.\n")
+			logging.info ("File Monitoring Ended.\n")
 		except Exception as e:
-			logging.exception("In FileMonitor run")
-			print(str(e))
+			logging.error("In FileMonitor run")
+			logging.error(str(e))
 	
 	def close(self):
 		self.running = False
@@ -415,10 +415,10 @@ class HandleCOHlogFile:
 		self.matchType = MatchType.BASIC
 	
 	def loadLog(self):
-		print("In loadLog")
+		logging.info("In loadLog")
 		with open(self.logPath, encoding='ISO-8859-1') as f:
 			content = f.readlines()
-		print(self.parameters.data['steamNumber'])
+		logging.info(self.parameters.data['steamNumber'])
 		steamNumberList = []
 
 		for item in content:
@@ -426,7 +426,7 @@ class HandleCOHlogFile:
 				steamNumberList.clear()
 
 			if ("match started") in item.lower():
-				print (item)
+				logging.info (item)
 				# dictionary containing player number linked to steamnumber
 				steamNumber = self.find_between(item, "steam/", "]")
 				steamNumberList.append(steamNumber)
@@ -465,7 +465,7 @@ class HandleCOHlogFile:
 			if ("AutoMatchForm - Starting game") in item:
 				steamNumberList.clear()
 
-				print("CLEARING PLAYER LIST\n")
+				logging.info("CLEARING PLAYER LIST\n")
 			
 		#self.numberOfHumans = len(steamNumberList)
 		appMemReader = ApplicationMemoryReader()
@@ -490,9 +490,9 @@ class HandleCOHlogFile:
 					if (player.name == playerStats.alias):
 						player.stats = playerStats
 
-		print("FULL PLAYERSTATLIST\n")
+		logging.info("FULL PLAYERSTATLIST\n")
 		for item in playerList:
-			print(item)
+			logging.info(item)
 
 		#set the current MatchType
 		self.matchType = MatchType.BASIC
@@ -518,8 +518,8 @@ class HandleCOHlogFile:
 			if (str(item.faction) == str(Faction.WM)) or (str(item.faction)== str(Faction.PE)):
 				axisTeam.append(item)
 
-		print("players in allies team : " +str(len(alliesTeam)))
-		print("players in axis team : " + str(len(axisTeam)))
+		logging.info("players in allies team : " +str(len(alliesTeam)))
+		logging.info("players in axis team : " + str(len(axisTeam)))
 
 		# output each player to file
 		if (self.parameters.data.get('useOverlayPreFormat')):
@@ -623,10 +623,10 @@ class HandleCOHlogFile:
 			if type(player.faction) is Faction:
 				factionIcon = "OverlayImages\\Armies\\" + str(player.faction.name).lower() + ".png"
 				fileExists = os.path.isfile(factionIcon)
-			print(factionIcon)
+			logging.info(factionIcon)
 			if fileExists:
 				imageOverlayFormattingDictionary['$FACTIONICON$'] = '<div id = "factionflagimg"><img src="{0}" height = "30"></div>'.format(factionIcon)
-				print(imageOverlayFormattingDictionary.get('$FACTIONICON$'))
+				logging.info(imageOverlayFormattingDictionary.get('$FACTIONICON$'))
 			else:
 				imageOverlayFormattingDictionary['$FACTIONICON$'] = '<div id = "factionflagimg"><img height = "30"></div>'		
 
@@ -659,11 +659,11 @@ class HandleCOHlogFile:
 							iconPrefix = "heer_"												
 						level = str(player.stats.leaderboardData[value].rankLevel).zfill(2)
 						levelIcon = "OverlayImages\\Ranks\\" + iconPrefix + level + ".png"
-						print("levelIcon : " + str(levelIcon))
+						logging.info("levelIcon : " + str(levelIcon))
 						fileExists = os.path.isfile(levelIcon)
 						if fileExists:
 							imageOverlayFormattingDictionary['$LEVELICON$'] =  '<div id = "rankimg"><img src="{0}" height = "45"></div>'.format(levelIcon)
-							print(imageOverlayFormattingDictionary.get('$LEVELICON$'))
+							logging.info(imageOverlayFormattingDictionary.get('$LEVELICON$'))
 						else:
 							imageOverlayFormattingDictionary['$LEVELICON$'] = '<div id = "rankimg"><img height = "45"></div>'
 		else:
@@ -683,11 +683,11 @@ class HandleCOHlogFile:
 			#compile a pattern for all the keys
 			pattern = re.compile(r'(' + '|'.join(re.escape(key) for key in stringFormattingDictionary.keys()) + r')')
 
-			print(pattern)
+			logging.info("pattern " + str(pattern))
 			#split the string to include the dictionary keys
 			fullSplit = re.split(pattern, theString)
 			
-			print(fullSplit)
+			logging.info("fullSplit " + str(fullSplit))
 			
 			#Then replace the Non key values with the postfix and prefix
 			for x in range(len(fullSplit)):
@@ -720,7 +720,7 @@ class HandleCOHlogFile:
 			for item in axisTeamList:
 				if item.stats:
 					if (str(self.parameters.data.get('steamNumber')) == str(item.stats.steamNumber)):
-						print ("Player team is AXIS")
+						logging.info ("Player team is AXIS")
 						team1List = axisTeamList
 						team2List = alliesTeamList
 
@@ -756,13 +756,13 @@ class HandleCOHlogFile:
 			# create output overlay from template
 			with open("overlay.html" , 'w', encoding="utf-8") as outfile:
 				outfile.write(htmlOutput)
-				print("Creating Overlay File\n")
+				logging.info("Creating Overlay File\n")
 			#check if css file exists and if not output the default template to folder
 			if not (os.path.isfile("overlaystyle.css")):
 				with open("overlaystyle.css" , 'w' , encoding="utf-8") as outfile:
 					outfile.write(OverlayTemplates().overlaycss)
 		except Exception as e:
-			print(str(e))
+			logging.error(str(e))
 
 	def clearOverlayHTML(self):
 		try:
@@ -771,7 +771,7 @@ class HandleCOHlogFile:
 			with open("overlay.html" , 'w') as outfile:
 				outfile.write(htmlOutput)
 		except Exception as e:
-			print(str(e))
+			logging.error(str(e))
 
 	def split_by_n(self, seq, n):
 		'''A generator to divide a sequence into chunks of n units.'''
@@ -877,12 +877,12 @@ class playerStat:
 			try:
 				self.totalWins += int(self.leaderboardData[value].wins)
 			except Exception as e:
-				print("problem with totalwins value : " + str(value) +" data : "+ str(self.leaderboardData[value].wins))
+				logging.error("problem with totalwins value : " + str(value) +" data : "+ str(self.leaderboardData[value].wins))
 				pass						
 			try:
 				self.totalLosses += int(self.leaderboardData[value].losses)
 			except Exception as e:
-				print("problem with totallosses value : " + str(value) +" data : "+ str(self.leaderboardData[value].losses))
+				logging.error("problem with totallosses value : " + str(value) +" data : "+ str(self.leaderboardData[value].losses))
 				pass
 
 		self.totalWins = str(self.totalWins)
@@ -894,7 +894,7 @@ class playerStat:
 
 		except Exception as e:
 			logging.exception("In cohStat creating totalWLRatio")
-			print(str(e))
+			logging.error(str(e))
 
 		if self.steamString:
 			self.steamNumber = str(self.steamString).replace("/steam/", "")
@@ -959,7 +959,7 @@ class factionResult:
 				self.lastTime = str(datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'))
 		except Exception as e:
 			#logging.exception("In factionResult Creating timestamp")
-			print(str(e))
+			logging.error(str(e))
 		try:
 			if (int(self.losses) != 0):
 				self.winLossRatio = str(round(int(self.wins)/int(self.losses), 2))
@@ -967,8 +967,8 @@ class factionResult:
 				if(int(self.wins) > 0):
 					self.winLossRatio = "Unbeaten"
 		except Exception as e:
-			logging.exception("In factionResult Creating winLossRatio")
-			print(str(e))	
+			logging.error("In factionResult Creating winLossRatio")
+			logging.error(str(e))	
 
 
 	def __str__(self):
@@ -1023,8 +1023,8 @@ class ApplicationMemoryReader():
 		# look for COH__REC inside application memory
 		buff = bytes(b"COH__REC")
 		pid = Process.get_pid_by_name('RelicCOH.exe')
-		print("searchCString : " + str(buff))
-		print("pid of RelicCOH.exe: " + str(pid))
+		logging.info("searchCString : " + str(buff))
+		logging.info("pid of RelicCOH.exe: " + str(pid))
 		playerList = []
 		if (pid):
 			with Process.open_process(pid) as p:
@@ -1032,8 +1032,8 @@ class ApplicationMemoryReader():
 				try:
 					assert(len(addrs) == 1)
 					#asset that an address exists or throw an exception
-					print("Address : " + str(addrs) + "\n")
-					print("Address : " + str(hex(addrs[0])) + "\n")
+					logging.info("Address : " + str(addrs) + "\n")
+					logging.info("Address : " + str(hex(addrs[0])) + "\n")
 
 					#read an abitrary number of bytes from the COH__REC memory location 4000 should do this will cover the replay header and extras
 					data_dump = p.read_memory(addrs[0], (ctypes.c_byte * 4000)())
@@ -1043,21 +1043,21 @@ class ApplicationMemoryReader():
 					for item in matchobject:
 						#for each start index found read the username and faction and put them in a list
 						indexOfDATAINFO = int(item.start())
-						print(data_dump.find(b'DATAINFO'))
+						logging.info(data_dump.find(b'DATAINFO'))
 						usernamelength = p.read_memory(addrs[0] + indexOfDATAINFO + 28, (ctypes.c_byte * 4)())
-						print(int.from_bytes(usernamelength, byteorder='little', signed=False))
+						logging.info(int.from_bytes(usernamelength, byteorder='little', signed=False))
 						usernamelength = int.from_bytes(usernamelength, byteorder='little', signed=False)
 						username = p.read_memory(addrs[0] + indexOfDATAINFO + 28 + 4, (ctypes.c_byte * (usernamelength*2))())
-						print(bytearray(username).decode('utf-16le'))
+						logging.info(bytearray(username).decode('utf-16le'))
 						lengthOfFactionString = p.read_memory(addrs[0] + indexOfDATAINFO + 32 + 8 + (usernamelength*2), (ctypes.c_byte * 4)())
 						lengthOfFactionString = int.from_bytes(lengthOfFactionString, byteorder='little', signed=False)
-						print (lengthOfFactionString)
+						logging.info (lengthOfFactionString)
 						factionString = p.read_memory(addrs[0] + indexOfDATAINFO + 32 + 8 + (usernamelength*2) + 4, (ctypes.c_byte * (lengthOfFactionString))())
-						print(bytearray(factionString).decode('ascii'))
+						logging.info(bytearray(factionString).decode('ascii'))
 						playerList.append(Player(name=bytearray(username).decode('utf-16le'),factionString=bytearray(factionString).decode('ascii')))
 							
 				except Exception as e:
-					print("Problem finding memory : " + str(e))
+					logging.error("Problem finding memory : " + str(e))
 		return playerList
 
 
