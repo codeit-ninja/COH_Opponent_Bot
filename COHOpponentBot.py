@@ -309,17 +309,17 @@ class COHBotGUI:
 		try:
 			self.optionsMenu.focus()
 		except Exception as e:
-			logging.exception('Exception : ')
+			logging.error('Exception : ' + str(e))
 
 	def toggleLogErrorsToFile(self):
 		# work in progress
 		if (bool(self.logErrorsToFile.get())):
+			logging.getLogger().setLevel(level=logging.INFO)
 			logging.info("Logging Started")
 			logging.info(VersionNumber)
-			logging.getLogger().setLevel(level=logging.CRITICAL)
 		else:
-			logging.info("Stopping Logging")
-			logging.getLogger().setLevel(level=logging.NOTSET)
+			logging.info("Stop Logging")
+			logging.getLogger().setLevel(level=logging.CRITICAL)
 
 		self.saveToggles()
 
@@ -542,7 +542,7 @@ class COHBotGUI:
 				return True
 			return False
 		except Exception as e:
-			logging.exception('Exception : ')
+			logging.error('Exception : ' + str(e))
 			return False
 
 	def checkSteamNumber(self, number):
@@ -553,12 +553,13 @@ class COHBotGUI:
 					return True
 			return False
 		except Exception as e:
-			logging.exception('Exception : ')
+			logging.error('Exception : ' + str(e))
 
 	def locateWarningLog(self):
 		self.disableEverything()
 		self.master.filename =  tk.filedialog.askopenfilename(initialdir = "/",title = "Select warning.log file",filetypes = (("log file","*.log"),("all files","*.*")))
 		logging.info("File Path : " + str(self.master.filename))
+		print("File Path : " + str(self.master.filename))
 		if(self.master.filename != ""):
 			pattern = re.compile("\u20A9|\uFFE6|\u00A5|\uFFE5") # replaces both Won sign varients for korean language and Yen symbol for Japanese language paths
 			theFilename = re.sub(pattern, "/", self.master.filename)
@@ -586,7 +587,7 @@ class COHBotGUI:
 						self.automaticFileMonitor.close()
 						self.automaticFileMonitor.event.set()
 				except Exception as e:
-					logging.exception('Exception : ')
+					logging.error('Exception : ' + str(e))
 				while (threading.active_count() > 1):
 					pass
 				self.testButton.config(state = DISABLED)
@@ -621,7 +622,7 @@ class COHBotGUI:
 			#if self.errorFile:
 			#	self.errorFile.close()
 		except Exception as e:
-			logging.exception('Exception : ')
+			logging.exception('Exception : ' + str(e))
 		while (threading.active_count() > 1):
 			pass
 		logging.info("Exiting main thread")
@@ -632,8 +633,7 @@ class COHBotGUI:
 # Default error logging log file location:
 for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
-logging.basicConfig(format='%(asctime)s (%(threadName)-10s) [%(levelname)s] %(message)s', filename= 'COH_Opponent_Bot.log',filemode = "w", level=logging.NOTSET)
-
+logging.basicConfig(format='%(asctime)s (%(threadName)-10s) [%(levelname)s] %(message)s', filename= 'COH_Opponent_Bot.log',filemode = "w", level=logging.CRITICAL)
 
 COHOpponentBot_1.HandleCOHlogFile().clearOverlayHTML()
 
