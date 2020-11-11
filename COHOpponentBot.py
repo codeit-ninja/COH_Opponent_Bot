@@ -314,12 +314,12 @@ class COHBotGUI:
 	def toggleLogErrorsToFile(self):
 		# work in progress
 		if (bool(self.logErrorsToFile.get())):
-			logging.getLogger().setLevel(level=logging.INFO)
+			logging.getLogger().disabled = False
 			logging.info("Logging Started")
 			logging.info(VersionNumber)
 		else:
 			logging.info("Stop Logging")
-			logging.getLogger().setLevel(level=logging.CRITICAL)
+			logging.getLogger().disabled = True
 
 		self.saveToggles()
 
@@ -618,9 +618,6 @@ class COHBotGUI:
 			if(self.automaticFileMonitor):
 				self.automaticFileMonitor.close()
 				self.automaticFileMonitor.event.set()
-			# handle Closing error output file if it exists
-			#if self.errorFile:
-			#	self.errorFile.close()
 		except Exception as e:
 			logging.exception('Exception : ' + str(e))
 		while (threading.active_count() > 1):
@@ -633,7 +630,7 @@ class COHBotGUI:
 # Default error logging log file location:
 for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
-logging.basicConfig(format='%(asctime)s (%(threadName)-10s) [%(levelname)s] %(message)s', filename= 'COH_Opponent_Bot.log',filemode = "w", level=logging.CRITICAL)
+logging.basicConfig(format='%(asctime)s (%(threadName)-10s) [%(levelname)s] %(message)s', filename= 'COH_Opponent_Bot.log',filemode = "w", level=logging.INFO)
 
 COHOpponentBot_1.HandleCOHlogFile().clearOverlayHTML()
 
