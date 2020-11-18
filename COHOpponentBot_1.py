@@ -307,23 +307,17 @@ class FileMonitor (threading.Thread):
 			self.running = True
 			self.parameters = parameters()
 			self.opponentBot = opponentBot
-			self.fileIndex = 0
+			self.filePointer = 0
 			self.pollInterval = int(pollInterval)
-			#self.queue = q
 			self.filePath = filePath
-			self.fileIndex = 0
-			self.theFile = []
 			self.event = threading.Event()
 			self.startingMissonEvent = threading.Event()
-			with open(self.filePath, 'r' , encoding='ISO-8859-1') as f:
-				lines = f.readlines()
-			for line in lines: 
-				self.theFile.append(line)
-				#self.queue.put(line)
-			#print(str(self.theFile))
-			logging.info("Initialzing with file length : " + str(len(self.theFile)) + "\n")
-			self.fileIndex = len(self.theFile)
-			self.theFile = None
+			f = open(self.filePath, 'r' , encoding='ISO-8859-1')
+			f.readlines()
+			self.filePointer = f.tell()
+			f.close()
+			logging.info("Initialzing with file length : " + str(len(self.filePointer)) + "\n")
+
 		except Exception as e:
 			logging.error("In FileMonitor __init__")
 			logging.error(str(e))
@@ -334,46 +328,46 @@ class FileMonitor (threading.Thread):
 			while self.running:
 				lines = []
 				clearOverlay = False
-				with open(self.filePath, 'r' , encoding='ISO-8859-1') as f:
-					lines = f.readlines()
-					print("current File index = : " + str(self.fileIndex) + "\n")
-					print ("file length = " + str(len(lines)) + "\n")
-				for x in range(int(self.fileIndex), len(lines)):
-					#Handle New Lines since load
-					#self.queue.put(lines[x])
-					if ("GAME -- Starting mission..." in lines[x]):
+				print("current File index = : " + str(self.filePointer) + "\n")
+				f = open(self.filePath, 'r' , encoding='ISO-8859-1')
+				f.seek(self.filePointer)
+				lines = f.readlines()
+				self.filePointer = f.tell()
+				f.close()
+				print("new File index = : " + str(self.filePointer) + "\n")
+				for line in lines:
+					if ("GAME -- Starting mission..." in line):
 						self.startingMissonEvent.wait(timeout= 30) # allow extra seconds for computer AI info to load if the game is a human vs ai game
 						if (self.opponentBot):
 							#trigger the opponent command in the opponentbot thread
 							self.opponentBot.queue.put("OPPONENT")
 							if (self.parameters.data.get('writePlaceYourBetsInChat')):
 								self.opponentBot.queue.put("PLACEYOURBETS")
-					if ("Win notification" in lines[x]):
+					if ("Win notification" in line):
 						#Check if streamer won
-						theSteamNumber = self.find_between(lines[x] ,"/steam/" , "]")
+						theSteamNumber = self.find_between(line ,"/steam/" , "]")
 						if (str(self.parameters.data.get('steamNumber')) == str(theSteamNumber)):
 							logging.info("STREAMER WON\n")
 							if (self.parameters.data.get('writeIWonLostInChat')):
 								self.opponentBot.queue.put("IWON")
 							if (self.parameters.data.get('clearOverlayAfterGameOver')):
 								clearOverlay = True
-					if ("Loss notification" in lines[x]):
+					if ("Loss notification" in line):
 						#Check if streamer lost
-						theSteamNumber = self.find_between(lines[x] ,"/steam/" , "]")
+						theSteamNumber = self.find_between(line ,"/steam/" , "]")
 						if (str(self.parameters.data.get('steamNumber')) == str(theSteamNumber)):
 							logging.info("STREAMER LOST\n")
 							if (self.parameters.data.get('writeIWonLostInChat')):
 								self.opponentBot.queue.put("ILOST")
 							if (self.parameters.data.get('clearOverlayAfterGameOver')):
 								clearOverlay = True
-					if ('GAME -- Ending mission (Game over)' in lines[x]):
+					if ('GAME -- Ending mission (Game over)' in line):
 						if (self.parameters.data.get('clearOverlayAfterGameOver')):
 								clearOverlay = True
 
 				if (self.parameters.data.get('clearOverlayAfterGameOver')):
 					if (clearOverlay):
 						self.opponentBot.queue.put("CLEAROVERLAY")
-				self.fileIndex = len(lines)
 				self.event = threading.Event()
 				self.event.wait(timeout = self.pollInterval)
 			logging.info ("File Monitoring Ended.\n")
