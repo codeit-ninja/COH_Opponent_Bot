@@ -303,6 +303,7 @@ class FileMonitor (threading.Thread):
 	def __init__(self, filePath, pollInterval, opponentBot):
 		Thread.__init__(self)
 		try:
+			logging.info("File Monitor Started!")
 			self.running = True
 			self.parameters = parameters()
 			self.opponentBot = opponentBot
@@ -381,6 +382,7 @@ class FileMonitor (threading.Thread):
 			logging.error(str(e))
 	
 	def close(self):
+		logging.info("File Monitor Closing!")
 		self.running = False
 		# break out of loops if waiting
 		if self.event:
