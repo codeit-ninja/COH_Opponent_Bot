@@ -46,6 +46,8 @@ class parameters:
 
 		self.data['writeIWonLostInChat'] = True
 
+		self.data['writePlaceYourBetsInChat'] = False
+
 		self.data['clearOverlayAfterGameOver'] = True
 
 		self.data['logPath'] = ""

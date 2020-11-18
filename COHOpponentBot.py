@@ -44,6 +44,7 @@ class COHBotGUI:
 		self.showSteamProfile = IntVar(value = int(bool(self.parameters.data.get('showSteamProfile'))))
 		self.automaticTrigger = IntVar(value = int(bool(self.parameters.data.get('automaticTrigger'))))
 		self.writeIWonLostInChat = IntVar(value = int(bool(self.parameters.data.get('writeIWonLostInChat'))))
+		self.writePlaceYourBetsInChat = IntVar(value = int(bool(self.parameters.data.get('writePlaceYourBetsInChat'))))
 		self.clearOverlayAfterGameOver = IntVar(value = int(bool(self.parameters.data.get('clearOverlayAfterGameOver'))))
 		self.useOverlayPreFormat = IntVar(value = int(bool(self.parameters.data.get('useOverlayPreFormat'))))
 		self.mirrorLeftToRightOverlay = IntVar(value = int(bool(self.parameters.data.get('mirrorLeftToRightOverlay'))))
@@ -295,6 +296,8 @@ class COHBotGUI:
 			self.checkAutomaticTrigger.grid( sticky=tk.W)
 			self.checkWriteIWonLostInChat = tk.Checkbutton(self.f5, text="Win/Lose message in Chat", variable=self.writeIWonLostInChat, command = self.saveToggles)
 			self.checkWriteIWonLostInChat.grid( sticky=tk.W)
+			self.checkWritePlaceYourBetsInChat = tk.Checkbutton(self.f5, text="Write '!Place Your Bets' in Chat at game start", variable=self.writePlaceYourBetsInChat, command = self.saveToggles)
+			self.checkWritePlaceYourBetsInChat.grid(sticky=tk.W)
 			self.checkClearOverlayAfterGame = tk.Checkbutton(self.f5, text="Clear overlay after game over", variable=self.clearOverlayAfterGameOver, command = self.saveToggles)
 			self.checkClearOverlayAfterGame.grid( sticky=tk.W)            
 
@@ -389,6 +392,7 @@ class COHBotGUI:
 	def automaticTriggerToggle(self):
 		if(bool(self.automaticTrigger.get())):
 			self.checkWriteIWonLostInChat.config(state = NORMAL)
+			self.checkWritePlaceYourBetsInChat.config(state = NORMAL)
 			self.checkClearOverlayAfterGame.config(state = NORMAL)            
 			if (self.thread):
 				logging.info("in automatic trigger toggle")
@@ -399,6 +403,7 @@ class COHBotGUI:
 				logging.info("trying to close automatic file monitor")
 				self.automaticFileMonitor.close()
 			self.checkWriteIWonLostInChat.config(state = DISABLED)
+			self.checkWritePlaceYourBetsInChat.config(state = DISABLED)
 			self.checkClearOverlayAfterGame.config(state = DISABLED)
 		self.saveToggles()        
 
@@ -410,6 +415,8 @@ class COHBotGUI:
 		self.parameters.data['automaticTrigger'] = bool(self.automaticTrigger.get())
 
 		self.parameters.data['writeIWonLostInChat'] = bool(self.writeIWonLostInChat.get())
+
+		self.parameters.data['writePlaceYourBetsInChat'] = bool(self.writePlaceYourBetsInChat.get())
 
 		self.parameters.data['clearOverlayAfterGameOver'] = bool(self.clearOverlayAfterGameOver.get())
 
@@ -594,6 +601,7 @@ class COHBotGUI:
 				self.enableButtons()
 				self.connectButton.config(text = "Connect")
 				self.thread = None
+				
 			else:
 				#start thread
 				self.disableEverything()

@@ -227,9 +227,11 @@ class IRC_Channel(threading.Thread):
 			if (line[0] == "OPPONENT"):
 				self.CheckForUserCommand("self","opp")
 			if (line[0] == "IWON"):
-				self.parent.SendPrivateMessageToIRC(str(self.parameters.data.get('channel')) +" won")
+				self.parent.SendPrivateMessageToIRC("!"+str(self.parameters.data.get('channel')) +" won")
 			if (line[0] == "ILOST"):
-				self.parent.SendPrivateMessageToIRC(str(self.parameters.data.get('channel')) +" lost")
+				self.parent.SendPrivateMessageToIRC("!"+str(self.parameters.data.get('channel')) +" lost")
+			if (line[0] == "PLACEYOURBETS"):
+				self.parent.SendPrivateMessageToIRC("!place your bets")
 			if (line[0] == "CLEAROVERLAY"):
 				HandleCOHlogFile().clearOverlayHTML()
 			if (len(line) >= 4) and ("PRIVMSG" == line[2]) and not ("jtv" in line[0]):
@@ -343,6 +345,8 @@ class FileMonitor (threading.Thread):
 						if (self.opponentBot):
 							#trigger the opponent command in the opponentbot thread
 							self.opponentBot.queue.put("OPPONENT")
+							if (self.parameters.data.get('writePlaceYourBetsInChat')):
+								self.opponentBot.queue.put("PLACEYOURBETS")
 					if ("Win notification" in lines[x]):
 						#Check if streamer won
 						theSteamNumber = self.find_between(lines[x] ,"/steam/" , "]")
