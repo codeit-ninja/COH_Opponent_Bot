@@ -1,6 +1,0 @@
-4 bytes before name starts appears to be the lenght of the name in characters (2bytes) unicode (4byte unsigned int)
-
-
-4 bytes before faction starts is the length of the faction string in characters (2bytes) unicode (4byte unsigned int)
-
-13 bytes after name is start of faction name
