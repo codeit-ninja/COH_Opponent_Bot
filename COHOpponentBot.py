@@ -540,8 +540,8 @@ class COHBotGUI:
 
 	def special_match(self, strg, search=re.compile(r'^[a-zA-Z0-9][\w]{3,24}$').search):
 		if strg == "":
-			return True
-		return bool(search(strg))
+			return True #empty returns True
+		return bool(search(strg)) #Allowed twitch username returns True, if None, it returns False
 
 	def checkOAuthKey(self, oauthkey):
 		try:
