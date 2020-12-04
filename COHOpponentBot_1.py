@@ -635,6 +635,11 @@ class HandleCOHlogFile:
 			# set default values for flags and faction rank
 			imageOverlayFormattingDictionary['$FLAGICON$'] = '<div id = "countryflagimg"><img height = "20"></div>'
 			imageOverlayFormattingDictionary['$LEVELICON$'] = '<div id = "rankimg"><img height = "45"></div>'
+			levelIcon = "OverlayImages\\Ranks\\no_rank_yet.png"
+			fileExists = os.path.isfile(levelIcon)
+			if fileExists:
+				imageOverlayFormattingDictionary['$LEVELICON$'] =  '<div id = "rankimg"><img src="{0}" height = "45"></div>'.format(levelIcon)
+
 
 			if player.stats.country:
 				countryIcon = "OverlayImages\\Flagssmall\\" + str(player.stats.country).lower() + ".png"
