@@ -633,8 +633,8 @@ class HandleCOHlogFile:
 		# if a computer it will have no stats therefore no country flag or rank
 		if player.stats:
 			# set default values for flags and faction rank
-			imageOverlayFormattingDictionary['$FLAGICON$'] = '<div id = "countryflagimg"></div>'
-			imageOverlayFormattingDictionary['$LEVELICON$'] = '<div id = "rankimg"></div>'
+			imageOverlayFormattingDictionary['$FLAGICON$'] = '<div id = "countryflagimg"><img height = "20"></div>'
+			imageOverlayFormattingDictionary['$LEVELICON$'] = '<div id = "rankimg"><img height = "45"></div>'
 
 			if player.stats.country:
 				countryIcon = "OverlayImages\\Flagssmall\\" + str(player.stats.country).lower() + ".png"
