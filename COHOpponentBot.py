@@ -296,7 +296,7 @@ class COHBotGUI:
 			self.checkAutomaticTrigger.grid( sticky=tk.W)
 			self.checkWriteIWonLostInChat = tk.Checkbutton(self.f5, text="Win/Lose message in Chat", variable=self.writeIWonLostInChat, command = self.saveToggles)
 			self.checkWriteIWonLostInChat.grid( sticky=tk.W)
-			self.checkWritePlaceYourBetsInChat = tk.Checkbutton(self.f5, text="Write '!Place Your Bets' in Chat at game start", variable=self.writePlaceYourBetsInChat, command = self.saveToggles)
+			self.checkWritePlaceYourBetsInChat = tk.Checkbutton(self.f5, text="Write '!Startbets' in Chat at game start", variable=self.writePlaceYourBetsInChat, command = self.saveToggles)
 			self.checkWritePlaceYourBetsInChat.grid(sticky=tk.W)
 			self.checkClearOverlayAfterGame = tk.Checkbutton(self.f5, text="Clear overlay after game over", variable=self.clearOverlayAfterGameOver, command = self.saveToggles)
 			self.checkClearOverlayAfterGame.grid( sticky=tk.W)            

@@ -206,9 +206,9 @@ class IRCClient(threading.Thread):
 
 
 class IRC_Channel(threading.Thread):
-	def __init__(self, parent, irc, queue, channel):
+	def __init__(self, ircClient, irc, queue, channel):
 		Thread.__init__(self)
-		self.parent = parent
+		self.ircClient = ircClient
 		self.running = True
 		self.irc = irc
 		self.queue = queue
@@ -227,11 +227,9 @@ class IRC_Channel(threading.Thread):
 			if (line[0] == "OPPONENT"):
 				self.CheckForUserCommand("self","opp")
 			if (line[0] == "IWON"):
-				self.parent.SendPrivateMessageToIRC("!"+str(self.parameters.data.get('channel')) +" won")
+				self.ircClient.SendPrivateMessageToIRC("!"+str(self.parameters.data.get('channel')) +" won")
 			if (line[0] == "ILOST"):
-				self.parent.SendPrivateMessageToIRC("!"+str(self.parameters.data.get('channel')) +" lost")
-			if (line[0] == "PLACEYOURBETS"):
-				self.parent.SendPrivateMessageToIRC("!place your bets")
+				self.ircClient.SendPrivateMessageToIRC("!"+str(self.parameters.data.get('channel')) +" lost")
 			if (line[0] == "CLEAROVERLAY"):
 				HandleCOHlogFile().clearOverlayHTML()
 			if (len(line) >= 4) and ("PRIVMSG" == line[2]) and not ("jtv" in line[0]):
@@ -254,21 +252,18 @@ class IRC_Channel(threading.Thread):
 		self.CheckForUserCommand(msgUserName, msgMessage)
 		
 	
-		if (msgMessage == "exit") and (msgUserName == self.parent.adminUserName):
-			self.parent.SendPrivateMessageToIRC("Exiting")
+		if (msgMessage == "exit") and (msgUserName == self.ircClient.adminUserName):
+			self.ircClient.SendPrivateMessageToIRC("Exiting")
 			self.close()
 
 
 	def CheckForUserCommand(self, userName, message):
 		if (bool(re.match("^(!)?opponent(\?)?$", message.lower())) or bool(re.match("^(!)?place your bets$" , message.lower())) or bool(re.match("^(!)?opp(\?)?$", message.lower()))):
 			self.myHandleCOHlogFile = HandleCOHlogFile()
-			returnedList =  self.myHandleCOHlogFile.loadLog()
-			if returnedList:
-				for item in returnedList:
-					self.parent.SendPrivateMessageToIRC(str(item))
+			self.myHandleCOHlogFile.loadLog(self.ircClient)
 		if (message.lower() == "test") and ((str(userName).lower() == str(self.parameters.privatedata.get('adminUserName')).lower()) or (str(userName) == str(self.parameters.data.get('channel')).lower())):
-			self.parent.SendPrivateMessageToIRC("I'm here! Pls give me mod to prevent twitch from autobanning me for spam if I have to send a few messages quickly.")
-			self.parent.output.insert(END, "Oh hi again, I heard you in the " +self.channel[1:] + " channel.\n")
+			self.ircClient.SendPrivateMessageToIRC("I'm here! Pls give me mod to prevent twitch from autobanning me for spam if I have to send a few messages quickly.")
+			self.ircClient.output.insert(END, "Oh hi again, I heard you in the " +self.channel[1:] + " channel.\n")
 
 	def close(self):
 		self.running = False
@@ -297,8 +292,6 @@ class StatsRequest:
 			return playerStats
 
 class FileMonitor (threading.Thread):
-
-	
 
 	def __init__(self, filePath, pollInterval, opponentBot):
 		Thread.__init__(self)
@@ -341,8 +334,7 @@ class FileMonitor (threading.Thread):
 						if (self.opponentBot):
 							#trigger the opponent command in the opponentbot thread
 							self.opponentBot.queue.put("OPPONENT")
-							if (self.parameters.data.get('writePlaceYourBetsInChat')):
-								self.opponentBot.queue.put("PLACEYOURBETS")
+
 					if ("Win notification" in line):
 						#Check if streamer won
 						theSteamNumber = self.find_between(line ,"/steam/" , "]")
@@ -413,8 +405,11 @@ class HandleCOHlogFile:
 
 		#self.isReplay = False
 		self.matchType = MatchType.BASIC
+
+		self.ircClient = None
 	
-	def loadLog(self):
+	def loadLog(self, ircClient):
+		self.ircClient = ircClient
 		logging.info("In loadLog")
 		with open(self.logPath, encoding='ISO-8859-1') as f:
 			content = f.readlines()
@@ -538,10 +533,23 @@ class HandleCOHlogFile:
 					else:
 						self.data = self.data + self.createCustomOutput(item)				
 				
-		if self.data:
-			return self.data
-		else:
-			return None
+		for item in self.data:
+			self.ircClient.SendPrivateMessageToIRC(str(item)) # outputs the information to IRC
+		
+		if (self.parameters.data.get('writePlaceYourBetsInChat')):
+			playerString = ""
+			outputList = []
+			if playerList:
+				if len(playerList) == 2: # if two player make sure the streamer is put first
+					for player in playerList:
+						outputList.append(player.name + " " + player.faction.name)
+					
+					if (str(self.parameters.data.get('steamNumber')) == str(playerList[0].stats.steamNumber)):			
+						playerString = "{} Vs. {}".format(outputList[0], outputList[1])
+					else:
+						playerString = "{} Vs. {}".format(outputList[1], outputList[0])
+								
+				self.ircClient.SendPrivateMessageToIRC("!startbets {}".format(playerString))
 
 
 	def createCustomOutput(self, player):
