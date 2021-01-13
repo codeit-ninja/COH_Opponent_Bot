@@ -233,7 +233,7 @@ class IRC_Channel(threading.Thread):
 			if (line[0] == "ILOST"):
 				self.ircClient.SendPrivateMessageToIRC("!"+str(self.parameters.data.get('channel')) +" lost")
 			if (line[0] == "CLEAROVERLAY"):
-				HandleCOHlogFile(self.ircClient).clearOverlayHTML()
+				HandleCOHlogFile.clearOverlayHTML()
 			if (len(line) >= 4) and ("PRIVMSG" == line[2]) and not ("jtv" in line[0]):
 				#call function to handle user message
 				self.UserMessage(line)
@@ -787,7 +787,8 @@ class HandleCOHlogFile:
 		except Exception as e:
 			logging.error(str(e))
 
-	def clearOverlayHTML(self):
+	@staticmethod
+	def clearOverlayHTML():
 		try:
 			htmlOutput = OverlayTemplates().overlayhtml.format("", "")
 			# create output overlay from template

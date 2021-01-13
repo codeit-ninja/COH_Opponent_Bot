@@ -144,7 +144,7 @@ class COHBotGUI:
 		self.testButton.grid(row =8, column=2 ,sticky=tk.E)
 		self.testButton.config(state = DISABLED)
 
-		self.clearOverlayButton = tk.Button(self.master, text = "Clear Overlay", command = COHOpponentBot_1.HandleCOHlogFile().clearOverlayHTML)
+		self.clearOverlayButton = tk.Button(self.master, text = "Clear Overlay", command = COHOpponentBot_1.HandleCOHlogFile.clearOverlayHTML)
 		self.clearOverlayButton.config(width = 10)
 		self.clearOverlayButton.grid(row = 9, column=2, sticky=tk.E)
 
@@ -640,6 +640,6 @@ for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
 logging.basicConfig(format='%(asctime)s (%(threadName)-10s) [%(levelname)s] %(message)s', filename= 'COH_Opponent_Bot.log',filemode = "w", level=logging.INFO)
 
-COHOpponentBot_1.HandleCOHlogFile().clearOverlayHTML()
+COHOpponentBot_1.HandleCOHlogFile.clearOverlayHTML()
 
 main = COHBotGUI()
