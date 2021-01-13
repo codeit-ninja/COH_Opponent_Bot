@@ -28,7 +28,7 @@ class COHBotGUI:
 
 		self.thread = None #reference to the opponentbot
 
-		self.parameters = IRCBetBot_Parameters.parameters()
+		self.parameters = IRCBetBot_Parameters.Parameters()
 		self.parameters.load()
 
 		self.master = tk.Tk()

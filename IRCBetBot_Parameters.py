@@ -13,7 +13,7 @@ import string
 import sys
 
 
-class parameters:
+class Parameters:
 	
 	def __init__(self):
 

@@ -35,3 +35,5 @@ decoding the relic replay file.txt
 icon.pyo
 IRCBetBot_Parameters.pyo
 overlayTemplates.pyo
+.vscode/.ropeproject/config.py
+.vscode/.ropeproject/objectdb

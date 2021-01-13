@@ -15,7 +15,7 @@ import ssl # required for urllib certificates
 import requests
 #import pymysql # for mysql 
 #import all secret parameters from parameters file
-from IRCBetBot_Parameters import parameters
+from IRCBetBot_Parameters import Parameters
 #import the GUI
 from tkinter import *
 import threading
@@ -53,7 +53,7 @@ class IRCClient(threading.Thread):
 
 		self.displayConsoleOut = consoleDisplayBool
 
-		self.parameters = parameters()
+		self.parameters = Parameters()
 
 		self.adminUserName = self.parameters.privatedata.get('adminUserName')	# This username will be able to use admin commands, exit the program and bypass some limits.
 		
@@ -213,7 +213,7 @@ class IRC_Channel(threading.Thread):
 		self.irc = irc
 		self.queue = queue
 		self.channel = channel
-		self.parameters = parameters()
+		self.parameters = Parameters()
 		self.myHandleCOHlogFile = None
 		
 	def run(self):
@@ -233,7 +233,7 @@ class IRC_Channel(threading.Thread):
 			if (line[0] == "ILOST"):
 				self.ircClient.SendPrivateMessageToIRC("!"+str(self.parameters.data.get('channel')) +" lost")
 			if (line[0] == "CLEAROVERLAY"):
-				HandleCOHlogFile().clearOverlayHTML()
+				HandleCOHlogFile(self.ircClient).clearOverlayHTML()
 			if (len(line) >= 4) and ("PRIVMSG" == line[2]) and not ("jtv" in line[0]):
 				#call function to handle user message
 				self.UserMessage(line)
@@ -262,26 +262,28 @@ class IRC_Channel(threading.Thread):
 		if (self.parameters.data.get('writePlaceYourBetsInChat')):
 			playerString = ""
 			outputList = []
-			memappreader = ApplicationMemoryReader()
-			playerList = memappreader.getFactions()
+			self.myHandleCOHlogFile = HandleCOHlogFile(self.ircClient)
+			self.myHandleCOHlogFile.populatePlayerList()
+			playerList = self.myHandleCOHlogFile.playerList
 			if playerList:
-				#if len(playerList) == 2: # if two player make sure the streamer is put first
-				#	for player in playerList:
-				#		outputList.append(player.name + " " + player.faction.name)
-				#	# player list does not have steam numbers. Need to aquire these from warning.log
-				#	if (str(self.parameters.data.get('steamNumber')) == str(playerList[0].stats.steamNumber)):			
-				#		playerString = "{} Vs. {}".format(outputList[0], outputList[1])
-				#	else:
-				#		playerString = "{} Vs. {}".format(outputList[1], outputList[0])
-				#				
-				#self.ircClient.SendPrivateMessageToIRC("!startbets {}".format(playerString))
-				pass
+				if len(playerList) == 2: # if two player make sure the streamer is put first
+					for player in playerList:
+						outputList.append(player.name + " " + player.faction.name)
+					# player list does not have steam numbers. Need to aquire these from warning.log
+					if (str(self.parameters.data.get('steamNumber')) == str(playerList[0].stats.steamNumber)):			
+						playerString = "{} Vs. {}".format(outputList[0], outputList[1])
+					else:
+						playerString = "{} Vs. {}".format(outputList[1], outputList[0])			
+				self.ircClient.SendPrivateMessageToIRC("!startbets {}".format(playerString))
 				# need to reimplement the readlog
 
 	def CheckForUserCommand(self, userName, message):
 		if (bool(re.match("^(!)?opponent(\?)?$", message.lower())) or bool(re.match("^(!)?place your bets$" , message.lower())) or bool(re.match("^(!)?opp(\?)?$", message.lower()))):
-			self.myHandleCOHlogFile = HandleCOHlogFile()
-			self.myHandleCOHlogFile.loadLog(self.ircClient)
+			self.myHandleCOHlogFile = HandleCOHlogFile(self.ircClient)
+			self.myHandleCOHlogFile.populatePlayerList()
+			self.myHandleCOHlogFile.outputOpponentData()
+
+
 		if (message.lower() == "test") and ((str(userName).lower() == str(self.parameters.privatedata.get('adminUserName')).lower()) or (str(userName) == str(self.parameters.data.get('channel')).lower())):
 			self.ircClient.SendPrivateMessageToIRC("I'm here! Pls give me mod to prevent twitch from autobanning me for spam if I have to send a few messages quickly.")
 			self.ircClient.output.insert(END, "Oh hi again, I heard you in the " +self.channel[1:] + " channel.\n")
@@ -294,8 +296,8 @@ class IRC_Channel(threading.Thread):
 
 
 class StatsRequest:
-	def __init__(self, parameters):
-		self.parameters = parameters		
+	def __init__(self):
+		self.parameters = Parameters()		
 		
 	def returnStats(self, statnumber):
 		logging.info ("got statnumber : " + str(statnumber))
@@ -309,7 +311,6 @@ class StatsRequest:
 			logging.info ("statdata load succeeded")
 			playerStats = playerStat(statdata, statnumber)
 			#print("playerStats : " + str(playerStats))
-
 			return playerStats
 
 class FileMonitor (threading.Thread):
@@ -319,7 +320,7 @@ class FileMonitor (threading.Thread):
 		try:
 			logging.info("File Monitor Started!")
 			self.running = True
-			self.parameters = parameters()
+			self.parameters = Parameters()
 			self.opponentBot = opponentBot
 			self.filePointer = 0
 			self.pollInterval = int(pollInterval)
@@ -409,9 +410,9 @@ class FileMonitor (threading.Thread):
 class HandleCOHlogFile:
 	
 
-	def __init__(self):
+	def __init__(self, ircClient):
 
-		self.parameters = parameters()
+		self.parameters = Parameters()
 		self.logPath = self.parameters.data['logPath']
 		self.data = []
 		self.numberOfHumans = 0
@@ -425,13 +426,12 @@ class HandleCOHlogFile:
 		self.numberOfSlots = 0
 		self.mapSize = 0
 
-		#self.isReplay = False
 		self.matchType = MatchType.BASIC
-
-		self.ircClient = None
-	
-	def loadLog(self, ircClient):
 		self.ircClient = ircClient
+
+		self.playerList = []
+	
+	def populatePlayerList(self):
 		logging.info("In loadLog")
 		with open(self.logPath, encoding='ISO-8859-1') as f:
 			content = f.readlines()
@@ -486,29 +486,28 @@ class HandleCOHlogFile:
 			
 		#self.numberOfHumans = len(steamNumberList)
 		appMemReader = ApplicationMemoryReader()
-		playerList = appMemReader.getFactions()
+		self.playerList = appMemReader.getFactions()
 		#contains all players including computers and empty Slots with no userName
-		self.numberOfSlots = len(playerList)
+		self.numberOfSlots = len(self.playerList)
 
 		#remove players from list where they have no name eg: slots
-		for item in playerList:
+		for item in self.playerList:
 			if (item.name == ""):
-				playerList.remove(item)
+				self.playerList.remove(item)
 
-		self.numberOfPlayers = len(playerList)
+		self.numberOfPlayers = len(self.playerList)
 		
 		if (steamNumberList):
 			for item in steamNumberList:
 				# get playerStats for each human player
-				myStatRequest = StatsRequest(self.parameters)
+				myStatRequest = StatsRequest()
 				playerStats = myStatRequest.returnStats(item)
-				for player in playerList:
-					# if the 
+				for player in self.playerList:
 					if (player.name == playerStats.alias):
 						player.stats = playerStats
 
 		logging.info("FULL PLAYERSTATLIST\n")
-		for item in playerList:
+		for item in self.playerList:
 			logging.info(item)
 
 		#set the current MatchType
@@ -522,6 +521,10 @@ class HandleCOHlogFile:
 		if (5 <= int(self.mapSize) <= 6) and (int(self.numberOfComputers) == 0):
 			self.matchType = MatchType.THREES		
 
+
+	def outputOpponentData(self):
+
+		# Prepare outputs
 		axisTeam = []
 		alliesTeam = []
 
@@ -529,34 +532,34 @@ class HandleCOHlogFile:
 		axisTeam.clear()
 		alliesTeam.clear()
 
-		for item in playerList:
-			if (str(item.faction) == str(Faction.US)) or (str(item.faction)== str(Faction.CW)):
-				alliesTeam.append(item)
-			if (str(item.faction) == str(Faction.WM)) or (str(item.faction)== str(Faction.PE)):
-				axisTeam.append(item)
+		if self.playerList:
+			for item in self.playerList:
+				if (str(item.faction) == str(Faction.US)) or (str(item.faction)== str(Faction.CW)):
+					alliesTeam.append(item)
+				if (str(item.faction) == str(Faction.WM)) or (str(item.faction)== str(Faction.PE)):
+					axisTeam.append(item)
 
-		logging.info("players in allies team : " +str(len(alliesTeam)))
-		logging.info("players in axis team : " + str(len(axisTeam)))
+			logging.info("players in allies team : " +str(len(alliesTeam)))
+			logging.info("players in axis team : " + str(len(axisTeam)))
 
-		# output each player to file
-		if (self.parameters.data.get('useOverlayPreFormat')):
-			self.saveOverlayHTML(axisTeam, alliesTeam)
+			# output each player to file
+			if (self.parameters.data.get('useOverlayPreFormat')):
+				self.saveOverlayHTML(axisTeam, alliesTeam)
 
-		# output to chat if customoutput ticked
-		if (self.parameters.data.get('useCustomPreFormat')):	
-			if (int(self.numberOfComputers) > 0):
-				self.data.append("Game with " + str(self.numberOfComputers) + " computer AI, ("+str(self.easyCPUCount)+") Easy, ("+str(self.normalCPUCount)+") Normal, ("+str(self.hardCPUCount)+") Hard, ("+str(self.expertCPUCount)+") Expert.")	
-			for item in playerList:
-				#check if item has stats if not it is a computer
-				if item.stats:
-					if(item.stats.steamNumber == self.parameters.data.get('steamNumber')):
-						if (self.parameters.data.get('showOwn')):
-							self.data = self.data + self.createCustomOutput(item)
-					else:
-						self.data = self.data + self.createCustomOutput(item)				
-				
-		for item in self.data:
-			self.ircClient.SendPrivateMessageToIRC(str(item)) # outputs the information to IRC
+			# output to chat if customoutput ticked
+			if (self.parameters.data.get('useCustomPreFormat')):	
+				if (int(self.numberOfComputers) > 0):
+					self.data.append("Game with " + str(self.numberOfComputers) + " computer AI, ("+str(self.easyCPUCount)+") Easy, ("+str(self.normalCPUCount)+") Normal, ("+str(self.hardCPUCount)+") Hard, ("+str(self.expertCPUCount)+") Expert.")	
+				for item in self.playerList:
+					#check if item has stats if not it is a computer
+					if item.stats:
+						if(item.stats.steamNumber == self.parameters.data.get('steamNumber')):
+							if (self.parameters.data.get('showOwn')):
+								self.data = self.data + self.createCustomOutput(item)
+						else:
+							self.data = self.data + self.createCustomOutput(item)					
+				for item in self.data:
+					self.ircClient.SendPrivateMessageToIRC(str(item)) # outputs the information to IRC
 
 
 	def createCustomOutput(self, player):
@@ -828,97 +831,98 @@ class playerStat:
 		
 		statString = "/steam/"+str(steamNumber)
 
-		if (statdata['result']['message'] == "SUCCESS"):
+		if statdata:
+			if (statdata['result']['message'] == "SUCCESS"):
 
-			if statdata['statGroups'][0]['members'][0]['alias']:
-				for item in statdata['statGroups']:
-					for value in item['members']:
-						if (value.get('name') == statString):
-							self.profile_id = value.get('profile_id')
-							self.alias = value.get('alias')
-							self.steamString = value.get('name')
-							self.country = value.get('country')
-			if statdata.get('leaderboardStats'):
-				#print(json.dumps(statdata, indent=4, sort_keys= True))
-				# following number compare to leaderboard_id
-				# 0 is basic american 
-				# 1 is basic wher 
-				# 2 is basic commonWeath
-				# 3 is basic pe
-				# 4 is american 1v1
-				# 5 is wher 1v1
-				# 6 is commonWeath 1v1
-				# 7 is pe 1v1
-				# 8 is american 2v2
-				# 9 is wher 2v2
-				# 10 is commonweath 2v2
-				# 11 is pe 2v2
-				# 12 is american 3v3
-				# 13 is wher 3v3
-				# 14 is commonWeath 3v3
-				# 15 is pe 3v3
-				for item in statdata['leaderboardStats']:
-					#print(item)
-					if item.get('leaderboard_id') == 0:
-						self.leaderboardData[0] = factionResult(faction = Faction.US, matchType = MatchType.BASIC, name = "Americans", nameShort = "US" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
-					if item.get('leaderboard_id') == 1:
-						self.leaderboardData[1] = factionResult(faction = Faction.WM, matchType = MatchType.BASIC, name = "Wehrmacht", nameShort = "WM" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
-					if item.get('leaderboard_id') == 2:
-						self.leaderboardData[2] = factionResult(faction = Faction.CW, matchType = MatchType.BASIC, name = "Commonwealth", nameShort = "CW" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
-					if item.get('leaderboard_id') == 3:
-						self.leaderboardData[3] = factionResult(faction = Faction.PE, matchType = MatchType.BASIC, name = "Panzer Elite", nameShort = "PE" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
-					if item.get('leaderboard_id') == 4:
-						self.leaderboardData[4] = factionResult(faction = Faction.US, matchType = MatchType.ONES, name = "Americans", nameShort = "US" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
-					if item.get('leaderboard_id') == 5:
-						self.leaderboardData[5] = factionResult(faction = Faction.WM, matchType = MatchType.ONES, name = "Wehrmacht", nameShort = "WM" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
-					if item.get('leaderboard_id') == 6:
-						self.leaderboardData[6] = factionResult(faction = Faction.CW, matchType = MatchType.ONES, name = "Commonwealth", nameShort = "CW" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
-					if item.get('leaderboard_id') == 7:
-						self.leaderboardData[7] = factionResult(faction = Faction.PE, matchType = MatchType.ONES, name = "Panzer Elite", nameShort = "PE" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
-					if item.get('leaderboard_id') == 8:
-						self.leaderboardData[8] = factionResult(faction = Faction.US, matchType = MatchType.TWOS, name = "Americans", nameShort = "US" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
-					if item.get('leaderboard_id') == 9:
-						self.leaderboardData[9] = factionResult(faction = Faction.WM, matchType = MatchType.TWOS, name = "Wehrmacht", nameShort = "WM" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
-					if item.get('leaderboard_id') == 10:
-						self.leaderboardData[10] = factionResult(faction = Faction.CW, matchType = MatchType.TWOS, name = "Commonwealth", nameShort = "CW" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
-					if item.get('leaderboard_id') == 11:
-						self.leaderboardData[11] = factionResult(faction = Faction.PE, matchType = MatchType.TWOS, name = "Panzer Elite", nameShort = "PE" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
-					if item.get('leaderboard_id') == 12:
-						self.leaderboardData[12] = factionResult(faction = Faction.US, matchType = MatchType.THREES, name = "Americans", nameShort = "US" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
-					if item.get('leaderboard_id') == 13:
-						self.leaderboardData[13] = factionResult(faction = Faction.WM, matchType = MatchType.THREES, name = "Wehrmacht", nameShort = "WM" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
-					if item.get('leaderboard_id') == 14:
-						self.leaderboardData[14] = factionResult(faction = Faction.CW, matchType = MatchType.THREES, name = "Commonwealth", nameShort = "CW" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
-					if item.get('leaderboard_id') == 15:
-						self.leaderboardData[15] = factionResult(faction = Faction.PE, matchType = MatchType.THREES, name = "Panzer Elite", nameShort = "PE" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
-	
+				if statdata['statGroups'][0]['members'][0]['alias']:
+					for item in statdata['statGroups']:
+						for value in item['members']:
+							if (value.get('name') == statString):
+								self.profile_id = value.get('profile_id')
+								self.alias = value.get('alias')
+								self.steamString = value.get('name')
+								self.country = value.get('country')
+				if statdata.get('leaderboardStats'):
+					#print(json.dumps(statdata, indent=4, sort_keys= True))
+					# following number compare to leaderboard_id
+					# 0 is basic american 
+					# 1 is basic wher 
+					# 2 is basic commonWeath
+					# 3 is basic pe
+					# 4 is american 1v1
+					# 5 is wher 1v1
+					# 6 is commonWeath 1v1
+					# 7 is pe 1v1
+					# 8 is american 2v2
+					# 9 is wher 2v2
+					# 10 is commonweath 2v2
+					# 11 is pe 2v2
+					# 12 is american 3v3
+					# 13 is wher 3v3
+					# 14 is commonWeath 3v3
+					# 15 is pe 3v3
+					for item in statdata['leaderboardStats']:
+						#print(item)
+						if item.get('leaderboard_id') == 0:
+							self.leaderboardData[0] = factionResult(faction = Faction.US, matchType = MatchType.BASIC, name = "Americans", nameShort = "US" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
+						if item.get('leaderboard_id') == 1:
+							self.leaderboardData[1] = factionResult(faction = Faction.WM, matchType = MatchType.BASIC, name = "Wehrmacht", nameShort = "WM" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
+						if item.get('leaderboard_id') == 2:
+							self.leaderboardData[2] = factionResult(faction = Faction.CW, matchType = MatchType.BASIC, name = "Commonwealth", nameShort = "CW" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
+						if item.get('leaderboard_id') == 3:
+							self.leaderboardData[3] = factionResult(faction = Faction.PE, matchType = MatchType.BASIC, name = "Panzer Elite", nameShort = "PE" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
+						if item.get('leaderboard_id') == 4:
+							self.leaderboardData[4] = factionResult(faction = Faction.US, matchType = MatchType.ONES, name = "Americans", nameShort = "US" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
+						if item.get('leaderboard_id') == 5:
+							self.leaderboardData[5] = factionResult(faction = Faction.WM, matchType = MatchType.ONES, name = "Wehrmacht", nameShort = "WM" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
+						if item.get('leaderboard_id') == 6:
+							self.leaderboardData[6] = factionResult(faction = Faction.CW, matchType = MatchType.ONES, name = "Commonwealth", nameShort = "CW" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
+						if item.get('leaderboard_id') == 7:
+							self.leaderboardData[7] = factionResult(faction = Faction.PE, matchType = MatchType.ONES, name = "Panzer Elite", nameShort = "PE" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
+						if item.get('leaderboard_id') == 8:
+							self.leaderboardData[8] = factionResult(faction = Faction.US, matchType = MatchType.TWOS, name = "Americans", nameShort = "US" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
+						if item.get('leaderboard_id') == 9:
+							self.leaderboardData[9] = factionResult(faction = Faction.WM, matchType = MatchType.TWOS, name = "Wehrmacht", nameShort = "WM" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
+						if item.get('leaderboard_id') == 10:
+							self.leaderboardData[10] = factionResult(faction = Faction.CW, matchType = MatchType.TWOS, name = "Commonwealth", nameShort = "CW" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
+						if item.get('leaderboard_id') == 11:
+							self.leaderboardData[11] = factionResult(faction = Faction.PE, matchType = MatchType.TWOS, name = "Panzer Elite", nameShort = "PE" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
+						if item.get('leaderboard_id') == 12:
+							self.leaderboardData[12] = factionResult(faction = Faction.US, matchType = MatchType.THREES, name = "Americans", nameShort = "US" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
+						if item.get('leaderboard_id') == 13:
+							self.leaderboardData[13] = factionResult(faction = Faction.WM, matchType = MatchType.THREES, name = "Wehrmacht", nameShort = "WM" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
+						if item.get('leaderboard_id') == 14:
+							self.leaderboardData[14] = factionResult(faction = Faction.CW, matchType = MatchType.THREES, name = "Commonwealth", nameShort = "CW" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
+						if item.get('leaderboard_id') == 15:
+							self.leaderboardData[15] = factionResult(faction = Faction.PE, matchType = MatchType.THREES, name = "Panzer Elite", nameShort = "PE" , leaderboard_id = item.get('leaderboard_id'), wins = item.get('wins'), losses = item.get('losses'), streak = item.get('streak'), disputes = item.get('disputes'), drops = item.get('drops'), rank = item.get('rank'), rankLevel = item.get('rankLevel'), lastMatch = item.get('lastMatchDate'))
+		
 
-		for value in self.leaderboardData:
+			for value in self.leaderboardData:
+				try:
+					self.totalWins += int(self.leaderboardData[value].wins)
+				except Exception as e:
+					logging.error("problem with totalwins value : " + str(value) +" data : "+ str(self.leaderboardData[value].wins))
+					pass						
+				try:
+					self.totalLosses += int(self.leaderboardData[value].losses)
+				except Exception as e:
+					logging.error("problem with totallosses value : " + str(value) +" data : "+ str(self.leaderboardData[value].losses))
+					pass
+
+			self.totalWins = str(self.totalWins)
+			self.totalLosses = str(self.totalLosses)
+
 			try:
-				self.totalWins += int(self.leaderboardData[value].wins)
+				if (int(self.totalLosses) > 0):
+					self.totalWLRatio = str(round(int(self.totalWins)/int(self.totalLosses), 2))
+
 			except Exception as e:
-				logging.error("problem with totalwins value : " + str(value) +" data : "+ str(self.leaderboardData[value].wins))
-				pass						
-			try:
-				self.totalLosses += int(self.leaderboardData[value].losses)
-			except Exception as e:
-				logging.error("problem with totallosses value : " + str(value) +" data : "+ str(self.leaderboardData[value].losses))
-				pass
+				logging.exception("In cohStat creating totalWLRatio")
+				logging.error(str(e))
 
-		self.totalWins = str(self.totalWins)
-		self.totalLosses = str(self.totalLosses)
-
-		try:
-			if (int(self.totalLosses) > 0):
-				self.totalWLRatio = str(round(int(self.totalWins)/int(self.totalLosses), 2))
-
-		except Exception as e:
-			logging.exception("In cohStat creating totalWLRatio")
-			logging.error(str(e))
-
-		if self.steamString:
-			self.steamNumber = str(self.steamString).replace("/steam/", "")
-			self.steamProfileAddress = "https://steamcommunity.com/profiles/" + str(self.steamNumber)
+			if self.steamString:
+				self.steamNumber = str(self.steamString).replace("/steam/", "")
+				self.steamProfileAddress = "https://steamcommunity.com/profiles/" + str(self.steamNumber)
 
 
 	
