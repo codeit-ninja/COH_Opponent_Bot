@@ -339,7 +339,7 @@ class MemoryMonitor (threading.Thread):
 
 				self.gameData.populateAllGameData()
 
-				if (self.gameData.cohRunning and self.gameData.gameStartedDate):
+				if (self.gameData.cohRunning and self. gameData.gameCurrentlyActive):
 					if not (self.gameData.gameStartedDate == self.previousGameStartedDate):
 						self.gameData.outputOpponentData()
 						self.ircClient.queue.put("STARTBETS")
