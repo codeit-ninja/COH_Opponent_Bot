@@ -1,4 +1,5 @@
-VersionNumber = "Version 2.0"
+VersionNumber = "2.0"
+BuildDate = "16-Jan-2021"
 
 import COHOpponentBot_Parameters
 import sys
@@ -194,13 +195,32 @@ class COHBotGUI:
 
 
 	def savePreferences(self):
-		pass
+		files = [('Json', '*.json'),('All Files', '*.*')] 
+		workingDirectory = os.getcwd()
+		print("workingDirectory : {}".format(workingDirectory))
+		self.master.filename =  tk.filedialog.asksaveasfilename(initialdir = workingDirectory , initialfile =  "data.json" ,title = "Save Preferences File",filetypes = files)
+		logging.info("File Path : " + str(self.master.filename))
+		print("File Path : " + str(self.master.filename))
+		if(self.master.filename):
+			pattern = re.compile(r"\u20A9|\uFFE6|\u00A5|\uFFE5") # replaces both Won sign varients for korean language and Yen symbol for Japanese language paths
+			theFilename = re.sub(pattern, "/", self.master.filename)
+			self.parameters.save(theFilename)
 
 	def loadPreferences(self):
-		pass
+		files = [('Json', '*.json'),('All Files', '*.*')] 
+		workingDirectory = os.getcwd()
+		print("workingDirectory : {}".format(workingDirectory))
+		self.master.filename =  tk.filedialog.askopenfilename(initialdir = workingDirectory , initialfile =  "data.json" ,title = "Load Preferences File",filetypes = files)
+		logging.info("File Path : " + str(self.master.filename))
+		print("File Path : " + str(self.master.filename))
+		if(self.master.filename):
+			pattern = re.compile(r"\u20A9|\uFFE6|\u00A5|\uFFE5") # replaces both Won sign varients for korean language and Yen symbol for Japanese language paths
+			theFilename = re.sub(pattern, "/", self.master.filename)
+			self.parameters.load(theFilename)
 
 	def showAboutDialogue(self):
-		pass
+		InformationString = "Version : {}\n\nBuild Date : {}\n\nCreated by : XcomReborn\n\n Special thanks : AveatorReborn".format(VersionNumber, BuildDate)
+		tk.messagebox.showinfo("Information", InformationString)
 
 	def doNothing(self):
 		pass
@@ -591,7 +611,7 @@ class COHBotGUI:
 		logging.info("File Path : " + str(self.master.filename))
 		print("File Path : " + str(self.master.filename))
 		if(self.master.filename != ""):
-			pattern = re.compile("\u20A9|\uFFE6|\u00A5|\uFFE5") # replaces both Won sign varients for korean language and Yen symbol for Japanese language paths
+			pattern = re.compile(r"\u20A9|\uFFE6|\u00A5|\uFFE5") # replaces both Won sign varients for korean language and Yen symbol for Japanese language paths
 			theFilename = re.sub(pattern, "/", self.master.filename)
 			self.parameters.data['logPath'] = theFilename.replace("/",'\\')
 			self.e5.config(state = NORMAL)

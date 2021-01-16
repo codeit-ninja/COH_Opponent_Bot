@@ -314,7 +314,7 @@ class StatsRequest:
 			return playerStats
 
 class MemoryMonitor (threading.Thread):
-	def __init__(self, pollInterval = 30, ircClient = None):
+	def __init__(self, pollInterval = 10, ircClient = None):
 		Thread.__init__(self)
 		self.running = True
 		self.pollInterval = pollInterval
@@ -361,7 +361,7 @@ class MemoryMonitor (threading.Thread):
 
 class FileMonitor (threading.Thread):
 
-	def __init__(self, filePath, pollInterval, ircClient):
+	def __init__(self, filePath, pollInterval = 10, ircClient = None):
 		Thread.__init__(self)
 		try:
 			logging.info("File Monitor Started!")
@@ -699,6 +699,8 @@ class GameData():
 
 		self.cohMemoryAddress = None
 
+		self.ircStringOutputList = None # This holds a list of IRC string outputs.
+
 
 	def getCOHMemoryAddress(self):
 		
@@ -883,10 +885,10 @@ class GameData():
 					if item.stats:
 						if(item.stats.steamNumber == self.parameters.data.get('steamNumber')):
 							if (self.parameters.data.get('showOwn')):
-								self.data = self.data + self.createCustomOutput(item)
+								self.ircStringOutputList = self.ircStringOutputList + self.createCustomOutput(item)
 						else:
-							self.data = self.data + self.createCustomOutput(item)					
-				for item in self.data:
+							self.ircStringOutputList = self.ircStringOutputList + self.createCustomOutput(item)					
+				for item in self.ircStringOutputList:
 					self.ircClient.SendPrivateMessageToIRC(str(item)) # outputs the information to IRC
 
 
