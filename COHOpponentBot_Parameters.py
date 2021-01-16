@@ -146,10 +146,10 @@ class Parameters:
  
 		
 	
-	def load(self):
+	def load(self, filePath = "data.json"):
 		try:
-			if (os.path.isfile('data.json')):
-				with open('data.json') as json_file:
+			if (os.path.isfile(filePath)):
+				with open(filePath) as json_file:
 					data = json.load(json_file)
 					success = self.checkDataIntegrity(data)
 					if success:
@@ -170,9 +170,9 @@ class Parameters:
 		return success
 
 		
-	def save(self):
+	def save(self, filePath = "data.json"):
 		try:
-			with open('data.json' , 'w') as outfile:
+			with open(filePath , 'w') as outfile:
 				json.dump(self.data, outfile)
 		except Exception as e:
 			logging.error("Problem in save")

@@ -173,10 +173,37 @@ class COHBotGUI:
 		## Delete the tempfile
 		os.remove(tempFile)
 
+		#Add File and Help menubar
+		self.menubar = Menu(self.master)
+		self.fileMenu = Menu(self.menubar, tearoff=0)
+		self.fileMenu.add_command(label="Load Preferences", command=self.loadPreferences)
+		self.fileMenu.add_command(label="Save Preferences", command=self.savePreferences)
+		self.fileMenu.add_separator()
+		self.fileMenu.add_command(label="Exit", command=self.master.quit)
+		self.menubar.add_cascade(label="File", menu=self.fileMenu)
+
+		self.helpmenu = Menu(self.menubar, tearoff=0)
+		self.helpmenu.add_command(label="About...", command=self.showAboutDialogue)
+		self.menubar.add_cascade(label="Help", menu=self.helpmenu)
 
 		self.master.protocol("WM_DELETE_WINDOW", self.on_closing)
 
+		self.master.config(menu=self.menubar)
+
 		self.master.mainloop()
+
+
+	def savePreferences(self):
+		pass
+
+	def loadPreferences(self):
+		pass
+
+	def showAboutDialogue(self):
+		pass
+
+	def doNothing(self):
+		pass
 
 	def createOptionsMenu(self):
 		if not self.optionsMenu:

@@ -20,7 +20,7 @@ class OverlayTemplates:
 <div style="clear: both;"></div>
 </body>
 </html> 
-	"""
+"""
 
 	overlaycss = """
 
