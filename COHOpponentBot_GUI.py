@@ -422,17 +422,9 @@ class COHBotGUI:
 			self.checkClearOverlayAfterGame.config(state = NORMAL)            
 			if (self.ircClient):
 				logging.info("in automatic trigger toggle")
-				self.automaticMemoryMonitor = COHOpponentBot_Bot.MemoryMonitor(self.parameters.data.get('filePollInterval'), ircClient= self.ircClient)
-				self.automaticMemoryMonitor.start()
-				self.automaticFileMonitor = COHOpponentBot_Bot.FileMonitor(self.parameters.data.get('logPath'), self.parameters.data.get('filePollInterval'), self.ircClient)
-				self.automaticFileMonitor.start()
+				self.startMonitors()
 		else:
-			if (self.automaticMemoryMonitor):
-				logging.info("trying to close automatic memory monitor")
-				self.automaticMemoryMonitor.close()
-			if (self.automaticFileMonitor):
-				logging.info("trying to close automatic file monitor")
-				self.automaticFileMonitor.close()
+			self.closeMonitors()
 			self.checkWriteIWonLostInChat.config(state = DISABLED)
 			self.checkWritePlaceYourBetsInChat.config(state = DISABLED)
 			self.checkClearOverlayAfterGame.config(state = DISABLED)
@@ -621,10 +613,7 @@ class COHBotGUI:
 				try:
 					if(self.ircClient):
 						self.ircClient.close()
-					if(self.automaticMemoryMonitor):
-						self.automaticMemoryMonitor.close()
-					if(self.automaticFileMonitor):
-						self.automaticFileMonitor.close()
+					self.closeMonitors()
 
 				except Exception as e:
 					logging.error('Exception : ' + str(e))
@@ -644,21 +633,33 @@ class COHBotGUI:
 				self.ircClient = COHOpponentBot_Bot.IRCClient(self.txt, bool(self.consoleDisplayBool.get()))
 				self.ircClient.start()
 				if (bool(self.parameters.data.get('automaticTrigger'))):
-					self.automaticMemoryMonitor = COHOpponentBot_Bot.MemoryMonitor(self.parameters.data.get('filePollInterval'), ircClient= self.ircClient)
-					self.automaticMemoryMonitor.start()
+					self.startMonitors()
 				self.connectButton.config(state = NORMAL)
 		else:
 			messagebox.showerror("Invalid details", "Please check that your twitch username, Steam Number and warning.log file path are valid.")
 
+	def startMonitors(self):
+		#Ensure they are off if running
+		self.closeMonitors()
+		#Create Monitor Threads and start them.
+		if self.ircClient:
+			self.automaticMemoryMonitor = COHOpponentBot_Bot.MemoryMonitor(self.parameters.data.get('filePollInterval'), ircClient= self.ircClient)
+			self.automaticMemoryMonitor.start()
+			self.automaticFileMonitor = COHOpponentBot_Bot.FileMonitor(self.parameters.data.get('logPath'), self.parameters.data.get('filePollInterval'), self.ircClient)
+			self.automaticFileMonitor.start()
+
+	def closeMonitors(self):
+		if self.automaticFileMonitor:
+			self.automaticFileMonitor.close()
+		if self.automaticMemoryMonitor:
+			self.automaticMemoryMonitor.close()
 
 	def on_closing(self):
 		logging.info("In on_closing program (Closing)")
 		try:
 			if(self.ircClient):
 				self.ircClient.close()
-			if(self.automaticMemoryMonitor):
-				self.automaticMemoryMonitor.close()
-				#self.automaticMemoryMonitor.event.set()
+			self.closeMonitors()
 		except Exception as e:
 			logging.exception('Exception : ' + str(e))
 		while (threading.active_count() > 1):
