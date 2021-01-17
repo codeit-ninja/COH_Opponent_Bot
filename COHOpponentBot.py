@@ -223,10 +223,10 @@ class COHBotGUI:
 		self.parameters = COHOpponentBot_Parameters.Parameters()
 		if self.ircClient:
 			self.ircClient.refreshParameters()
-		if self.automaticFileMonitor:
-			self.automaticFileMonitor.refreshParameters()
-		if self.automaticMemoryMonitor:
-			self.automaticMemoryMonitor.refreshParameters()
+		#if self.automaticFileMonitor:
+		#	self.automaticFileMonitor.refreshParameters()
+		#if self.automaticMemoryMonitor:
+		#	self.automaticMemoryMonitor.refreshParameters()
 
 	def showAboutDialogue(self):
 		InformationString = "Version : {}\n\nBuild Date : {}\n\nCreated by : XcomReborn\n\n Special thanks : AveatorReborn".format(VersionNumber, BuildDate)

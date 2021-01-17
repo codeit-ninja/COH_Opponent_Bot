@@ -358,6 +358,7 @@ class MemoryMonitor (threading.Thread):
 
 		except Exception as e:
 			logging.error("An Error Occurred in MemoryMonitor")
+			logging.exception("Stack Trace : ")
 			logging.error(str(e))
 
 	def refreshParameters(self):
@@ -388,7 +389,7 @@ class FileMonitor (threading.Thread):
 			f.readlines()
 			self.filePointer = f.tell()
 			f.close()
-			logging.info("Initialzing with file length : " + str(len(self.filePointer)) + "\n")
+			logging.info("Initialzing with file length : " + str(self.filePointer) + "\n")
 
 		except Exception as e:
 			logging.error("In FileMonitor __init__")
@@ -714,7 +715,7 @@ class GameData():
 
 		self.cohMemoryAddress = None
 
-		self.ircStringOutputList = None # This holds a list of IRC string outputs.
+		self.ircStringOutputList = [] # This holds a list of IRC string outputs.
 
 	def refreshParameters(self):
 		self.parameters = Parameters()
