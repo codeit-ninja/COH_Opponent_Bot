@@ -64,7 +64,8 @@ class Parameters:
 
 		#your personal steam number
 		self.data['steamNumber'] = 'EnterYourSteamNumberHere (17 digits)'		#eg 76561197970959399 # alter this value to prevent the program from picking your steam info instead of your opponents.
-		self.data['channel'] = 'EnterYourChannelNameHere'#'xereborn'
+		self.data['steamAlias'] = 'EnterYourSteamAliasHere'# eg 'xereborn'
+		self.data['channel'] = 'EnterYourChannelNameHere'# eg 'xereborn'
 
 		#location of the COH log file
 		CSIDL_PERSONAL = 5       # My Documents
@@ -114,6 +115,7 @@ class Parameters:
 						for value in item['members']:
 							if (value['name'] == statString):
 								self.data['channel'] = value['alias']
+								self.data['steamAlias'] = value['alias']
 		except Exception as e:
 			logging.error(str(e))
 

@@ -231,12 +231,12 @@ class IRC_Channel(threading.Thread):
 				self.close()
 			if (line[0] == "OPPONENT"):
 				self.CheckForUserCommand("self","opp")
-			if (line[0] == "STARTBETS"):
-				self.StartBets()
+			#if (line[0] == "STARTBETS"):
+			#	self.StartBets()
 			if (line[0] == "IWON"):
-				self.ircClient.SendPrivateMessageToIRC("!"+str(self.parameters.data.get('channel')) +" won")
+				self.ircClient.SendPrivateMessageToIRC("!"+str(self.parameters.data.get('steamAlias')) +" won")
 			if (line[0] == "ILOST"):
-				self.ircClient.SendPrivateMessageToIRC("!"+str(self.parameters.data.get('channel')) +" lost")
+				self.ircClient.SendPrivateMessageToIRC("!"+str(self.parameters.data.get('steamAlias')) +" lost")
 			if (line[0] == "CLEAROVERLAY"):
 				GameData.clearOverlayHTML()
 			if (len(line) >= 4) and ("PRIVMSG" == line[2]) and not ("jtv" in line[0]):
@@ -262,25 +262,6 @@ class IRC_Channel(threading.Thread):
 		if (msgMessage == "exit") and (msgUserName == self.ircClient.adminUserName):
 			self.ircClient.SendPrivateMessageToIRC("Exiting")
 			self.close()
-
-	def StartBets(self):
-		if (self.parameters.data.get('writePlaceYourBetsInChat')):
-			playerString = ""
-			outputList = []
-			self.gameData = GameData(self.ircClient)
-			self.gameData.populateAllGameData()
-			playerList = self.gameData.playerList
-			if playerList:
-				if len(playerList) == 2: # if two player make sure the streamer is put first
-					for player in playerList:
-						outputList.append(player.name + " " + player.faction.name)
-					# player list does not have steam numbers. Need to aquire these from warning.log
-					if (str(self.parameters.data.get('steamNumber')) == str(playerList[0].stats.steamNumber)):			
-						playerString = "{} Vs. {}".format(outputList[0], outputList[1])
-					else:
-						playerString = "{} Vs. {}".format(outputList[1], outputList[0])			
-				self.ircClient.SendPrivateMessageToIRC("!startbets {}".format(playerString))
-				# need to reimplement the readlog
 
 	def CheckForUserCommand(self, userName, message):
 		if (bool(re.match("^(!)?opponent(\?)?$", message.lower())) or bool(re.match("^(!)?place your bets$" , message.lower())) or bool(re.match("^(!)?opp(\?)?$", message.lower()))):
@@ -351,7 +332,7 @@ class MemoryMonitor (threading.Thread):
 				if (self.gameData.cohRunning and self.gameData.gameCurrentlyActive):
 					if not (self.gameData.gameStartedDate == self.previousGameStartedDate):
 						self.gameData.outputOpponentData()
-						self.ircClient.queue.put("STARTBETS")
+						self.StartBets()
 						self.previousGameStartedDate = self.gameData.gameStartedDate
 
 				self.event.wait(timeout = self.pollInterval)
@@ -360,6 +341,22 @@ class MemoryMonitor (threading.Thread):
 			logging.error("An Error Occurred in MemoryMonitor")
 			logging.exception("Stack Trace : ")
 			logging.error(str(e))
+
+	def StartBets(self):
+		if (self.parameters.data.get('writePlaceYourBetsInChat')):
+			playerString = ""
+			outputList = []
+			if self.gameData:
+				if self.gameData.playerList:
+					if len(self.gameData.playerList) == 2: # if two player make sure the streamer is put first
+						for player in self.gameData.playerList:
+							outputList.append(player.name + " " + player.faction.name)
+						# player list does not have steam numbers. Need to aquire these from warning.log
+						playerString = "{} Vs. {}".format(outputList[1], outputList[0])	
+						if self.gameData.playerList[0].stats:
+							if (str(self.parameters.data.get('steamNumber')) == str(self.gameData.playerList[0].stats.steamNumber)):			
+								playerString = "{} Vs. {}".format(outputList[0], outputList[1])									
+					self.ircClient.SendPrivateMessageToIRC("!startbets {}".format(playerString))
 
 	def refreshParameters(self):
 		if self.gameData:
@@ -717,6 +714,7 @@ class GameData():
 
 		self.ircStringOutputList = [] # This holds a list of IRC string outputs.
 
+
 	def refreshParameters(self):
 		self.parameters = Parameters()
 
@@ -821,6 +819,11 @@ class GameData():
 						player = Player(name=bytearray(username).decode('utf-16le'),factionString=bytearray(factionString).decode('ascii'))
 						if PlayerStat:
 							player.stats = PlayerStat
+
+							#Assign Streamer name from steam alias and streamer steam Number 
+							if self.parameters.data.get('steamNumber') == steamNumber:
+								self.parameters.data['steamAlias'] = player.stats.alias
+								self.parameters.save()
 
 						#Add the fully populated player to the playerList
 						self.playerList.append(player)
