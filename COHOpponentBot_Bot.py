@@ -167,10 +167,11 @@ class IRCClient(threading.Thread):
 		self.output.insert(END, "Connection to "+self.channel+" timed out, was the channel spelt correctly and is port 6667 open?\n")
 		self.close()
 
-	def refreshParameters(self):
-		self.parameters = Parameters()
-		if self.channelThread:
-			self.channelThread.refreshParameters()
+	def refreshParameters(self, parameters):
+		if type(parameters) is Parameters:
+			self.parameters = Parameters()
+			if self.channelThread:
+				self.channelThread.refreshParameters(parameters)
 
 	def close(self):
 		self.queue.put("EXITTHREAD")
@@ -274,10 +275,11 @@ class IRC_Channel(threading.Thread):
 			self.ircClient.SendPrivateMessageToIRC("I'm here! Pls give me mod to prevent twitch from autobanning me for spam if I have to send a few messages quickly.")
 			self.ircClient.output.insert(END, "Oh hi again, I heard you in the " +self.channel[1:] + " channel.\n")
 
-	def refreshParameters(self):
-		if self.gameData:
-			self.gameData.refreshParameters()
-		self.parameters = Parameters()
+	def refreshParameters(self, parameters):
+		if type(parameters) is Parameters:
+			if self.gameData:
+				self.gameData.refreshParameters(parameters)
+			self.parameters = parameters
 
 	def close(self):
 		self.running = False
@@ -312,9 +314,10 @@ class MemoryMonitor (threading.Thread):
 		self.event = threading.Event()
 
 		self.ircClient = ircClient
-		self.gameData = None
+		self.gameData = GameData(ircClient=self.ircClient)
 
 		self.previousGameStartedDate = None
+		self.parameters = Parameters()
 	
 	def run(self):
 		# While the montitor runs it needs to check for the following:
@@ -324,15 +327,17 @@ class MemoryMonitor (threading.Thread):
 			logging.error("IRC Client not found.")
 			return
 		try:
-			self.gameData = GameData(ircClient=self.ircClient)
 			while self.running:
 
-				self.gameData.populateAllGameData()
+				if self.gameData:
+					self.gameData.populateAllGameData()
 
 				if (self.gameData.cohRunning and self.gameData.gameCurrentlyActive):
 					if not (self.gameData.gameStartedDate == self.previousGameStartedDate):
 						self.gameData.outputOpponentData()
+						logging.info("before startbets")
 						self.StartBets()
+						logging.info("after startbets")
 						self.previousGameStartedDate = self.gameData.gameStartedDate
 
 				self.event.wait(timeout = self.pollInterval)
@@ -343,6 +348,7 @@ class MemoryMonitor (threading.Thread):
 			logging.error(str(e))
 
 	def StartBets(self):
+		logging.info("Size of self.gameData.playerList in StartBets {}".format(len(self.gameData.playerList)))
 		if (self.parameters.data.get('writePlaceYourBetsInChat')):
 			playerString = ""
 			outputList = []
@@ -358,9 +364,11 @@ class MemoryMonitor (threading.Thread):
 								playerString = "{} Vs. {}".format(outputList[0], outputList[1])									
 					self.ircClient.SendPrivateMessageToIRC("!startbets {}".format(playerString))
 
-	def refreshParameters(self):
-		if self.gameData:
-			self.gameData.refreshParameters()
+	def refreshParameters(self, parameters):
+		if type(parameters) is Parameters:
+			self.parameters = parameters
+			if self.gameData:
+				self.gameData.refreshParameters(parameters)
 	
 	def close(self):
 		self.running = False
@@ -445,8 +453,9 @@ class FileMonitor (threading.Thread):
 		if self.event:
 			self.event.set()
 
-	def refreshParameters(self):
-		self.parameters = Parameters()
+	def refreshParameters(self, parameters):
+		if type(parameters) is Parameters:
+			self.parameters = parameters
 
 	def find_between(self, s, first, last ):
 		try:
@@ -715,8 +724,9 @@ class GameData():
 		self.ircStringOutputList = [] # This holds a list of IRC string outputs.
 
 
-	def refreshParameters(self):
-		self.parameters = Parameters()
+	def refreshParameters(self, parameters):
+		if type(parameters) is Parameters:
+			self.parameters = parameters
 
 	def getCOHMemoryAddress(self):
 		

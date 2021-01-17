@@ -222,7 +222,7 @@ class COHBotGUI:
 	def refreshParameters(self):
 		self.parameters = COHOpponentBot_Parameters.Parameters()
 		if self.ircClient:
-			self.ircClient.refreshParameters()
+			self.ircClient.refreshParameters(self.parameters)
 		#if self.automaticFileMonitor:
 		#	self.automaticFileMonitor.refreshParameters()
 		#if self.automaticMemoryMonitor:
