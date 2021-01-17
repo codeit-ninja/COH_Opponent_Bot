@@ -166,7 +166,12 @@ class IRCClient(threading.Thread):
 	def connectionTimedOut(self):
 		self.output.insert(END, "Connection to "+self.channel+" timed out, was the channel spelt correctly and is port 6667 open?\n")
 		self.close()
-					
+
+	def refreshParameters(self):
+		self.parameters = Parameters()
+		if self.channelThread:
+			self.channelThread.refreshParameters()
+
 	def close(self):
 		self.queue.put("EXITTHREAD")
 		self.running = False
@@ -288,6 +293,11 @@ class IRC_Channel(threading.Thread):
 			self.ircClient.SendPrivateMessageToIRC("I'm here! Pls give me mod to prevent twitch from autobanning me for spam if I have to send a few messages quickly.")
 			self.ircClient.output.insert(END, "Oh hi again, I heard you in the " +self.channel[1:] + " channel.\n")
 
+	def refreshParameters(self):
+		if self.gameData:
+			self.gameData.refreshParameters()
+		self.parameters = Parameters()
+
 	def close(self):
 		self.running = False
 		logging.info("Closing Channel " + str(self.channel) + " thread.")
@@ -318,13 +328,12 @@ class MemoryMonitor (threading.Thread):
 		Thread.__init__(self)
 		self.running = True
 		self.pollInterval = pollInterval
-		self.event = None
+		self.event = threading.Event()
 
 		self.ircClient = ircClient
 		self.gameData = None
 
 		self.previousGameStartedDate = None
-
 	
 	def run(self):
 		# While the montitor runs it needs to check for the following:
@@ -339,18 +348,21 @@ class MemoryMonitor (threading.Thread):
 
 				self.gameData.populateAllGameData()
 
-				if (self.gameData.cohRunning and self. gameData.gameCurrentlyActive):
+				if (self.gameData.cohRunning and self.gameData.gameCurrentlyActive):
 					if not (self.gameData.gameStartedDate == self.previousGameStartedDate):
 						self.gameData.outputOpponentData()
 						self.ircClient.queue.put("STARTBETS")
 						self.previousGameStartedDate = self.gameData.gameStartedDate
 
-				self.event = threading.Event()
 				self.event.wait(timeout = self.pollInterval)
 
 		except Exception as e:
 			logging.error("An Error Occurred in MemoryMonitor")
 			logging.error(str(e))
+
+	def refreshParameters(self):
+		if self.gameData:
+			self.gameData.refreshParameters()
 	
 	def close(self):
 		self.running = False
@@ -434,6 +446,9 @@ class FileMonitor (threading.Thread):
 		# break out of loops if waiting
 		if self.event:
 			self.event.set()
+
+	def refreshParameters(self):
+		self.parameters = Parameters()
 
 	def find_between(self, s, first, last ):
 		try:
@@ -701,6 +716,8 @@ class GameData():
 
 		self.ircStringOutputList = None # This holds a list of IRC string outputs.
 
+	def refreshParameters(self):
+		self.parameters = Parameters()
 
 	def getCOHMemoryAddress(self):
 		

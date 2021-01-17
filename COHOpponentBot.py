@@ -217,6 +217,16 @@ class COHBotGUI:
 			pattern = re.compile(r"\u20A9|\uFFE6|\u00A5|\uFFE5") # replaces both Won sign varients for korean language and Yen symbol for Japanese language paths
 			theFilename = re.sub(pattern, "/", self.master.filename)
 			self.parameters.load(theFilename)
+			self.refreshParameters()
+
+	def refreshParameters(self):
+		self.parameters = COHOpponentBot_Parameters.Parameters()
+		if self.ircClient:
+			self.ircClient.refreshParameters()
+		if self.automaticFileMonitor:
+			self.automaticFileMonitor.refreshParameters()
+		if self.automaticMemoryMonitor:
+			self.automaticMemoryMonitor.refreshParameters()
 
 	def showAboutDialogue(self):
 		InformationString = "Version : {}\n\nBuild Date : {}\n\nCreated by : XcomReborn\n\n Special thanks : AveatorReborn".format(VersionNumber, BuildDate)
@@ -473,6 +483,7 @@ class COHBotGUI:
 
 
 		self.parameters.save()
+		self.refreshParameters() # cascades refresh parameters for all objects that have local parameters object copies.
 		try:
 			if self.ircClient:
 				self.ircClient.parameters = self.parameters
