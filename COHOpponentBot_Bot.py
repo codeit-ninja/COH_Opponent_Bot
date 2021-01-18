@@ -931,7 +931,7 @@ class GameData():
 
 		statRequest = StatsRequest()
 		for steamNumber in steamNumberList:
-			stat = statRequest(steamNumber)
+			stat = statRequest(str(steamNumber))
 			statsList.append(stat)
 
 			#if player.stats:
