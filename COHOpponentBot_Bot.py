@@ -819,34 +819,20 @@ class GameData():
 					end = start + lengthOfFactionString
 					factionString = bytearray(data_dump[start:end])
 
-					#Look for the steamnumber related to the username by interating over all occurance of username in memory and looking for /steam/number
-					steamNumber = ""
-					if username:
-						addressesContainingUsername = p.search_all_memory(username)
-						for address in addressesContainingUsername:
-							try:
-								data_dump3 = p.read_memory(address - 56, ((ctypes.c_byte * (56)))())
-								if str("/steam/") in bytearray(data_dump3).decode('utf-16le'):
-									steamNumber = bytearray(data_dump3).decode('utf-16le')[7:24]
-									break
-							except Exception as e:
-								pass # all errors can be passed over.
+					player = Player(name=bytearray(username).decode('utf-16le'),factionString=bytearray(factionString).decode('ascii'))
+					self.playerList.append(player)
 
-						PlayerStat = None
-						if steamNumber:
-							statRequest = StatsRequest()
-							PlayerStat = statRequest.returnStats(str(steamNumber))
-						player = Player(name=bytearray(username).decode('utf-16le'),factionString=bytearray(factionString).decode('ascii'))
-						if PlayerStat:
-							player.stats = PlayerStat
+				statList = self.getStatsFromLogFile()
 
+				for player in self.playerList:
+					for stat in statList:
+						if str(stat.alias).decode('utf-16le') == str(player.name).decode('utf-16le'):
+							player.stats = stat
+				
 							#Assign Streamer name from steam alias and streamer steam Number 
-							if self.parameters.data.get('steamNumber') == steamNumber:
+							if self.parameters.data.get('steamNumber') == player.stats.steamNumber:
 								self.parameters.data['steamAlias'] = player.stats.alias
-								self.parameters.save()
-
-						#Add the fully populated player to the playerList
-						self.playerList.append(player)
+								self.parameters.save()					
 
 				self.numberOfHumans = sum(item.stats is not None for item in self.playerList)
 
@@ -916,12 +902,45 @@ class GameData():
 								self.ircClient.SendToOutputField(item)
 		else:
 			self.ircClient.SendToOutputField("I could not get stats from the stat server using steam# {} it might be down or the steam# might be invalid.".format(steamNumber))
-		#if (self.parameters.data.get('showSteamProfile')):
-		#	self.ircClient.SendToOutputField("Steam profile " + str(streamerPlayer.stats.steamProfileAddress))
-		#outputList = self.createCustomOutput(streamerPlayer)
-		#for item in outputList:
-		#	self.ircClient.SendPrivateMessageToIRC("Hello! Your connection to IRC is a good one.")		
 
+
+	def getStatsFromLogFile(self):
+
+		steamNumberList = []
+
+		with open(self.parameters.data.get('logPath') , encoding='ISO-8859-1') as f:
+			content = f.readlines()
+
+		for item in content:
+
+			if ('detected successful game start' in item):
+				steamNumberList.clear()
+
+			if ("match started") in item.lower():
+				logging.info (item)
+				# dictionary containing player number linked to steamnumber
+				steamNumber = self.find_between(item, "steam/", "]")
+				steamNumberList.append(steamNumber)			
+
+			# clear the steam number list if a new game is found in the file
+			if ("AutoMatchForm - Starting game") in item:
+				steamNumberList.clear()
+				logging.info("CLEARING PLAYER LIST\n")
+
+		statsList = []
+
+		statRequest = StatsRequest()
+		for steamNumber in steamNumberList:
+			stat = statRequest(steamNumber)
+			statsList.append(stat)
+
+			#if player.stats:
+			#	#Assign Streamer name from steam alias and streamer steam Number 
+			#	if self.parameters.data.get('steamNumber') == steamNumber:
+			#		self.parameters.data['steamAlias'] = player.stats.alias
+			#		self.parameters.save()
+
+		return statsList
 
 
 	def outputOpponentData(self):
