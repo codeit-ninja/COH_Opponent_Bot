@@ -3,7 +3,8 @@ import socket
 import string
 import sys
 import threading
-import json # for loading json's for emoticons
+import json
+from typing import Match # for loading json's for emoticons
 import urllib.request # more for loadings jsons from urls
 import collections # for deque
 from decimal import *
@@ -197,7 +198,10 @@ class IRCClient(threading.Thread):
 	
 	def SendPrivateMessageToIRC(self, message):
 		self.ircMessageBuffer.append(message)   # removed this to stop message being sent to IRC
-		self.output.insert(END, message + "\n") # output message to text window
+		self.SendToOutputField(message) # output message to text window
+
+	def SendToOutputField(self, message):
+		self.output.insert(END, message + "\n")
 
 	def IRCSendCalledEveryThreeSeconds(self):
 		if (self.ircMessageBuffer):
@@ -220,7 +224,7 @@ class IRC_Channel(threading.Thread):
 		self.queue = queue
 		self.channel = channel
 		self.parameters = Parameters()
-		self.gameData = None
+		self.gameData = GameData(self.ircClient)
 		
 	def run(self):
 		self.irc.send(('JOIN ' + self.channel + '\r\n').encode("utf8"))
@@ -232,8 +236,8 @@ class IRC_Channel(threading.Thread):
 				self.close()
 			if (line[0] == "OPPONENT"):
 				self.CheckForUserCommand("self","opp")
-			#if (line[0] == "STARTBETS"):
-			#	self.StartBets()
+			if (line[0] == "TEST"):
+				self.testOutput()
 			if (line[0] == "IWON"):
 				self.ircClient.SendPrivateMessageToIRC("!"+str(self.parameters.data.get('steamAlias')) +" won")
 			if (line[0] == "ILOST"):
@@ -266,7 +270,8 @@ class IRC_Channel(threading.Thread):
 
 	def CheckForUserCommand(self, userName, message):
 		if (bool(re.match("^(!)?opponent(\?)?$", message.lower())) or bool(re.match("^(!)?place your bets$" , message.lower())) or bool(re.match("^(!)?opp(\?)?$", message.lower()))):
-			self.gameData = GameData(self.ircClient)
+			if not self.gameData:
+				self.gameData = GameData(self.ircClient)
 			self.gameData.populateAllGameData()
 			self.gameData.outputOpponentData()
 
@@ -274,6 +279,11 @@ class IRC_Channel(threading.Thread):
 		if (message.lower() == "test") and ((str(userName).lower() == str(self.parameters.privatedata.get('adminUserName')).lower()) or (str(userName) == str(self.parameters.data.get('channel')).lower())):
 			self.ircClient.SendPrivateMessageToIRC("I'm here! Pls give me mod to prevent twitch from autobanning me for spam if I have to send a few messages quickly.")
 			self.ircClient.output.insert(END, "Oh hi again, I heard you in the " +self.channel[1:] + " channel.\n")
+
+	def testOutput(self):
+		if not self.gameData:
+			self.gameData = GameData(self.ircClient)
+		self.gameData.testOutput()
 
 	def refreshParameters(self, parameters):
 		if type(parameters) is Parameters:
@@ -881,6 +891,37 @@ class GameData():
 			print(str(e))
 			logging.info("Problem in populateGameData")
 			logging.error(str(e))
+
+	def testOutput(self):
+		steamNumber = self.parameters.data.get('steamNumber')
+		statsRequest = StatsRequest()
+		streamerStats = statsRequest.returnStats(str(steamNumber))
+		streamerPlayer = Player(name = self.parameters.data.get('channel'))
+		streamerPlayer.stats = streamerStats
+		if streamerPlayer.stats:
+			self.ircClient.SendToOutputField("Streamer Full Stat list formatted according to Custom Chat Output Preformat:")
+			self.ircClient.SendToOutputField(self.parameters.data.get('customStringPreFormat'))
+
+			for match in MatchType:
+				for faction in Faction:
+					for value in streamerPlayer.stats.leaderboardData:
+						if (str(streamerPlayer.stats.leaderboardData[value].faction) == str(faction)) and (str(streamerPlayer.stats.leaderboardData[value].matchType) == str(match)):
+							self.matchType = match
+							streamerPlayer.faction = faction
+							stringFormattingDictionary = self.populateStringFormattingDictionary(streamerPlayer)
+							customPreFormattedOutputString = self.parameters.data.get('customStringPreFormat')
+							theString = self.formatPreFormattedString(customPreFormattedOutputString, stringFormattingDictionary)
+							outputList = list(self.split_by_n(theString, 500))
+							for item in outputList:
+								self.ircClient.SendToOutputField(item)
+		else:
+			self.ircClient.SendToOutputField("I could not get stats from the stat server using steam# {} it might be down or the steam# might be invalid.".format(steamNumber))
+		#if (self.parameters.data.get('showSteamProfile')):
+		#	self.ircClient.SendToOutputField("Steam profile " + str(streamerPlayer.stats.steamProfileAddress))
+		#outputList = self.createCustomOutput(streamerPlayer)
+		#for item in outputList:
+		#	self.ircClient.SendPrivateMessageToIRC("Hello! Your connection to IRC is a good one.")		
+
 
 
 	def outputOpponentData(self):

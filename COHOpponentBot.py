@@ -442,7 +442,7 @@ class COHBotGUI:
 	def testStats(self):
 		logging.info("Testing Stats")
 		if (self.ircClient):
-			self.ircClient.queue.put('OPPONENT')
+			self.ircClient.queue.put('TEST')
 
 
 	def automaticTriggerToggle(self):
