@@ -416,13 +416,13 @@ class FileMonitor (threading.Thread):
 			while self.running:
 				lines = []
 				clearOverlay = False
-				print("current File index = : " + str(self.filePointer) + "\n")
+				#print("current File index = : " + str(self.filePointer) + "\n")
 				f = open(self.filePath, 'r' , encoding='ISO-8859-1')
 				f.seek(self.filePointer)
 				lines = f.readlines()
 				self.filePointer = f.tell()
 				f.close()
-				print("new File index = : " + str(self.filePointer) + "\n")
+				#print("new File index = : " + str(self.filePointer) + "\n")
 				for line in lines:
 					if ("Win notification" in line):
 						#Check if streamer won
@@ -789,10 +789,11 @@ class GameData():
 				data_dump = bytearray(data_dump)
 
 				# get game start date
-				startDate = bytearray(data_dump[8:42])
-				startDate = startDate.decode('utf-16le')
-				#
-				self.gameStartedDate = time.mktime(datetime.datetime.strptime(startDate, "%d/%m/%Y %H:%M").timetuple()) #Attempt to convert string objected to timestamp.
+				startDate = bytearray(data_dump[8:40])
+				startDate = startDate.decode('utf-16le').strip()
+				#print("startDate {}".format(startDate))
+				#self.gameStartedDate = startDate
+				self.gameStartedDate = datetime.strptime(str(startDate), '%d/%m/%Y %H:%M') #Attempt to convert string objected to timestamp.
 				#do a regular expression match to find all occurances of DATAINFO in the data_dump
 				matchobject = re.finditer(b'DATAINFO', data_dump)
 				self.numberOfSlots = len(re.findall(b'DATAINFO', data_dump))
@@ -830,8 +831,8 @@ class GameData():
 
 				for player in self.playerList:
 					for stat in statList:
-						print("userName from alias : {}".format(str(stat.alias).encode('utf-16le')))
-						print("userName from game : {}".format(str(player.name).encode('utf-16le')))
+						#print("userName from alias : {}".format(str(stat.alias).encode('utf-16le')))
+						#print("userName from game : {}".format(str(player.name).encode('utf-16le')))
 						if str(stat.alias).encode('utf-16le') == str(player.name).encode('utf-16le'):
 							player.stats = stat
 				
