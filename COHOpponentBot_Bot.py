@@ -791,6 +791,8 @@ class GameData():
 				# get game start date
 				startDate = bytearray(data_dump[8:42])
 				self.gameStartedDate = startDate.decode('utf-16le')
+				#
+				self.gameStartedDate = time.mktime(datetime.datetime.strptime(self.gameStartedDate, "%d/%m/%Y %H:%M").timetuple()) #Attempt to convert string objected to timestamp.
 				#do a regular expression match to find all occurances of DATAINFO in the data_dump
 				matchobject = re.finditer(b'DATAINFO', data_dump)
 				self.numberOfSlots = len(re.findall(b'DATAINFO', data_dump))
