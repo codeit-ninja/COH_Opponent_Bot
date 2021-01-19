@@ -826,7 +826,9 @@ class GameData():
 
 				for player in self.playerList:
 					for stat in statList:
-						if str(stat.alias).decode('utf-16le') == str(player.name).decode('utf-16le'):
+						print("userName from alias : {}".format(str(stat.alias).encode('utf-16le')))
+						print("userName from game : {}".format(str(player.name).encode('utf-16le')))
+						if str(stat.alias).encode('utf-16le') == str(player.name).encode('utf-16le'):
 							player.stats = stat
 				
 							#Assign Streamer name from steam alias and streamer steam Number 
@@ -876,6 +878,7 @@ class GameData():
 			print("Problem in populateGameData")
 			print(str(e))
 			logging.info("Problem in populateGameData")
+			logging.exception("Stack")
 			logging.error(str(e))
 
 	def testOutput(self):
@@ -931,14 +934,8 @@ class GameData():
 
 		statRequest = StatsRequest()
 		for steamNumber in steamNumberList:
-			stat = statRequest(str(steamNumber))
+			stat = statRequest.returnStats(str(steamNumber))
 			statsList.append(stat)
-
-			#if player.stats:
-			#	#Assign Streamer name from steam alias and streamer steam Number 
-			#	if self.parameters.data.get('steamNumber') == steamNumber:
-			#		self.parameters.data['steamAlias'] = player.stats.alias
-			#		self.parameters.save()
 
 		return statsList
 
