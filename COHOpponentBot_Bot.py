@@ -782,6 +782,8 @@ class GameData():
 				# clear the playerList
 				if self.playerList:
 					self.playerList.clear()
+				if self.ircOutputData:
+					self.ircOutputData.clear()
 				#read an abitrary number of bytes from the COH__REC memory location 4000 should do this will cover the replay header and extras		
 				data_dump = p.read_memory(replayMemoryAddress[0], (ctypes.c_byte * 4000)())
 				data_dump = bytearray(data_dump)
@@ -1024,14 +1026,14 @@ class GameData():
 
 
 			#set default null values for all parameters in dictionary
-			stringFormattingDictionary['$WINS$'] =  prefixDiv + "" + postfixDivClose
-			stringFormattingDictionary['$LOSSES$'] =  prefixDiv + "" + postfixDivClose
-			stringFormattingDictionary['$DISPUTES$'] =  prefixDiv + "" + postfixDivClose
-			stringFormattingDictionary['$STREAK$'] =  prefixDiv + "" + postfixDivClose
-			stringFormattingDictionary['$DROPS$'] =  prefixDiv + "" + postfixDivClose
-			stringFormattingDictionary['$RANK$'] =  prefixDiv + "" + postfixDivClose
-			stringFormattingDictionary['$LEVEL$'] =  prefixDiv + "" + postfixDivClose
-			stringFormattingDictionary['$WLRATIO$'] =  prefixDiv + "" + postfixDivClose			
+			stringFormattingDictionary['$WINS$'] =  prefixDiv + "0" + postfixDivClose
+			stringFormattingDictionary['$LOSSES$'] =  prefixDiv + "0" + postfixDivClose
+			stringFormattingDictionary['$DISPUTES$'] =  prefixDiv + "0" + postfixDivClose
+			stringFormattingDictionary['$STREAK$'] =  prefixDiv + "0" + postfixDivClose
+			stringFormattingDictionary['$DROPS$'] =  prefixDiv + "0" + postfixDivClose
+			stringFormattingDictionary['$RANK$'] =  prefixDiv + "None" + postfixDivClose
+			stringFormattingDictionary['$LEVEL$'] =  prefixDiv + "0" + postfixDivClose
+			stringFormattingDictionary['$WLRATIO$'] =  prefixDiv + "-" + postfixDivClose			
 
 			for value in player.stats.leaderboardData:
 				if (str(player.stats.leaderboardData[value].matchType) == str(self.matchType)):
