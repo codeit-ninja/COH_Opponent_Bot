@@ -733,6 +733,8 @@ class GameData():
 
 		self.ircStringOutputList = [] # This holds a list of IRC string outputs.
 
+		self.mapName = None
+
 
 	def refreshParameters(self, parameters):
 		if type(parameters) is Parameters:
@@ -793,7 +795,18 @@ class GameData():
 				startDate = startDate.decode('utf-16le').strip()
 				#print("startDate {}".format(startDate))
 				#self.gameStartedDate = startDate
-				self.gameStartedDate = datetime.strptime(str(startDate), '%d/%m/%Y %H:%M') #Attempt to convert string objected to timestamp.
+				try:
+					self.gameStartedDate = datetime.strptime(str(startDate), '%d/%m/%Y %H:%M') #Attempt to convert string objected to timestamp.
+				except:
+					pass
+				mapNameStartIndex = data_dump.find(b"RelicCoH")
+				mapNameLength = bytearray(data_dump[mapNameStartIndex+8:mapNameStartIndex+12])
+				mapNameLength = int.from_bytes(mapNameLength, byteorder='little', signed=False)
+				print("mapName Length : {}".format(mapNameLength))
+				mapNameFull = bytearray(data_dump[mapNameStartIndex+12:mapNameStartIndex+12+mapNameLength])
+				print("mapNameFull : {}".format(mapNameFull))
+				self.mapName = mapNameFull
+
 				#do a regular expression match to find all occurances of DATAINFO in the data_dump
 				matchobject = re.finditer(b'DATAINFO', data_dump)
 				self.numberOfSlots = len(re.findall(b'DATAINFO', data_dump))
@@ -868,6 +881,8 @@ class GameData():
 				self.normalCPUCount = normalCounter
 				self.hardCPUCount = hardCounter
 				self.expertCPUCount = expertCounter
+
+				self.mapSize = self.numberOfPlayers # tempory until the mapsize it taken from memory
 
 				#set the current MatchType
 				self.matchType = MatchType.BASIC
