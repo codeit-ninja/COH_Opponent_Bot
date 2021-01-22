@@ -823,17 +823,10 @@ class GameData():
 				print("start {}".format(start))
 				mapNameLength = bytearray(data_dump[start-4:start])
 				mapNameLength = int.from_bytes(mapNameLength, byteorder='little', signed=False)
-<<<<<<< HEAD
-				#print("mapName Length : {}".format(mapNameLength))
-				mapNameFull = bytearray(data_dump[mapNameStartIndex+12:mapNameStartIndex+12+mapNameLength])
-				#print("mapNameFull : {}".format(mapNameFull))
-				self.mapName = mapNameFull
-=======
 				print("mapName Length : {}".format(mapNameLength))
 				mapNameFull = bytearray(data_dump[start:start+mapNameLength])
 				print("mapNameFull : {}".format(mapNameFull))
 				self.mapLocation = mapNameFull.decode('ascii')
->>>>>>> 35b574fd10549610320f3c0ceca7fd10007cc57a
 
 				#get the mapsize from filename
 				words = self.mapLocation.split("\\")
