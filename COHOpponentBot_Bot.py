@@ -340,10 +340,11 @@ class MemoryMonitor (threading.Thread):
 			while self.running:
 
 				if self.gameData:
-					self.gameData.populateAllGameData()
+					self.gameData.getReplayMemoryAddress()
 
 				if (self.gameData.cohRunning and self.gameData.gameCurrentlyActive):
 					if not (self.gameData.gameStartedDate == self.previousGameStartedDate):
+						self.gameData.populateAllGameData()
 						self.gameData.outputOpponentData()
 						logging.info("before startbets")
 						self.StartBets()
@@ -749,9 +750,8 @@ class GameData():
 		else:
 			self.cohRunning = False
 			return None
-	
-	def populateAllGameData(self):
 
+	def getReplayMemoryAddress(self):
 		# First Check if self.cohMemoryAddress is a valid handle if not try to get one.
 		try:
 			with Process.open_process(self.cohMemoryAddress) as p:
@@ -759,28 +759,33 @@ class GameData():
 		except:
 			self.cohMemoryAddress = self.getCOHMemoryAddress()
 
-		replayMemoryAddress = None
-
 		try:
 			with Process.open_process(self.cohMemoryAddress) as p:
 				buff = bytes(b"COH__REC")
 				replayMemoryAddress = p.search_all_memory(buff)
+				# Check if replayMemoryAddress has been assigned if not return.
+				if len(replayMemoryAddress) != 1:
+					self.gameCurrentlyActive = False
+					return
+				# Program will get here if the program found a valid memory address for COH__REC therefore the game is active.
+				self.gameCurrentlyActive = True
+				return replayMemoryAddress
 		except:
-			logging.error("Invalid Memory Address")
 			return
+			
+	
+	def populateAllGameData(self):
+
+		replayMemoryAddress = self.getReplayMemoryAddress()
 
 		# Check if replayMemoryAddress has been assigned if not return.
 		try:
 			assert(len(replayMemoryAddress) == 1)
 		except Exception as e:
-			print("Couldn't find COH__REC : " + str(e))
 			self.gameCurrentlyActive = False
 			return
-
 		try:
 			with Process.open_process(self.cohMemoryAddress) as p:
-				# Program will get here if the program found a valid memory address for COH__REC therefore the game is active.
-				self.gameCurrentlyActive = True
 				# clear the playerList
 				if self.playerList:
 					self.playerList.clear()
@@ -802,9 +807,9 @@ class GameData():
 				mapNameStartIndex = data_dump.find(b"RelicCoH")
 				mapNameLength = bytearray(data_dump[mapNameStartIndex+8:mapNameStartIndex+12])
 				mapNameLength = int.from_bytes(mapNameLength, byteorder='little', signed=False)
-				print("mapName Length : {}".format(mapNameLength))
+				#print("mapName Length : {}".format(mapNameLength))
 				mapNameFull = bytearray(data_dump[mapNameStartIndex+12:mapNameStartIndex+12+mapNameLength])
-				print("mapNameFull : {}".format(mapNameFull))
+				#print("mapNameFull : {}".format(mapNameFull))
 				self.mapName = mapNameFull
 
 				#do a regular expression match to find all occurances of DATAINFO in the data_dump
@@ -900,6 +905,7 @@ class GameData():
 			logging.info("Problem in populateGameData")
 			logging.exception("Stack")
 			logging.error(str(e))
+
 
 	def testOutput(self):
 		steamNumber = self.parameters.data.get('steamNumber')
