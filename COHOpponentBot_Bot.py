@@ -735,6 +735,7 @@ class GameData():
 		self.ircStringOutputList = [] # This holds a list of IRC string outputs.
 
 		self.mapName = None
+		self.mapLocation = None
 
 
 	def refreshParameters(self, parameters):
@@ -796,22 +797,52 @@ class GameData():
 				data_dump = bytearray(data_dump)
 
 				# get game start date
-				startDate = bytearray(data_dump[8:40])
-				startDate = startDate.decode('utf-16le').strip()
+				#need to read letter by letter and add to bullt string until every null 2 bytes because string format may change 
+				startDate = ""
+				n = 1
+				start = 8
+				while n < len(data_dump):
+					character = bytearray(data_dump[start:start+2])
+					if character == bytearray(b"\x00\x00"):
+						break
+					startDate += character.decode('utf-16le')
+					start += 2
+					n += 1
+					print(startDate)
 				#print("startDate {}".format(startDate))
 				#self.gameStartedDate = startDate
-				try:
-					self.gameStartedDate = datetime.strptime(str(startDate), '%d/%m/%Y %H:%M') #Attempt to convert string objected to timestamp.
-				except:
-					pass
-				mapNameStartIndex = data_dump.find(b"RelicCoH")
-				mapNameLength = bytearray(data_dump[mapNameStartIndex+8:mapNameStartIndex+12])
+				self.gameStartedDate = startDate
+				#try:
+				#	self.gameStartedDate = datetime.strptime(str(startDate), '%d/%m/%Y %H:%M') #Attempt to convert string objected to timestamp.
+				#except:
+				#	pass
+				mapNameStartIndex = data_dump.find(b"DATA:")
+				if mapNameStartIndex == -1:
+					return
+				start = mapNameStartIndex
+				print("start {}".format(start))
+				mapNameLength = bytearray(data_dump[start-4:start])
 				mapNameLength = int.from_bytes(mapNameLength, byteorder='little', signed=False)
+<<<<<<< HEAD
 				#print("mapName Length : {}".format(mapNameLength))
 				mapNameFull = bytearray(data_dump[mapNameStartIndex+12:mapNameStartIndex+12+mapNameLength])
 				#print("mapNameFull : {}".format(mapNameFull))
 				self.mapName = mapNameFull
+=======
+				print("mapName Length : {}".format(mapNameLength))
+				mapNameFull = bytearray(data_dump[start:start+mapNameLength])
+				print("mapNameFull : {}".format(mapNameFull))
+				self.mapLocation = mapNameFull.decode('ascii')
+>>>>>>> 35b574fd10549610320f3c0ceca7fd10007cc57a
 
+				#get the mapsize from filename
+				words = self.mapLocation.split("\\")
+
+				self.mapName = words[-1]
+				try:
+					self.mapSize = int(self.mapName[0:1])
+				except:
+					pass
 				#do a regular expression match to find all occurances of DATAINFO in the data_dump
 				matchobject = re.finditer(b'DATAINFO', data_dump)
 				self.numberOfSlots = len(re.findall(b'DATAINFO', data_dump))
@@ -887,7 +918,6 @@ class GameData():
 				self.hardCPUCount = hardCounter
 				self.expertCPUCount = expertCounter
 
-				self.mapSize = self.numberOfPlayers # tempory until the mapsize it taken from memory
 
 				#set the current MatchType
 				self.matchType = MatchType.BASIC
@@ -1268,6 +1298,11 @@ class GameData():
 		output += "Expert CPU : {}\n".format(str(self.expertCPUCount))
 		output += "Number Of Humans : {}\n".format(str(self.numberOfHumans))
 		output += "Match Type : {}\n".format(str(self.matchType.name))
+		output += "Full Map Location : {}\n".format(str(self.mapLocation))
+		output += "Map Name : {}\n".format(str(self.mapName))
+		output += "Map Size : {}\n".format(str(self.mapSize))
+
+
 		output += "COH running : {}\n".format(str(self.cohRunning)) 
 		output += "Game Active : {}\n".format(str(self.gameCurrentlyActive)) 
 
