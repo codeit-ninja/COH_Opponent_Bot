@@ -974,11 +974,6 @@ class GameData():
 				steamNumber = self.find_between(item, "steam/", "]")
 				steamNumberList.append(steamNumber)			
 
-			# clear the steam number list if a new game is found in the file
-			if ("AutoMatchForm - Starting game") in item:
-				steamNumberList.clear()
-				logging.info("CLEARING PLAYER LIST\n")
-
 		statsList = []
 
 		statRequest = StatsRequest()
