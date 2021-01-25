@@ -343,13 +343,13 @@ class MemoryMonitor (threading.Thread):
 					self.gameData.getReplayMemoryAddress()
 
 				if (self.gameData.cohRunning and self.gameData.gameCurrentlyActive):
-					if not (self.gameData.gameStartedDate == self.previousGameStartedDate):
+					if not (str(self.gameData.gameStartedDate) == str(self.previousGameStartedDate)):
 						self.gameData.populateAllGameData()
 						self.gameData.outputOpponentData()
 						logging.info("before startbets")
 						self.StartBets()
 						logging.info("after startbets")
-						self.previousGameStartedDate = self.gameData.gameStartedDate
+						self.previousGameStartedDate = str(self.gameData.gameStartedDate)
 
 				self.event.wait(timeout = self.pollInterval)
 
