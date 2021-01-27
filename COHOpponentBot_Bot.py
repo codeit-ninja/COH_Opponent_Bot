@@ -316,77 +316,6 @@ class StatsRequest:
 			#print("playerStats : " + str(playerStats))
 			return playerStats
 
-class MemoryMonitor (threading.Thread):
-	def __init__(self, pollInterval = 10, ircClient = None):
-		Thread.__init__(self)
-		self.running = True
-		self.pollInterval = pollInterval
-		self.event = threading.Event()
-
-		self.ircClient = ircClient
-		self.gameData = GameData(ircClient=self.ircClient)
-
-		self.previousGameStartedDate = None
-		self.parameters = Parameters()
-	
-	def run(self):
-		# While the montitor runs it needs to check for the following:
-		# a new game has started - ouput irc, output overlay, startbets
-		# a running game has ended = clear overlay, win , lose
-		if not self.ircClient:
-			logging.error("IRC Client not found.")
-			return
-		try:
-			while self.running:
-
-				if self.gameData:
-					self.gameData.getReplayMemoryAddress()
-
-				if (self.gameData.cohRunning and self.gameData.gameCurrentlyActive):
-					if not (str(self.gameData.gameStartedDate) == str(self.previousGameStartedDate)):
-						self.gameData.populateAllGameData()
-						self.gameData.outputOpponentData()
-						logging.info("before startbets")
-						self.StartBets()
-						logging.info("after startbets")
-						self.previousGameStartedDate = str(self.gameData.gameStartedDate)
-
-				self.event.wait(timeout = self.pollInterval)
-
-		except Exception as e:
-			logging.error("An Error Occurred in MemoryMonitor")
-			logging.exception("Stack Trace : ")
-			logging.error(str(e))
-
-	def StartBets(self):
-		logging.info("Size of self.gameData.playerList in StartBets {}".format(len(self.gameData.playerList)))
-		if (self.parameters.data.get('writePlaceYourBetsInChat')):
-			playerString = ""
-			outputList = []
-			if self.gameData:
-				if self.gameData.playerList:
-					if len(self.gameData.playerList) == 2: # if two player make sure the streamer is put first
-						for player in self.gameData.playerList:
-							outputList.append(player.name + " " + player.faction.name)
-						# player list does not have steam numbers. Need to aquire these from warning.log
-						playerString = "{} Vs. {}".format(outputList[1], outputList[0])	
-						if self.gameData.playerList[0].stats:
-							if (str(self.parameters.data.get('steamNumber')) == str(self.gameData.playerList[0].stats.steamNumber)):			
-								playerString = "{} Vs. {}".format(outputList[0], outputList[1])									
-					self.ircClient.SendPrivateMessageToIRC("!startbets {}".format(playerString))
-
-	def refreshParameters(self, parameters):
-		if type(parameters) is Parameters:
-			self.parameters = parameters
-			if self.gameData:
-				self.gameData.refreshParameters(parameters)
-	
-	def close(self):
-		self.running = False
-		if self.event:
-			self.event.set()
-
-
 
 class FileMonitor (threading.Thread):
 
@@ -401,11 +330,13 @@ class FileMonitor (threading.Thread):
 			self.pollInterval = int(pollInterval)
 			self.filePath = filePath
 			self.event = threading.Event()
+			self.pauseBeforeGameStart = threading.Event()
 			f = open(self.filePath, 'r' , encoding='ISO-8859-1')
 			f.readlines()
 			self.filePointer = f.tell()
 			f.close()
 			logging.info("Initialzing with file length : " + str(self.filePointer) + "\n")
+			self.gameData = GameData(ircClient=ircClient)
 
 		except Exception as e:
 			logging.error("In FileMonitor __init__")
@@ -425,6 +356,10 @@ class FileMonitor (threading.Thread):
 				f.close()
 				#print("new File index = : " + str(self.filePointer) + "\n")
 				for line in lines:
+
+					if ("detected successful game start" in line):
+						self.GameStarted()
+
 					if ("Win notification" in line):
 						#Check if streamer won
 						theSteamNumber = self.find_between(line ,"/steam/" , "]")
@@ -456,6 +391,42 @@ class FileMonitor (threading.Thread):
 		except Exception as e:
 			logging.error("In FileMonitor run")
 			logging.error(str(e))
+
+	def GameStarted(self):
+		try:
+			if self.gameData:
+				while not self.gameData.gameCurrentlyActive:
+					self.gameData.getReplayMemoryAddress()
+					self.pauseBeforeGameStart.wait(self.pollInterval)
+				self.gameData.populateAllGameData()
+				self.gameData.outputOpponentData()
+				self.StartBets()
+		except Exception as e:
+			logging.info("Problem in GameStarted")
+			logging.error(str(e))
+			logging.exception("Stack :")
+
+	def StartBets(self):
+		try:
+			logging.info("Size of self.gameData.playerList in StartBets {}".format(len(self.gameData.playerList)))
+			if (bool(self.parameters.data.get('writePlaceYourBetsInChat'))):
+				playerString = ""
+				outputList = []
+				if self.gameData:
+					if self.gameData.playerList:
+						if len(self.gameData.playerList) == 2: # if two player make sure the streamer is put first
+							for player in self.gameData.playerList:
+								outputList.append(player.name + " " + player.faction.name)
+							# player list does not have steam numbers. Need to aquire these from warning.log
+							playerString = "{} Vs. {}".format(outputList[1], outputList[0])	
+							if self.gameData.playerList[0].stats:
+								if (str(self.parameters.data.get('steamNumber')) == str(self.gameData.playerList[0].stats.steamNumber)):			
+									playerString = "{} Vs. {}".format(outputList[0], outputList[1])									
+						self.ircClient.SendPrivateMessageToIRC("!startbets {}".format(playerString))
+		except Exception as e:
+			logging.error("Problem in StartBets")
+			logging.error(str(e))
+			logging.exception("Stack : ")
 	
 	def close(self):
 		logging.info("File Monitor Closing!")
@@ -463,6 +434,8 @@ class FileMonitor (threading.Thread):
 		# break out of loops if waiting
 		if self.event:
 			self.event.set()
+		if self.pauseBeforeGameStart:
+			self.pauseBeforeGameStart.set()
 
 	def refreshParameters(self, parameters):
 		if type(parameters) is Parameters:
@@ -796,46 +769,6 @@ class GameData():
 				data_dump = p.read_memory(replayMemoryAddress[0], (ctypes.c_byte * 4000)())
 				data_dump = bytearray(data_dump)
 
-				# get game start date
-				#need to read letter by letter and add to bullt string until every null 2 bytes because string format may change 
-				startDate = ""
-				n = 1
-				start = 8
-				while n < len(data_dump):
-					character = bytearray(data_dump[start:start+2])
-					if character == bytearray(b"\x00\x00"):
-						break
-					startDate += character.decode('utf-16le')
-					start += 2
-					n += 1
-					print(startDate)
-				#print("startDate {}".format(startDate))
-				#self.gameStartedDate = startDate
-				self.gameStartedDate = startDate
-				#try:
-				#	self.gameStartedDate = datetime.strptime(str(startDate), '%d/%m/%Y %H:%M') #Attempt to convert string objected to timestamp.
-				#except:
-				#	pass
-				mapNameStartIndex = data_dump.find(b"DATA:")
-				if mapNameStartIndex == -1:
-					return
-				start = mapNameStartIndex
-				print("start {}".format(start))
-				mapNameLength = bytearray(data_dump[start-4:start])
-				mapNameLength = int.from_bytes(mapNameLength, byteorder='little', signed=False)
-				print("mapName Length : {}".format(mapNameLength))
-				mapNameFull = bytearray(data_dump[start:start+mapNameLength])
-				print("mapNameFull : {}".format(mapNameFull))
-				self.mapLocation = mapNameFull.decode('ascii')
-
-				#get the mapsize from filename
-				words = self.mapLocation.split("\\")
-
-				self.mapName = words[-1]
-				try:
-					self.mapSize = int(self.mapName[0:1])
-				except:
-					pass
 				#do a regular expression match to find all occurances of DATAINFO in the data_dump
 				matchobject = re.finditer(b'DATAINFO', data_dump)
 				self.numberOfSlots = len(re.findall(b'DATAINFO', data_dump))
@@ -911,6 +844,7 @@ class GameData():
 				self.hardCPUCount = hardCounter
 				self.expertCPUCount = expertCounter
 
+				self.mapSize = self.numberOfPlayers
 
 				#set the current MatchType
 				self.matchType = MatchType.BASIC

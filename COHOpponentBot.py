@@ -129,7 +129,6 @@ class COHBotGUI:
 		self.b6.grid(row=5, column=2)
 
 		self.ircClient = None
-		self.automaticMemoryMonitor = None
 		self.automaticFileMonitor = None
 
 		self.style.configure('W.TButton', font = 'calibri', size = 10, foreground = 'red')
@@ -223,10 +222,6 @@ class COHBotGUI:
 		self.parameters = COHOpponentBot_Parameters.Parameters()
 		if self.ircClient:
 			self.ircClient.refreshParameters(self.parameters)
-		#if self.automaticFileMonitor:
-		#	self.automaticFileMonitor.refreshParameters()
-		#if self.automaticMemoryMonitor:
-		#	self.automaticMemoryMonitor.refreshParameters()
 
 	def showAboutDialogue(self):
 		InformationString = "Version : {}\n\nBuild Date : {}\n\nCreated by : XcomReborn\n\n Special thanks : AveatorReborn".format(VersionNumber, BuildDate)
@@ -483,7 +478,6 @@ class COHBotGUI:
 
 
 		self.parameters.save()
-		self.refreshParameters() # cascades refresh parameters for all objects that have local parameters object copies.
 		try:
 			if self.ircClient:
 				self.ircClient.parameters = self.parameters
@@ -503,13 +497,13 @@ class COHBotGUI:
 		self.b3.config(state = DISABLED)
 		self.b4.config(state = DISABLED)
 		self.b5.config(state = DISABLED)
+		self.b6.config(state = DISABLED)
 		self.e1.config(state = DISABLED)
 		self.e2.config(state = DISABLED)
 		self.e3.config(state = DISABLED)
 		self.e4.config(state = DISABLED)
 		self.e5.config(state = DISABLED)
 		self.connectButton.config(state = DISABLED)
-		self.b6.config(state = DISABLED)
 		self.testButton.config(state = DISABLED)
 
 	def enableButtons(self):
@@ -518,8 +512,8 @@ class COHBotGUI:
 		self.b3.config(state = NORMAL)
 		self.b4.config(state = NORMAL)
 		self.b5.config(state = NORMAL)
-		self.connectButton.config(state = NORMAL)
 		self.b6.config(state = NORMAL)
+		self.connectButton.config(state = NORMAL)
 		#self.testButton.config(state = NORMAL)
 		
 
@@ -659,7 +653,6 @@ class COHBotGUI:
 				#start thread
 				self.disableEverything()
 				self.connectButton.config(text = "Disconnect")
-				self.b6.config(state = NORMAL)
 				self.testButton.config(state = NORMAL)
 				self.ircClient = COHOpponentBot_Bot.IRCClient(self.txt, bool(self.consoleDisplayBool.get()))
 				self.ircClient.start()
@@ -674,16 +667,12 @@ class COHBotGUI:
 		self.closeMonitors()
 		#Create Monitor Threads and start them.
 		if self.ircClient:
-			self.automaticMemoryMonitor = COHOpponentBot_Bot.MemoryMonitor(self.parameters.data.get('filePollInterval'), ircClient= self.ircClient)
-			self.automaticMemoryMonitor.start()
 			self.automaticFileMonitor = COHOpponentBot_Bot.FileMonitor(self.parameters.data.get('logPath'), self.parameters.data.get('filePollInterval'), self.ircClient)
 			self.automaticFileMonitor.start()
 
 	def closeMonitors(self):
 		if self.automaticFileMonitor:
 			self.automaticFileMonitor.close()
-		if self.automaticMemoryMonitor:
-			self.automaticMemoryMonitor.close()
 
 	def on_closing(self):
 		logging.info("In on_closing program (Closing)")
