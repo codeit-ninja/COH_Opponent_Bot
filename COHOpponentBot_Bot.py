@@ -683,7 +683,6 @@ class GameData():
 	def __init__(self, ircClient = None):
 		self.parameters = Parameters()
 		self.playerList = []
-		self.ircOutputData = []
 		self.numberOfHumans = 0
 		self.numberOfComputers = 0
 		self.easyCPUCount = 0
@@ -763,8 +762,8 @@ class GameData():
 				# clear the playerList
 				if self.playerList:
 					self.playerList.clear()
-				if self.ircOutputData:
-					self.ircOutputData.clear()
+				if self.ircStringOutputList:
+					self.ircStringOutputList.clear()
 				#read an abitrary number of bytes from the COH__REC memory location 4000 should do this will cover the replay header and extras		
 				data_dump = p.read_memory(replayMemoryAddress[0], (ctypes.c_byte * 4000)())
 				data_dump = bytearray(data_dump)
@@ -945,7 +944,7 @@ class GameData():
 			# output to chat if customoutput ticked
 			if (self.parameters.data.get('useCustomPreFormat')):	
 				if (int(self.numberOfComputers) > 0):
-					self.ircOutputData.append("Game with " + str(self.numberOfComputers) + " computer AI, ("+str(self.easyCPUCount)+") Easy, ("+str(self.normalCPUCount)+") Normal, ("+str(self.hardCPUCount)+") Hard, ("+str(self.expertCPUCount)+") Expert.")	
+					self.ircStringOutputList.append("Game with " + str(self.numberOfComputers) + " computer AI, ("+str(self.easyCPUCount)+") Easy, ("+str(self.normalCPUCount)+") Normal, ("+str(self.hardCPUCount)+") Hard, ("+str(self.expertCPUCount)+") Expert.")	
 				for item in self.playerList:
 					#check if item has stats if not it is a computer
 					if item.stats:
