@@ -11,6 +11,7 @@ import requests
 import urllib.request # more for loadings jsons from urls
 import string
 import sys
+import winreg #  to get steamlocation automatically
 
 
 class Parameters:
@@ -53,6 +54,10 @@ class Parameters:
 		self.data['logPath'] = ""
 		self.data['temprecReplayPath'] = ""
 
+		self.data['streamFolder'] = ""
+		self.data['cohPath'] = ""
+		self.data['cohUCSPath'] = ""
+
 		self.data['useOverlayPreFormat'] = True
 		self.data['overlayStringPreFormatLeft'] = "$NAME$ ($FLAGICON$) $LEVELICON$ #$RANK$ $FACTIONICON$"
 		self.data['mirrorLeftToRightOverlay'] = True
@@ -93,6 +98,66 @@ class Parameters:
 					logging.error(str(e))
 		except Exception as e:
 			logging.error(str(e))
+
+
+		try:
+			if self.data['cohPath'] == "":
+				#connecting to key in registry
+				try:
+					#64 bit windows
+					access_registry = winreg.ConnectRegistry(None,winreg.HKEY_LOCAL_MACHINE)
+					access_key = winreg.OpenKey(access_registry,r"SOFTWARE\WOW6432Node\Valve\Steam")
+					steam_path = winreg.QueryValueEx(access_key, "InstallPath")
+					if steam_path:
+						self.data['steamFolder'] = steam_path[0]
+				except:
+					pass
+
+				try:
+					#32 bit windows
+					access_registry = winreg.ConnectRegistry(None,winreg.HKEY_LOCAL_MACHINE)
+					access_key = winreg.OpenKey(access_registry,r"SOFTWARE\Valve\Steam")
+					steam_path = winreg.QueryValueEx(access_key, "InstallPath")
+					if steam_path:
+						self.data['steamFolder'] = steam_path[0]
+				except:
+					pass
+
+		except Exception as e:
+			logging.error(str(e))
+			logging.exception("Stack : ")
+
+		#get cohLocation
+
+		filePath = self.data['steamFolder'] + "\\steamapps\\libraryfolders.vdf"
+		steamlibraryBases = []
+		if self.data['steamFolder']:
+			steamlibraryBases.append(self.data['steamFolder'])
+
+		try:
+			if (os.path.isfile(filePath)):
+				with open(filePath) as f:
+					for line in f:
+						words = line.split()
+						try:
+							if int(words[0]) is int:
+								steamlibraryBases.append(line[1])
+						except:
+							pass
+			print(steamlibraryBases)
+			for steamBase in steamlibraryBases:
+				cohPath = steamBase + "\\steamapps\\common\\Company of Heroes Relaunch\\RelicCOH.exe"
+				if (os.path.isfile(cohPath)):
+					self.data['cohPath'] = cohPath
+					ucsPath = steamBase + "\\steamapps\\common\\Company of Heroes Relaunch\\CoH\\Engine\\Locale\\English\\RelicCOH.English.ucs"
+					if (os.path.isfile(ucsPath)):
+						self.data['cohUCSPath'] = ucsPath
+
+		except Exception as e:
+			logging.error("Problem in load")
+			logging.error(str(e))
+
+
 
 		try:
 			self.data['temprecReplayPath'] = self.data.get('logPath').replace("warnings.log" , "playback\\temp.rec")

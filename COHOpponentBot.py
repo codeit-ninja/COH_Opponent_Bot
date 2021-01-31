@@ -1,5 +1,5 @@
 VersionNumber = "2.0"
-BuildDate = "16-Jan-2021"
+BuildDate = "31-Jan-2021"
 
 import COHOpponentBot_Parameters
 import sys
@@ -19,8 +19,6 @@ import os
 from icon import Icon
 
 import logging # For logging information and warnings about opperation errors
-
-
 
 
 class COHBotGUI:
@@ -68,22 +66,30 @@ class COHBotGUI:
 		tk.Label(self.master, text="Bot oAuth Key").grid(row=2, sticky=tk.W)
 		tk.Label(self.master, text="Steam64ID Number").grid(row=3, sticky=tk.W)
 		tk.Label(self.master, text="warning.log path").grid(row=4, sticky=tk.W)
+		tk.Label(self.master, text="RelicCOH.exe path").grid(row=5, sticky=tk.W)
 
 		self.e1 = tk.Entry(self.master, width = 70)
 		self.e2 = tk.Entry(self.master, width = 70)
 		self.e3 = tk.Entry(self.master, width = 70)
 		self.e4 = tk.Entry(self.master, width = 70)
 		self.e5 = tk.Entry(self.master, width = 70)
+		self.e6 = tk.Entry(self.master, width = 70)
 
 		self.e1.grid(row=0, column=1)
 		self.e2.grid(row=1, column=1)
 		self.e3.grid(row=2, column=1)
 		self.e4.grid(row=3, column=1)
 		self.e5.grid(row=4, column=1)
+		self.e6.grid(row=5, column=1)
 
 		logPath = self.parameters.data.get('logPath')
 		if (logPath):
 			self.e5.insert(0, str(logPath))
+
+		cohPath = self.parameters.data.get('cohPath')
+		if (cohPath):
+			self.e6.insert(0, str(cohPath))
+		
 
 		steamNumber = "enter your steam number"
 		if self.parameters.data.get('steamNumber'):
@@ -108,6 +114,7 @@ class COHBotGUI:
 		self.e3.config(state = "disabled")
 		self.e4.config(state = "disabled")
 		self.e5.config(state = "disabled")
+		self.e6.config(state = "disabled")
 
 		self.b1 = tk.Button(self.master, text = "edit", command = lambda: self.editTwitchName())
 		self.b1.config(width = 10)
@@ -124,9 +131,12 @@ class COHBotGUI:
 		self.b5 = tk.Button(self.master, text = "browse", command = lambda : self.locateWarningLog() )
 		self.b5.config(width = 10)
 		self.b5.grid(row=4, column=2)
+		self.cohBrowseButton = tk.Button(self.master, text = "browse", command = lambda : self.locateCOH() )
+		self.cohBrowseButton.config(width = 10)
+		self.cohBrowseButton.grid(row=5, column=2)
 		self.b6 = tk.Button(self.master, text = "options", command = self.createOptionsMenu )
 		self.b6.config(width = 10)
-		self.b6.grid(row=5, column=2)
+		self.b6.grid(row=6, column=2)
 
 		self.ircClient = None
 		self.automaticFileMonitor = None
@@ -134,29 +144,29 @@ class COHBotGUI:
 		self.style.configure('W.TButton', font = 'calibri', size = 10, foreground = 'red')
 		self.connectButton = ttk.Button(self.master, text = "Connect",style ='W.TButton', command = lambda : self.connectIRC(self.ircClient))
 
-		self.connectButton.grid(row=6, columnspan = 3, sticky = tk.W+tk.E+tk.N+tk.S, padx=30,pady=30)
+		self.connectButton.grid(row=7, columnspan = 3, sticky = tk.W+tk.E+tk.N+tk.S, padx=30,pady=30)
 
 		self.consoleDisplayBool = IntVar()
 
 		self.testButton = tk.Button(self.master, text = "Test Output", command = self.testStats )
 		self.testButton.config(width = 10)
-		self.testButton.grid(row =8, column=2 ,sticky=tk.E)
+		self.testButton.grid(row =9, column=2 ,sticky=tk.E)
 		self.testButton.config(state = DISABLED)
 
 		self.clearOverlayButton = tk.Button(self.master, text = "Clear Overlay", command = COHOpponentBot_Bot.GameData.clearOverlayHTML)
 		self.clearOverlayButton.config(width = 10)
-		self.clearOverlayButton.grid(row = 9, column=2, sticky=tk.E)
+		self.clearOverlayButton.grid(row = 10, column=2, sticky=tk.E)
 
 
 
 		tk.Label(self.master, text="Console Output:").grid(row=10, sticky=tk.W)
 		# create a Text widget
 		self.txt = tk.Text(self.master)
-		self.txt.grid(row=11, columnspan=3, sticky="nsew", padx=2, pady=2)
+		self.txt.grid(row=12, columnspan=3, sticky="nsew", padx=2, pady=2)
 
 		# create a Scrollbar and associate it with txt
 		scrollb = ttk.Scrollbar(self.master, command=self.txt.yview)
-		scrollb.grid(row=11, column=4, sticky='nsew')
+		scrollb.grid(row=12, column=4, sticky='nsew')
 		self.txt['yscrollcommand'] = scrollb.set
 
 		# import icon base64 data from separate icon.py file
@@ -503,6 +513,7 @@ class COHBotGUI:
 		self.e3.config(state = DISABLED)
 		self.e4.config(state = DISABLED)
 		self.e5.config(state = DISABLED)
+		self.e6.config(state = DISABLED)
 		self.connectButton.config(state = DISABLED)
 		self.testButton.config(state = DISABLED)
 
@@ -628,6 +639,24 @@ class COHBotGUI:
 			self.parameters.save()
 		self.enableButtons()
 
+	def locateCOH(self):
+		self.disableEverything()
+		self.master.filename =  tk.filedialog.askopenfilename(initialdir = "/",title = "Select location of RelicCOH.exe file",filetypes = (("log file","*.exe"),("all files","*.*")))
+		logging.info("File Path : " + str(self.master.filename))
+		print("File Path : " + str(self.master.filename))
+		if(self.master.filename != ""):
+			pattern = re.compile(r"\u20A9|\uFFE6|\u00A5|\uFFE5") # replaces both Won sign varients for korean language and Yen symbol for Japanese language paths
+			theFilename = re.sub(pattern, "/", self.master.filename)
+			self.parameters.data['logPath'] = theFilename.replace("/",'\\')
+			self.e6.config(state = NORMAL)
+			self.e6.delete(0, tk.END)
+			logpath = self.parameters.data.get('cohPath')
+			if logpath:
+				self.e6.insert(0, str(logpath))
+			self.e6.config(state = DISABLED)
+			self.parameters.save()
+		self.enableButtons()
+
 
 
 	def connectIRC(self, thread):
@@ -686,6 +715,7 @@ class COHBotGUI:
 			pass
 		logging.info("Exiting main thread")
 		sys.exit()
+
 
 
 # Program Entry Starts here

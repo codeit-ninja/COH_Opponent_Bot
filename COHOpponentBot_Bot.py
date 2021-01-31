@@ -32,6 +32,7 @@ import ctypes
 from mem_edit import Process
 import mem_edit
 import binascii
+from functools import partial
 
 
 #Because python floating point arthmatic is a nightmare
@@ -279,6 +280,15 @@ class IRC_Channel(threading.Thread):
 		if (message.lower() == "test") and ((str(userName).lower() == str(self.parameters.privatedata.get('adminUserName')).lower()) or (str(userName) == str(self.parameters.data.get('channel')).lower())):
 			self.ircClient.SendPrivateMessageToIRC("I'm here! Pls give me mod to prevent twitch from autobanning me for spam if I have to send a few messages quickly.")
 			self.ircClient.output.insert(END, "Oh hi again, I heard you in the " +self.channel[1:] + " channel.\n")
+
+		if (message.lower() == "gameinfo"):
+			self.gameInfo()
+
+	def gameInfo(self):
+		if not self.gameData:
+			self.gameData = GameData(self.ircClient)
+		self.gameData.populateAllGameData()
+		self.ircClient.SendPrivateMessageToIRC("Map : {}, Mod : {}, Start : {}, High Resources : {}, Automatch : {}, Slots : {}, Players : {}.".format(self.gameData.mapFullName,self.gameData.modName,self.gameData.randomStart,self.gameData.highResources, self.gameData.automatch, self.gameData.mapSize,  self.gameData.numberOfPlayers))
 
 	def testOutput(self):
 		if not self.gameData:
@@ -706,8 +716,12 @@ class GameData():
 
 		self.ircStringOutputList = [] # This holds a list of IRC string outputs.
 
-		self.mapName = None
-		self.mapLocation = None
+		self.randomStart = None
+		self.highResources = None
+		self.VPCount = None
+		self.automatch = None
+		self.mapFullName = None
+		self.modName = None
 
 
 	def refreshParameters(self, parameters):
@@ -765,40 +779,35 @@ class GameData():
 				if self.ircStringOutputList:
 					self.ircStringOutputList.clear()
 				#read an abitrary number of bytes from the COH__REC memory location 4000 should do this will cover the replay header and extras		
-				data_dump = p.read_memory(replayMemoryAddress[0], (ctypes.c_byte * 4000)())
+				data_dump = p.read_memory(replayMemoryAddress[0]-4, (ctypes.c_byte * 4000)())
 				data_dump = bytearray(data_dump)
 
-				#do a regular expression match to find all occurances of DATAINFO in the data_dump
-				matchobject = re.finditer(b'DATAINFO', data_dump)
-				self.numberOfSlots = len(re.findall(b'DATAINFO', data_dump))
+				cohinfo = COH_Replay_Parser()
+				cohinfo.data = data_dump
+				cohinfo.processData()
 
-				for item in matchobject:
-					#for each start index found read the username and faction and put them in a list
-					indexOfDATAINFO = int(item.start())
+				self.gameStartedDate = cohinfo.localDate
 
-					#Dissect out the 4 bytes containing the user name string length and cast that to an int
-					start = (indexOfDATAINFO + 28)
-					end = start + 4
-					usernamelength = bytearray(data_dump[start:end])
-					usernamelength = int.from_bytes(usernamelength, byteorder='little', signed=False)
+				print(cohinfo)
 
-					#Use the user name length to dissect out the bytes for the user name encoded as 'utf-16le'
-					start = (indexOfDATAINFO + 28 + 4)
-					end = start + (usernamelength*2)
-					username = bytearray(data_dump[start:end])
+				if self.randomStart:
+					self.randomStart = "Random"
+				else:
+					self.randomStart = "Fixed"
+				self.highResources = cohinfo.highResources
+				self.VPCount = cohinfo.VPCount
+				if cohinfo.matchType.lower() == "automatch":
+					self.automatch = True
+				else:
+					self.automatch = False
+				self.mapFullName = cohinfo.mapNameFull
+				self.modName = cohinfo.modName
 
-					#Dissect out the 4 bytes containing the length of the faction string
-					start = (indexOfDATAINFO + 32 + 8 + (usernamelength*2))
-					end = start + 4
-					lengthOfFactionString = bytearray(data_dump[start:end])
-					lengthOfFactionString = int.from_bytes(lengthOfFactionString, byteorder='little', signed=False)
-
-					#Use the length of the faction string to get the faction string encoded as 8 bit ASCII
-					start = indexOfDATAINFO + 32 + 8 + (usernamelength*2) + 4
-					end = start + lengthOfFactionString
-					factionString = bytearray(data_dump[start:end])
-
-					player = Player(name=bytearray(username).decode('utf-16le'),factionString=bytearray(factionString).decode('ascii'))
+				
+				for item in cohinfo.playerList:
+					username = item['name']
+					factionString = item['faction']
+					player = Player(name=username,factionString=factionString)
 					self.playerList.append(player)
 
 				statList = self.getStatsFromLogFile()
@@ -843,7 +852,7 @@ class GameData():
 				self.hardCPUCount = hardCounter
 				self.expertCPUCount = expertCounter
 
-				self.mapSize = self.numberOfPlayers
+				self.mapSize = len(cohinfo.playerList)
 
 				#set the current MatchType
 				self.matchType = MatchType.BASIC
@@ -1232,6 +1241,357 @@ class GameData():
 	def __repr__(self):
 		return str(self)
 
+
+
+class COH_Replay_Parser:
+	"""Parses a company of heroes 1 replay to extract as much useful information from it as possible."""
+
+	def __init__(self, filePath = None) -> None:
+
+
+		self.filePath = filePath
+
+		self.fileVersion = None
+		self.chunkyVersion = None
+		self.randomStart = None
+		self.highResources = None
+		self.VPCount = None
+		self.matchType = None
+		self.localDate = None
+		self.unknownDate = None
+		self.replayName = None
+		self.gameVersion = None
+		self.modName = None
+		self.mapName = None
+		self.mapNameFull = None
+		self.mapDescription = None
+		self.mapDescriptionFull = None
+		self.mapFileName = None
+		self.mapWidth = None
+		self.mapHeight = None
+		self.playerList = []
+
+		self.data = None
+		self.dataIndex = 0
+
+		if filePath:
+			self.load(self.filePath)
+
+	def read_UnsignedLong4Bytes(self) -> int:
+		"""Reads 4 bytes as an unsigned long int."""
+		try:
+			if self.data:
+				fourBytes = bytearray(self.data[self.dataIndex:self.dataIndex+4])
+				self.dataIndex += 4
+				theInt = int.from_bytes(fourBytes, byteorder='little', signed=False)
+				return theInt
+		except Exception as e:
+			logging.error("Failed to read 4 bytes")
+			logging.exception("Stack Trace: ")
+
+	def read_Bytes(self, numberOfBytes):
+		"""reads a number of bytes from the data array"""
+		try:
+			if self.data:
+				output = bytearray(self.data[self.dataIndex:self.dataIndex+numberOfBytes])
+				self.dataIndex += numberOfBytes
+				return output
+		except Exception as e:
+			logging.error("Failed to Read bytes")
+			logging.exception("Stack Trace: ")
+
+
+	def read_LengthString(self):
+		"""Reads the first 4 bytes containing the string length and then the rest of the string."""
+		try:
+			if self.data:
+				stringLength = self.read_UnsignedLong4Bytes()
+				theString = self.read_2ByteString(stringLength =stringLength)
+				return theString
+		except Exception as e:
+			logging.error("Failed to read a string of specified length")
+			logging.exception("Stack Trace: ")
+
+	def read_2ByteString(self, stringLength=0 ) -> str:
+		"""Reads a 2byte encoded little-endian string of specified length."""
+		try:
+			if self.data:
+				theBytes = bytearray(self.data[self.dataIndex:self.dataIndex+(stringLength*2)])
+				self.dataIndex += stringLength*2
+				theString = theBytes.decode('utf-16le')
+				return theString
+		except Exception as e:
+			logging.error("Failed to read a string of specified length")
+			logging.exception("Stack Trace: ")            
+
+	def read_LengthASCIIString(self) -> str:
+		"""Reads ASCII string, the length defined by the first four bytes."""
+		try:
+			if self.data:
+				stringLength = self.read_UnsignedLong4Bytes()
+				theString = self.read_ASCIIString(stringLength=stringLength)
+				return theString
+		except Exception as e:
+			logging.error("Failed to read a string of specified length")
+			logging.exception("Stack Trace: ")  
+
+	def read_ASCIIString(self, stringLength=0) -> str:
+		"""Reads a byte array of spcified length and attempts to convert it into a string."""
+		try:
+			if self.data:
+				theBytes = bytearray(self.data[self.dataIndex:self.dataIndex+stringLength])
+				self.dataIndex += stringLength
+				theString = theBytes.decode('ascii')
+				return theString
+		except Exception as e:
+			logging.error("Failed to read a string of specified length")
+			logging.exception("Stack Trace: ")  
+
+	def read_NULLTerminated_2ByteString(self) -> str:
+		"""Reads a Utf-16 little endian character string until the first two byte NULL value."""
+		try:
+			if self.data:
+				characters = ""
+				for character in iter(partial(self.read_Bytes, 2) , bytearray(b"\x00\x00")):
+					characters += bytearray(character).decode('utf-16le')
+				return characters    
+		except Exception as e:
+			logging.error("Failed to read a string of specified length")
+			logging.exception("Stack Trace: ")  
+
+	def read_NULLTerminated_ASCIIString(self) -> str:
+		"""Reads a byte array until the first NULL and converts to a string."""
+		try:
+			if self.data:
+				characters = ""
+				for character in iter(partial(self.read_Bytes, 1) , bytearray(b"\x00")):
+					characters += bytearray(character).decode('ascii')
+				return characters  
+		except Exception as e:
+			logging.error("Failed to read a string of specified length")
+			logging.exception("Stack Trace: ")  
+
+	def seek(self, numberOfBytes, relative = 0):
+		"""Moves the file index a number of bytes forward or backward"""
+		try:
+			numberOfBytes = int(numberOfBytes)
+			relative = int(relative)
+			if relative == 0:
+				assert(0 <= numberOfBytes <= len(self.data))
+				self.dataIndex = numberOfBytes
+			if relative == 1:
+				assert(0 <= (numberOfBytes+self.dataIndex) <= len(self.data))
+				self.dataIndex += numberOfBytes
+			if relative == 2:
+				assert(0 <= (len(self.data) - numberOfBytes) <= len(self.data))
+				self.dataIndex = len(self.data) - numberOfBytes
+		except Exception as e:
+			logging.error("Failed move file Index")
+			logging.exception("Stack Trace: ")
+			return None          
+
+
+
+	def load(self, filePath = ""):
+		with open(filePath, "rb") as fileHandle:
+			self.data = fileHandle.read()
+		self.processData()
+
+	def processData(self):
+
+		#Process the file Header
+		self.fileVersion = self.read_UnsignedLong4Bytes()
+
+		cohrec = self.read_ASCIIString(stringLength= 8)
+
+		self.localDate = self.read_NULLTerminated_2ByteString()
+
+		self.seek(76,0)
+
+		firstRelicChunkyAddress = self.dataIndex
+
+		relicChunky = self.read_ASCIIString(stringLength=12)
+
+		unknown = self.read_UnsignedLong4Bytes()
+
+		self.chunkyVersion = self.read_UnsignedLong4Bytes() # 3
+
+		unknown = self.read_UnsignedLong4Bytes()
+
+		self.chunkyHeaderLength = self.read_UnsignedLong4Bytes()
+		
+		self.seek(-28,1) # sets file pointer back to start of relic chunky
+		self.seek(self.chunkyHeaderLength, 1) # seeks to begining of FOLDPOST
+
+		self.seek(firstRelicChunkyAddress, 0)
+		self.seek(96,1) # move pointer to the position of the second relic chunky
+		secondRelicChunkyAddress = self.dataIndex
+
+		relicChunky = self.read_ASCIIString(stringLength=12)
+
+		unknown = self.read_UnsignedLong4Bytes()
+		chunkyVersion = self.read_UnsignedLong4Bytes() # 3
+		unknown = self.read_UnsignedLong4Bytes()
+		chunkLength = self.read_UnsignedLong4Bytes()
+		
+		self.seek(secondRelicChunkyAddress, 0)
+		self.seek(chunkLength, 1) # seek to position of first viable chunk
+
+		self.parseChunk(0)
+		self.parseChunk(0)
+
+		#get mapname and mapdescription from ucs file if they exist there
+		self.mapNameFull = UCS().compareUCS(self.mapName)
+		self.mapDescriptionFull = UCS().compareUCS(self.mapDescription)
+
+
+	def parseChunk(self, level):
+
+		chunkType = self.read_ASCIIString(stringLength= 8) # Reads FOLDFOLD, FOLDDATA, DATASDSC, DATAINFO etc
+
+		chunkVersion = self.read_UnsignedLong4Bytes()
+
+		chunkLength = self.read_UnsignedLong4Bytes()
+
+		chunkNameLength = self.read_UnsignedLong4Bytes()
+
+		self.seek(8,1)
+
+		chunkName = ""
+		if chunkNameLength > 0:
+			chunkName = self.read_ASCIIString(stringLength=chunkNameLength)
+
+		chunkStart = self.dataIndex
+
+		#Here we start a recusive loop
+		if chunkType:
+			if (chunkType.startswith("FOLD")):
+
+				while (self.dataIndex < (chunkStart + chunkLength )):
+					self.parseChunk(level=level+1)
+
+		if (chunkType == "DATASDSC") and (int(chunkVersion) == 2004):
+
+			unknown = self.read_UnsignedLong4Bytes()
+			self.unknownDate = self.read_LengthString()
+			unknown = self.read_UnsignedLong4Bytes()
+			unknown = self.read_UnsignedLong4Bytes()
+			unknown = self.read_UnsignedLong4Bytes()
+			self.modName = self.read_LengthASCIIString() 
+			self.mapFileName = self.read_LengthASCIIString()
+			unknown = self.read_UnsignedLong4Bytes()
+			unknown = self.read_UnsignedLong4Bytes()
+			unknown = self.read_UnsignedLong4Bytes()
+			unknown = self.read_UnsignedLong4Bytes()
+			unknown = self.read_UnsignedLong4Bytes()
+			self.mapName = self.read_LengthString()
+			
+			value = self.read_UnsignedLong4Bytes() 
+			if value != 0: # test to see if data is replicated or not
+				unknown = self.read_2ByteString(value)
+			self.mapDescription = self.read_LengthString()
+			unknown = self.read_UnsignedLong4Bytes()
+			self.mapWidth = self.read_UnsignedLong4Bytes()
+			self.mapHeight = self.read_UnsignedLong4Bytes()
+			unknown = self.read_UnsignedLong4Bytes()
+			unknown = self.read_UnsignedLong4Bytes()
+			unknown = self.read_UnsignedLong4Bytes() 
+
+		if(chunkType == "DATABASE") and (int(chunkVersion == 11)):
+
+			self.seek(16, 1)
+
+			self.randomStart = (self.read_UnsignedLong4Bytes() == 0)
+			
+			COLS = self.read_UnsignedLong4Bytes()
+			
+			self.highResources = (self.read_UnsignedLong4Bytes() == 1)
+
+			TSSR = self.read_UnsignedLong4Bytes()
+			
+			self.VPCount = 250 * (1 << (int)(self.read_UnsignedLong4Bytes()))
+
+			self.seek(5, 1)
+
+			self.replayName = self.read_LengthString()
+
+			self.seek(8, 1)
+
+			self.VPGame = (self.read_UnsignedLong4Bytes() ==  0x603872a3)
+
+			self.seek(23 , 1)
+
+			self.read_LengthASCIIString()
+
+			self.seek(4,1)
+
+			self.read_LengthASCIIString()
+
+			self.seek(8,1)
+
+			if (self.read_UnsignedLong4Bytes() == 2):
+				self.read_LengthASCIIString()
+				self.gameVersion = self.read_LengthASCIIString()
+			self.read_LengthASCIIString()
+			self.matchType = self.read_LengthASCIIString()
+
+		if(chunkType == "DATAINFO") and (chunkVersion == 6):
+
+			userName = self.read_LengthString()
+			self.read_UnsignedLong4Bytes()
+			self.read_UnsignedLong4Bytes()
+			faction = self.read_LengthASCIIString()
+			self.read_UnsignedLong4Bytes()
+			self.read_UnsignedLong4Bytes()
+			self.playerList.append({'name':userName,'faction':faction})
+
+
+		self.seek(chunkStart + chunkLength, 0)
+
+	def __str__(self) -> str:
+		output = "Data:\n"
+		output += "fileVersion : {}\n".format(self.fileVersion)
+		output += "chunkyVersion : {}\n".format(self.chunkyVersion)
+		output += "randomStart : {}\n".format(self.randomStart)
+		output += "highResources : {}\n".format(self.highResources)
+		output += "VPCount : {}\n".format(self.VPCount)
+		output += "matchType : {}\n".format(self.matchType)
+		output += "localDate : {}\n".format(self.localDate)
+		output += "unknownDate : {}\n".format(self.unknownDate)
+		output += "replayName : {}\n".format(self.replayName)
+		output += "gameVersion : {}\n".format(self.gameVersion)
+		output += "modName : {}\n".format(self.modName)
+		output += "mapName : {}\n".format(self.mapName)
+		output += "mapNameFull : {}\n".format(self.mapNameFull)
+		output += "mapDescription : {}\n".format(self.mapDescription)
+		output += "mapDescriptionFull : {}\n".format(self.mapDescriptionFull)
+		output += "mapFileName : {}\n".format(self.mapFileName)
+		output += "mapWidth : {}\n".format(self.mapWidth)
+		output += "mapHeight : {}\n".format(self.mapHeight)
+		output += "playerList : {}\n".format(len(self.playerList))
+		output += "playerList : {}\n".format(self.playerList)
+		return output
+
+class UCS:
+	def __init__(self) -> None:
+		
+		self.parameters = Parameters()
+		self.ucsPath = self.parameters.data.get('cohUCSPath')
+
+	def compareUCS(self, compareString):
+		try:
+			if (os.path.isfile(self.ucsPath)):
+				linenumber = 1
+				with open(self.ucsPath, "r", encoding="utf-16") as f:	
+					for line in f:
+						linenumber += 1
+						firstString = str(line.split('\t')[0])
+						if str(compareString[1:].strip()) == str(firstString):
+							if len(line.split('\t')) > 1:
+								return " ".join(line.split()[1:])
+		except Exception as e:
+			logging.error(str(e))
+			logging.exception("Stack : ")
 
 # to use this file without the GUI be sure to have the parameters file in the same directory and uncomment below
 #myIRC = IRCClient()
