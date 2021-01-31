@@ -128,6 +128,7 @@ class Parameters:
 			logging.exception("Stack : ")
 
 		#get cohLocation
+		#print(self.data['steamFolder'])
 
 		filePath = self.data['steamFolder'] + "\\steamapps\\libraryfolders.vdf"
 		steamlibraryBases = []
@@ -139,10 +140,16 @@ class Parameters:
 				with open(filePath) as f:
 					for line in f:
 						words = line.split()
+						#print(words)
 						try:
-							if int(words[0]) is int:
-								steamlibraryBases.append(line[1])
-						except:
+							number = words[0].replace('"',"")
+							location = " ".join(words[1:]).replace('"',"")
+							#print(number.strip())
+							number = int(number.strip())
+							if type(number) is int:
+								#print(location)
+								steamlibraryBases.append(location)
+						except Exception as e:
 							pass
 			print(steamlibraryBases)
 			for steamBase in steamlibraryBases:
