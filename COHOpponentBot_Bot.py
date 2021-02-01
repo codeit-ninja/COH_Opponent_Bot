@@ -774,10 +774,8 @@ class GameData():
 		try:
 			with Process.open_process(self.cohMemoryAddress) as p:
 				# clear the playerList
-				if self.playerList:
-					self.playerList.clear()
-				if self.ircStringOutputList:
-					self.ircStringOutputList.clear()
+				self.playerList = []
+				self.ircStringOutputList = []
 				#read an abitrary number of bytes from the COH__REC memory location 4000 should do this will cover the replay header and extras		
 				data_dump = p.read_memory(replayMemoryAddress[0]-4, (ctypes.c_byte * 4000)())
 				data_dump = bytearray(data_dump)
@@ -908,7 +906,7 @@ class GameData():
 		for item in content:
 
 			if ('detected successful game start' in item):
-				steamNumberList.clear()
+				steamNumberList = []
 
 			if ("match started") in item.lower():
 				logging.info (item)
@@ -1228,8 +1226,6 @@ class GameData():
 		output += "Expert CPU : {}\n".format(str(self.expertCPUCount))
 		output += "Number Of Humans : {}\n".format(str(self.numberOfHumans))
 		output += "Match Type : {}\n".format(str(self.matchType.name))
-		output += "Full Map Location : {}\n".format(str(self.mapLocation))
-		output += "Map Name : {}\n".format(str(self.mapName))
 		output += "Map Size : {}\n".format(str(self.mapSize))
 
 
