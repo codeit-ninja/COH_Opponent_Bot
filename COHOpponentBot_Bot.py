@@ -149,7 +149,8 @@ class IRCClient(threading.Thread):
 					logging.info (str(line).encode('utf8'))
 					if (self.displayConsoleOut):
 						try:
-							self.output.insert(END, "".join(line) + "\n")
+							message = "".join(line) + "\n"
+							self.SendToOutputField(message)
 						except Exception as e:
 							logging.error("In run")
 							logging.error(str(e))
@@ -157,8 +158,14 @@ class IRCClient(threading.Thread):
 					if (len(line) >= 3) and ("JOIN" == line[1]) and (":"+self.nick.lower()+"!"+self.nick.lower()+"@"+self.nick.lower()+".tmi.twitch.tv" == line[0]):
 						#cancel auto closing the thread
 						timeoutTimer.cancel()
-						self.output.insert(END, "Joined "+self.channel+" successfully.\n")
-						self.output.insert(END, "You can type 'test' in the " +self.channel[1:]+ " channel to say hello!\n")
+						try:
+							message = "Joined "+self.channel+" successfully.\n"
+							self.SendToOutputField(message)
+							message = "You can type 'test' in the " +self.channel[1:]+ " channel to say hello!\n"
+							self.SendToOutputField(message)
+						except Exception as e:
+							logging.error(str(e))
+							logging.exception("Stack : ")
 
 					if(line[0]=="PING"):
 						self.irc.send(("PONG %s\r\n" % line[0]).encode("utf8"))
@@ -166,7 +173,12 @@ class IRCClient(threading.Thread):
 				pass
 
 	def connectionTimedOut(self):
-		self.output.insert(END, "Connection to "+self.channel+" timed out, was the channel spelt correctly and is port 6667 open?\n")
+		try:
+			message = "Connection to "+self.channel+" timed out, was the channel spelt correctly and is port 6667 open?\n"
+			self.SendToOutputField(message)
+		except Exception as e:
+			logging.error(str(e))
+			logging.exception("Stack : ")
 		self.close()
 
 	def refreshParameters(self, parameters):
@@ -202,7 +214,21 @@ class IRCClient(threading.Thread):
 		self.SendToOutputField(message) # output message to text window
 
 	def SendToOutputField(self, message):
-		self.output.insert(END, message + "\n")
+		try:
+			#First strip characters outside of range that cannot be handled by tkinter output field
+			char_list = '' 
+			for x in range(len(message)): 
+				if ord(message[x]) in range(65536):
+					char_list += message[x]
+			message = char_list
+		except Exception as e:
+			logging.error(str(e))
+			logging.exception("Stack : ")
+		try:
+			self.output.insert(END, message + "\n")
+		except Exception as e:
+			logging.error(str(e))
+			logging.exception("Stack : ")
 
 	def IRCSendCalledEveryThreeSeconds(self):
 		if (self.ircMessageBuffer):
