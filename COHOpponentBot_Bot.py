@@ -798,7 +798,10 @@ class GameData():
 					self.automatch = True
 				else:
 					self.automatch = False
-				self.mapFullName = cohinfo.mapNameFull
+				if cohinfo.mapNameFull:
+					self.mapFullName = cohinfo.mapNameFull
+				else:
+					self.mapFullName = cohinfo.mapName
 				self.modName = cohinfo.modName
 
 				
