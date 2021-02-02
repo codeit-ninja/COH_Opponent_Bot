@@ -307,7 +307,7 @@ class IRC_Channel(threading.Thread):
 			self.ircClient.SendPrivateMessageToIRC("I'm here! Pls give me mod to prevent twitch from autobanning me for spam if I have to send a few messages quickly.")
 			self.ircClient.output.insert(END, "Oh hi again, I heard you in the " +self.channel[1:] + " channel.\n")
 
-		if (message.lower() == "gameinfo"):
+		if (bool(re.match("^(!)?gameinfo(\?)?$", message.lower()))):
 			self.gameInfo()
 
 	def gameInfo(self):
