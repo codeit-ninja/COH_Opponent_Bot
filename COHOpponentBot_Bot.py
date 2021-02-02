@@ -802,6 +802,8 @@ class GameData():
 				# clear the playerList
 				self.playerList = []
 				self.ircStringOutputList = []
+				self.playerList.clear()
+				self.ircStringOutputList.clear()
 				#read an abitrary number of bytes from the COH__REC memory location 4000 should do this will cover the replay header and extras		
 				data_dump = p.read_memory(replayMemoryAddress[0]-4, (ctypes.c_byte * 4000)())
 				data_dump = bytearray(data_dump)
