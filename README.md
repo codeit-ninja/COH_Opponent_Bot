@@ -24,7 +24,7 @@ On Windows you can compile a single executable using pyinstaller, the commands c
 
 # A precompiled windows 10 compatable executable can be downloaded :
 
-HERE : https://github.com/XcomReborn/COH_Opponent_Bot/blob/master/dist/COHOpponentBot.rar
+HERE : https://github.com/XcomReborn/COH_Opponent_Bot/releases
 
 To use the executable:
 
