@@ -299,8 +299,7 @@ class IRC_Channel(threading.Thread):
 
 	def CheckForUserCommand(self, userName, message):
 		if (bool(re.match("^(!)?opponent(\?)?$", message.lower())) or bool(re.match("^(!)?place your bets$" , message.lower())) or bool(re.match("^(!)?opp(\?)?$", message.lower()))):
-			if not self.gameData:
-				self.gameData = GameData(self.ircClient, parameters=self.parameters)
+			self.gameData = GameData(self.ircClient, parameters=self.parameters)
 			self.gameData.populateAllGameData()
 			self.gameData.outputOpponentData()
 
@@ -313,8 +312,7 @@ class IRC_Channel(threading.Thread):
 			self.gameInfo()
 
 	def gameInfo(self):
-		if not self.gameData:
-			self.gameData = GameData(self.ircClient, parameters=self.parameters)
+		self.gameData = GameData(self.ircClient, parameters=self.parameters)
 		self.gameData.populateAllGameData()
 		self.ircClient.SendPrivateMessageToIRC("Map : {}, Mod : {}, Start : {}, High Resources : {}, Automatch : {}, Slots : {}, Players : {}.".format(self.gameData.mapFullName,self.gameData.modName,self.gameData.randomStart,self.gameData.highResources, self.gameData.automatch, self.gameData.mapSize,  self.gameData.numberOfPlayers))
 
@@ -376,7 +374,7 @@ class FileMonitor (threading.Thread):
 			self.filePointer = f.tell()
 			f.close()
 			logging.info("Initialzing with file length : " + str(self.filePointer) + "\n")
-			self.gameData = GameData(ircClient=ircClient)
+			self.gameData = None
 
 		except Exception as e:
 			logging.error("In FileMonitor __init__")
@@ -434,6 +432,7 @@ class FileMonitor (threading.Thread):
 
 	def GameStarted(self):
 		try:
+			self.gameData = GameData(ircClient=self.ircClient, parameters=self.parameters)
 			if self.gameData:
 				while not self.gameData.gameCurrentlyActive:
 					self.gameData.getReplayMemoryAddress()
@@ -842,8 +841,8 @@ class GameData():
 
 				for player in self.playerList:
 					for stat in statList:
-						#print("userName from alias : {}".format(str(stat.alias).encode('utf-16le')))
-						#print("userName from game : {}".format(str(player.name).encode('utf-16le')))
+						logging.info("userName from alias : {}".format(str(stat.alias).encode('utf-16le')))
+						logging.info("userName from game : {}".format(str(player.name).encode('utf-16le')))
 						if str(stat.alias).encode('utf-16le') == str(player.name).encode('utf-16le'):
 							player.stats = stat
 				
