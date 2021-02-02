@@ -47,7 +47,7 @@ toSend = False
 
 class IRCClient(threading.Thread):
 	
-	def __init__(self, output, consoleDisplayBool):
+	def __init__(self, output, consoleDisplayBool, parameters = None):
 
 		Thread.__init__(self)
 
@@ -55,7 +55,10 @@ class IRCClient(threading.Thread):
 
 		self.displayConsoleOut = consoleDisplayBool
 
-		self.parameters = Parameters()
+		if parameters:
+			self.parameters = parameters
+		else:
+			self.parameters = Parameters()	
 
 		self.adminUserName = self.parameters.privatedata.get('adminUserName')	# This username will be able to use admin commands, exit the program and bypass some limits.
 		
@@ -115,7 +118,7 @@ class IRCClient(threading.Thread):
 		#start sub thread that uses shared Queue to communicate 
 		# pass it irc for messaging, channel to join and queue
 		self.queue = Queue()
-		self.channelThread = IRC_Channel(self, self.irc, self.queue, self.channel)
+		self.channelThread = IRC_Channel(self, self.irc, self.queue, self.channel, parameters=self.parameters)
 		self.channelThread.start()
 
 		#
@@ -181,12 +184,6 @@ class IRCClient(threading.Thread):
 			logging.exception("Stack : ")
 		self.close()
 
-	def refreshParameters(self, parameters):
-		if type(parameters) is Parameters:
-			self.parameters = Parameters()
-			if self.channelThread:
-				self.channelThread.refreshParameters(parameters)
-
 	def close(self):
 		self.queue.put("EXITTHREAD")
 		self.running = False
@@ -243,15 +240,20 @@ class IRCClient(threading.Thread):
 
 
 class IRC_Channel(threading.Thread):
-	def __init__(self, ircClient, irc, queue, channel):
+	def __init__(self, ircClient, irc, queue, channel, parameters = None):
 		Thread.__init__(self)
 		self.ircClient = ircClient
 		self.running = True
 		self.irc = irc
 		self.queue = queue
 		self.channel = channel
-		self.parameters = Parameters()
-		self.gameData = GameData(self.ircClient)
+
+		if parameters:
+			self.parameters = parameters
+		else:
+			self.parameters = Parameters()	
+
+		self.gameData = GameData(self.ircClient, parameters=self.parameters)
 		
 	def run(self):
 		self.irc.send(('JOIN ' + self.channel + '\r\n').encode("utf8"))
@@ -298,7 +300,7 @@ class IRC_Channel(threading.Thread):
 	def CheckForUserCommand(self, userName, message):
 		if (bool(re.match("^(!)?opponent(\?)?$", message.lower())) or bool(re.match("^(!)?place your bets$" , message.lower())) or bool(re.match("^(!)?opp(\?)?$", message.lower()))):
 			if not self.gameData:
-				self.gameData = GameData(self.ircClient)
+				self.gameData = GameData(self.ircClient, parameters=self.parameters)
 			self.gameData.populateAllGameData()
 			self.gameData.outputOpponentData()
 
@@ -312,7 +314,7 @@ class IRC_Channel(threading.Thread):
 
 	def gameInfo(self):
 		if not self.gameData:
-			self.gameData = GameData(self.ircClient)
+			self.gameData = GameData(self.ircClient, parameters=self.parameters)
 		self.gameData.populateAllGameData()
 		self.ircClient.SendPrivateMessageToIRC("Map : {}, Mod : {}, Start : {}, High Resources : {}, Automatch : {}, Slots : {}, Players : {}.".format(self.gameData.mapFullName,self.gameData.modName,self.gameData.randomStart,self.gameData.highResources, self.gameData.automatch, self.gameData.mapSize,  self.gameData.numberOfPlayers))
 
@@ -320,12 +322,6 @@ class IRC_Channel(threading.Thread):
 		if not self.gameData:
 			self.gameData = GameData(self.ircClient)
 		self.gameData.testOutput()
-
-	def refreshParameters(self, parameters):
-		if type(parameters) is Parameters:
-			if self.gameData:
-				self.gameData.refreshParameters(parameters)
-			self.parameters = parameters
 
 	def close(self):
 		self.running = False
@@ -335,8 +331,11 @@ class IRC_Channel(threading.Thread):
 
 
 class StatsRequest:
-	def __init__(self):
-		self.parameters = Parameters()		
+	def __init__(self, parameters = None):
+		if parameters:
+			self.parameters = parameters
+		else:
+			self.parameters = Parameters()	
 		
 	def returnStats(self, statnumber):
 		logging.info ("got statnumber : " + str(statnumber))
@@ -355,12 +354,17 @@ class StatsRequest:
 
 class FileMonitor (threading.Thread):
 
-	def __init__(self, filePath, pollInterval = 10, ircClient = None):
+	def __init__(self, filePath, pollInterval = 10, ircClient = None, parameters = None):
 		Thread.__init__(self)
 		try:
 			logging.info("File Monitor Started!")
 			self.running = True
-			self.parameters = Parameters()
+
+			if parameters:
+				self.parameters = parameters
+			else:
+				self.parameters = Parameters()	
+
 			self.ircClient = ircClient
 			self.filePointer = 0
 			self.pollInterval = int(pollInterval)
@@ -472,10 +476,6 @@ class FileMonitor (threading.Thread):
 			self.event.set()
 		if self.pauseBeforeGameStart:
 			self.pauseBeforeGameStart.set()
-
-	def refreshParameters(self, parameters):
-		if type(parameters) is Parameters:
-			self.parameters = parameters
 
 	def find_between(self, s, first, last ):
 		try:
@@ -716,8 +716,13 @@ class Player:
 
 class GameData():
 
-	def __init__(self, ircClient = None):
-		self.parameters = Parameters()
+	def __init__(self, ircClient = None, parameters = None):
+
+		if parameters:
+			self.parameters = parameters
+		else:
+			self.parameters = Parameters()	
+
 		self.playerList = []
 		self.numberOfHumans = 0
 		self.numberOfComputers = 0
@@ -749,11 +754,6 @@ class GameData():
 		self.mapFullName = None
 		self.modName = None
 
-
-	def refreshParameters(self, parameters):
-		if type(parameters) is Parameters:
-			self.parameters = parameters
-
 	def getCOHMemoryAddress(self):
 		
 		pid = Process.get_pid_by_name('RelicCOH.exe')
@@ -762,6 +762,7 @@ class GameData():
 			return pid
 		else:
 			self.cohRunning = False
+			self.cohMemoryAddress = None
 			return None
 
 	def getReplayMemoryAddress(self):
@@ -1598,9 +1599,13 @@ class COH_Replay_Parser:
 		return output
 
 class UCS:
-	def __init__(self) -> None:
+	def __init__(self, parameters = None) -> None:
 		
-		self.parameters = Parameters()
+		if parameters:
+			self.parameters = parameters
+		else:
+			self.parameters = Parameters()	
+
 		self.ucsPath = self.parameters.data.get('cohUCSPath')
 
 	def compareUCS(self, compareString):

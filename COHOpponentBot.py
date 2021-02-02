@@ -28,7 +28,6 @@ class COHBotGUI:
 		self.ircClient = None #reference to the opponentbot
 
 		self.parameters = COHOpponentBot_Parameters.Parameters()
-		self.parameters.load()
 
 		self.master = tk.Tk()
 
@@ -230,8 +229,6 @@ class COHBotGUI:
 
 	def refreshParameters(self):
 		self.parameters = COHOpponentBot_Parameters.Parameters()
-		if self.ircClient:
-			self.ircClient.refreshParameters(self.parameters)
 
 	def showAboutDialogue(self):
 		InformationString = "Version : {}\n\nBuild Date : {}\n\nCreated by : XcomReborn\n\n Special thanks : AveatorReborn".format(VersionNumber, BuildDate)
@@ -683,7 +680,7 @@ class COHBotGUI:
 				self.disableEverything()
 				self.connectButton.config(text = "Disconnect")
 				self.testButton.config(state = NORMAL)
-				self.ircClient = COHOpponentBot_Bot.IRCClient(self.txt, bool(self.consoleDisplayBool.get()))
+				self.ircClient = COHOpponentBot_Bot.IRCClient(self.txt, bool(self.consoleDisplayBool.get()), parameters=self.parameters)
 				self.ircClient.start()
 				if (bool(self.parameters.data.get('automaticTrigger'))):
 					self.startMonitors()
@@ -696,7 +693,7 @@ class COHBotGUI:
 		self.closeMonitors()
 		#Create Monitor Threads and start them.
 		if self.ircClient:
-			self.automaticFileMonitor = COHOpponentBot_Bot.FileMonitor(self.parameters.data.get('logPath'), self.parameters.data.get('filePollInterval'), self.ircClient)
+			self.automaticFileMonitor = COHOpponentBot_Bot.FileMonitor(self.parameters.data.get('logPath'), self.parameters.data.get('filePollInterval'), self.ircClient, parameters=self.parameters)
 			self.automaticFileMonitor.start()
 
 	def closeMonitors(self):
