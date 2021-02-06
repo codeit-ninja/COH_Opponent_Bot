@@ -839,7 +839,7 @@ class GameData():
 					player = Player(name=username,factionString=factionString)
 					self.playerList.append(player)
 
-				statList = self.getStatsFromLogFile()
+				statList = self.getStatsFromGame()
 
 				for player in self.playerList:
 					for stat in statList:
@@ -900,10 +900,41 @@ class GameData():
 			logging.exception("Stack")
 			logging.error(str(e))
 
+	def getStatsFromGame(self):
+		try:
+			with Process.open_process(self.cohMemoryAddress) as p:
+				steamNumberList = []
+				for player in self.playerList:
+					name = bytearray(str(player.name).encode('utf-16le'))
+					buff = bytes(name)
+					if buff:
+						print(player.name)
+						print(len(player.name))
+						replayMemoryAddress = p.search_all_memory(buff)
+						for address in replayMemoryAddress:
+							try:
+								data_dump = p.read_memory(address-56, (ctypes.c_byte * 48)())
+								data_dump = bytearray(data_dump)
+								steamNumber = data_dump.decode('utf-16le').strip()
+								if "/steam/" in steamNumber:
+									print(steamNumber[7:24])
+									steamNumberList.append(steamNumber[7:24])
+									break
+							except Exception as e:
+								pass
+				statList = []
+				for item in steamNumberList:
+					statRquest = StatsRequest(parameters= self.parameters)
+					stat = statRquest.returnStats(item)
+					statList.append(stat)
+				return statList
+		except Exception as e:
+			logging.error(str(e))
+			logging.exception("Stack : ")
 
 	def testOutput(self):
 		steamNumber = self.parameters.data.get('steamNumber')
-		statsRequest = StatsRequest()
+		statsRequest = StatsRequest(parameters=self.parameters)
 		streamerStats = statsRequest.returnStats(str(steamNumber))
 		streamerPlayer = Player(name = self.parameters.data.get('channel'))
 		streamerPlayer.stats = streamerStats
@@ -947,7 +978,7 @@ class GameData():
 
 		statsList = []
 
-		statRequest = StatsRequest()
+		statRequest = StatsRequest(parameters= self.parameters)
 		for steamNumber in steamNumberList:
 			stat = statRequest.returnStats(str(steamNumber))
 			statsList.append(stat)
