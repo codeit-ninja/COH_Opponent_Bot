@@ -843,8 +843,12 @@ class GameData():
 
 				for player in self.playerList:
 					for stat in statList:
-						logging.info("userName from alias : {}".format(str(stat.alias).encode('utf-16le')))
-						logging.info("userName from game : {}".format(str(player.name).encode('utf-16le')))
+						try:
+							logging.info("userName from alias : {}".format(str(stat.alias).encode('utf-16le')))
+							logging.info("userName from game : {}".format(str(player.name).encode('utf-16le')))
+						except Exception as e:
+							logging.error(str(e))
+							logging.exception("Stack : ")
 						if str(stat.alias).encode('utf-16le') == str(player.name).encode('utf-16le'):
 							player.stats = stat
 				
@@ -918,7 +922,7 @@ class GameData():
 								steamNumber = data_dump.decode('utf-16le').strip()
 								if "/steam/" in steamNumber:
 									print(steamNumber[7:24])
-									steamNumberList.append(steamNumber[7:24])
+									str(int(steamNumberList.append(steamNumber[7:24])))
 									break
 							except Exception as e:
 								pass
