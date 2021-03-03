@@ -2,7 +2,6 @@ import time
 import socket
 import string
 import sys
-import threading
 import json
 from typing import Match # for loading json's for emoticons
 import urllib.request # more for loadings jsons from urls
