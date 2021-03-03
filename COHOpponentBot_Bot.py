@@ -619,6 +619,7 @@ class PlayerStat:
 
 		return output
 
+
 class Faction(Enum):
 	US = 0
 	WM = 1
@@ -922,7 +923,8 @@ class GameData():
 								steamNumber = data_dump.decode('utf-16le').strip()
 								if "/steam/" in steamNumber:
 									print(steamNumber[7:24])
-									str(int(steamNumberList.append(steamNumber[7:24])))
+									int(steamNumber[7:24])
+									steamNumberList.append(steamNumber[7:24])
 									break
 							except Exception as e:
 								pass
