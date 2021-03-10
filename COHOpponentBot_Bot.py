@@ -712,6 +712,17 @@ class Player:
 	def __repr__(self):
 		return str(self)
 
+class GameMonitor():
+
+	def __init__(self, ircClient = None, parameters = None):
+
+		if parameters:
+			self.parameters = parameters
+		else:
+			self.parameters = Parameters()	
+
+		self.ircClient = ircClient		
+
 
 class GameData():
 
@@ -758,6 +769,7 @@ class GameData():
 		pid = Process.get_pid_by_name('RelicCOH.exe')
 		if pid:
 			self.cohRunning = True
+			self.cohMemoryAddress = pid
 			return pid
 		else:
 			self.cohRunning = False
