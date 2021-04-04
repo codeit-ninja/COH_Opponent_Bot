@@ -926,6 +926,8 @@ class GameData():
 					if buff:
 						print(player.name)
 						print(len(player.name))
+						print(name)
+						print(buff)
 						replayMemoryAddress = p.search_all_memory(buff)
 						for address in replayMemoryAddress:
 							try:
@@ -935,7 +937,7 @@ class GameData():
 								if "/steam/" in steamNumber:
 									print(steamNumber[7:24])
 									int(steamNumber[7:24])
-									steamNumberList.append(steamNumber[7:24])
+									steamNumberList.append(str(steamNumber[7:24]))
 									break
 							except Exception as e:
 								pass
