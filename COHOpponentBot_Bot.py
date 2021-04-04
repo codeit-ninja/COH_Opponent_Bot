@@ -351,7 +351,7 @@ class StatsRequest:
 
 class FileMonitor (threading.Thread):
 
-	def __init__(self, filePath, pollInterval = 10, ircClient = None, parameters = None):
+	def __init__(self, filePath, pollInterval = 30, ircClient = None, parameters = None):
 		Thread.__init__(self)
 		try:
 			logging.info("File Monitor Started!")
@@ -435,7 +435,7 @@ class FileMonitor (threading.Thread):
 			if self.gameData:
 				while not self.gameData.gameCurrentlyActive:
 					self.gameData.getReplayMemoryAddress()
-					self.pauseBeforeGameStart.wait(self.pollInterval)
+					self.pauseBeforeGameStart.wait(30)
 				self.gameData.populateAllGameData()
 				self.gameData.outputOpponentData()
 				self.StartBets()

@@ -37,7 +37,7 @@ class Parameters:
 
 		self.data['showOwn'] = False
 
-		self.data['logErrorsToFile'] = False
+		self.data['logErrorsToFile'] = True
 
 		self.data['filePollInterval'] = 10
 
