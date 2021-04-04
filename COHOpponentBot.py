@@ -505,6 +505,7 @@ class COHBotGUI:
 		self.b4.config(state = DISABLED)
 		self.b5.config(state = DISABLED)
 		self.b6.config(state = DISABLED)
+		self.cohBrowseButton.config(state = DISABLED)
 		self.e1.config(state = DISABLED)
 		self.e2.config(state = DISABLED)
 		self.e3.config(state = DISABLED)
@@ -521,6 +522,7 @@ class COHBotGUI:
 		self.b4.config(state = NORMAL)
 		self.b5.config(state = NORMAL)
 		self.b6.config(state = NORMAL)
+		self.cohBrowseButton.config(state = NORMAL)
 		self.connectButton.config(state = NORMAL)
 		#self.testButton.config(state = NORMAL)
 		
