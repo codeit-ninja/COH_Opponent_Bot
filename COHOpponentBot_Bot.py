@@ -924,19 +924,19 @@ class GameData():
 					name = bytearray(str(player.name).encode('utf-16le'))
 					buff = bytes(name)
 					if buff:
-						print(player.name)
-						print(len(player.name))
-						print(name)
-						print(buff)
+						#print(player.name)
+						#print(len(player.name))
+						#print(name)
+						#print(buff)
 						replayMemoryAddress = p.search_all_memory(buff)
 						for address in replayMemoryAddress:
 							try:
-								data_dump = p.read_memory(address-56, (ctypes.c_byte * 48)())
+								data_dump = p.read_memory(address-56, (ctypes.c_byte * 48)())	
 								data_dump = bytearray(data_dump)
 								steamNumber = data_dump.decode('utf-16le').strip()
 								if "/steam/" in steamNumber:
 									print(steamNumber[7:24])
-									int(steamNumber[7:24])
+									int(steamNumber[7:24]) # throws exception if steam number is not a number
 									steamNumberList.append(str(steamNumber[7:24]))
 									break
 							except Exception as e:
@@ -1022,8 +1022,8 @@ class GameData():
 				if (str(item.faction) == str(Faction.WM)) or (str(item.faction)== str(Faction.PE)):
 					axisTeam.append(item)
 
-			logging.info("players in allies team : " +str(len(alliesTeam)))
-			logging.info("players in axis team : " + str(len(axisTeam)))
+			#logging.info("players in allies team : " +str(len(alliesTeam)))
+			#logging.info("players in axis team : " + str(len(axisTeam)))
 
 			# output each player to file
 			if (self.parameters.data.get('useOverlayPreFormat')):
