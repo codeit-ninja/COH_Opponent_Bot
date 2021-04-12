@@ -851,7 +851,8 @@ class GameData():
 					player = Player(name=username,factionString=factionString)
 					self.playerList.append(player)
 
-				statList = self.getStatsFromGame()
+				#statList = self.getStatsFromGame()
+				statList = self.getStatsFromLogFile()
 
 				for player in self.playerList:
 					for stat in statList:
@@ -915,6 +916,7 @@ class GameData():
 			logging.info("Problem in populateGameData")
 			logging.exception("Stack")
 			logging.error(str(e))
+
 
 	def getStatsFromGame(self):
 		try:
