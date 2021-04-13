@@ -101,6 +101,7 @@ class COHBotGUI:
 			twitchName = self.parameters.data.get('channel')
 
 		self.e1.insert(0, twitchName)
+
 		if (self.parameters.data.get('botUserName')):
 			self.e2.insert(0, str(self.parameters.data.get('botUserName')))
 

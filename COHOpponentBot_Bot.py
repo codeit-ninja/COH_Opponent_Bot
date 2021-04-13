@@ -342,18 +342,25 @@ class StatsRequest:
 			self.parameters = Parameters()	
 		
 	def returnStats(self, statnumber):
-		logging.info ("got statnumber : " + str(statnumber))
-		#statString = "/steam/" + str(statnumber)
-		if (not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None)):
-			ssl._create_default_https_context = ssl._create_unverified_context
-		response = urllib.request.urlopen(self.parameters.privatedata['relicServerProxy']+str(statnumber)).read()
-		statdata = json.loads(response.decode('utf-8'))
-		#print(json.dumps(statdata, indent=4, sort_keys= True))
-		if (statdata['result']['message'] == "SUCCESS"):
-			logging.info ("statdata load succeeded")
-			playerStats = PlayerStat(statdata, statnumber)
-			#print("playerStats : " + str(playerStats))
+		
+		try:
+			logging.info ("got statnumber : " + str(statnumber))
+			#check stat number is 17 digit int
+			stringLength = len(statnumber)
+			assert(stringLength == 17)
+			assert(int(statnumber))
+			if (not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None)):
+				ssl._create_default_https_context = ssl._create_unverified_context
+			response = urllib.request.urlopen(self.parameters.privatedata['relicServerProxy']+str(statnumber)).read()
+			statdata = json.loads(response.decode('utf-8'))
+			if (statdata['result']['message'] == "SUCCESS"):
+				logging.info ("statdata load succeeded")
+				playerStats = PlayerStat(statdata, statnumber)
 			return playerStats
+		except Exception as e:
+			logging.info("Problem in returnStats")
+			logging.info(str(e))
+			logging.exception("Stack : ")
 
 
 class FileMonitor (threading.Thread):
@@ -864,14 +871,15 @@ class GameData():
 				for player in self.playerList:
 					for stat in statList:
 						try:
-							logging.info("userName from alias : {}".format(str(stat.alias).encode('utf-16le')))
-							logging.info("userName from game : {}".format(str(player.name).encode('utf-16le')))
+							if stat:
+								logging.info("userName from alias : {}".format(str(stat.alias).encode('utf-16le')))
+								logging.info("userName from game : {}".format(str(player.name).encode('utf-16le')))
+								if str(stat.alias).encode('utf-16le') == str(player.name).encode('utf-16le'):
+									player.stats = stat						
 						except Exception as e:
 							logging.error(str(e))
 							logging.exception("Stack : ")
-						if str(stat.alias).encode('utf-16le') == str(player.name).encode('utf-16le'):
-							player.stats = stat
-				
+
 							#Assign Streamer name from steam alias and streamer steam Number 
 							if self.parameters.data.get('steamNumber') == player.stats.steamNumber:
 								self.parameters.data['steamAlias'] = player.stats.alias
