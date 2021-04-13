@@ -297,18 +297,25 @@ class IRC_Channel(threading.Thread):
 			self.close()
 
 	def CheckForUserCommand(self, userName, message):
-		if (bool(re.match("^(!)?opponent(\?)?$", message.lower())) or bool(re.match("^(!)?place your bets$" , message.lower())) or bool(re.match("^(!)?opp(\?)?$", message.lower()))):
-			self.gameData = GameData(self.ircClient, parameters=self.parameters)
-			self.gameData.populateAllGameData()
-			self.gameData.outputOpponentData()
+		logging.info("Checking For User Comamnd")
+		try:
+			if (bool(re.match("^(!)?opponent(\?)?$", message.lower())) or bool(re.match("^(!)?place your bets$" , message.lower())) or bool(re.match("^(!)?opp(\?)?$", message.lower()))):
+				logging.info("Got Opponent")
+				self.gameData = GameData(ircClient= self.ircClient, parameters=self.parameters)
+				self.gameData.populateAllGameData()
+				self.gameData.outputOpponentData()
 
 
-		if (message.lower() == "test") and ((str(userName).lower() == str(self.parameters.privatedata.get('adminUserName')).lower()) or (str(userName) == str(self.parameters.data.get('channel')).lower())):
-			self.ircClient.SendPrivateMessageToIRC("I'm here! Pls give me mod to prevent twitch from autobanning me for spam if I have to send a few messages quickly.")
-			self.ircClient.output.insert(END, "Oh hi again, I heard you in the " +self.channel[1:] + " channel.\n")
+			if (message.lower() == "test") and ((str(userName).lower() == str(self.parameters.privatedata.get('adminUserName')).lower()) or (str(userName) == str(self.parameters.data.get('channel')).lower())):
+				self.ircClient.SendPrivateMessageToIRC("I'm here! Pls give me mod to prevent twitch from autobanning me for spam if I have to send a few messages quickly.")
+				self.ircClient.output.insert(END, "Oh hi again, I heard you in the " +self.channel[1:] + " channel.\n")
 
-		if (bool(re.match("^(!)?gameinfo(\?)?$", message.lower()))):
-			self.gameInfo()
+			if (bool(re.match("^(!)?gameinfo(\?)?$", message.lower()))):
+				self.gameInfo()
+		except Exception as e:
+			logging.error("Problem in CheckForUserCommand")
+			logging.error(str(e))
+			logging.exception("Stack :")
 
 	def gameInfo(self):
 		self.gameData = GameData(self.ircClient, parameters=self.parameters)
