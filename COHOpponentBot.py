@@ -140,6 +140,7 @@ class COHBotGUI:
 
 		self.ircClient = None
 		self.automaticFileMonitor = None
+		self.automaticMemoryMonitor = None
 
 		self.style.configure('W.TButton', font = 'calibri', size = 10, foreground = 'red')
 		self.connectButton = ttk.Button(self.master, text = "Connect",style ='W.TButton', command = lambda : self.connectIRC(self.ircClient))
@@ -698,10 +699,14 @@ class COHBotGUI:
 		if self.ircClient:
 			self.automaticFileMonitor = COHOpponentBot_Bot.FileMonitor(self.parameters.data.get('logPath'), self.parameters.data.get('filePollInterval'), self.ircClient, parameters=self.parameters)
 			self.automaticFileMonitor.start()
+			self.automaticMemoryMonitor = COHOpponentBot_Bot.MemoryMonitor(pollInterval= self.parameters.data.get('filePollInterval'), ircClient= self.ircClient, parameters=self.parameters)
+			self.automaticMemoryMonitor.start()
 
 	def closeMonitors(self):
 		if self.automaticFileMonitor:
 			self.automaticFileMonitor.close()
+		if self.automaticMemoryMonitor:
+			self.automaticMemoryMonitor.close()
 
 	def on_closing(self):
 		logging.info("In on_closing program (Closing)")

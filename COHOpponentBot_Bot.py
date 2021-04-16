@@ -1,3 +1,4 @@
+from json import encoder
 import time
 import socket
 import string
@@ -11,7 +12,9 @@ import operator # for sorting dictionary by value
 from random import choice
 import os # to allow directory exists checking etc.
 import os.path
-import ssl # required for urllib certificates
+import ssl
+import pymem
+from pymem.process import module_from_name # required for urllib certificates
 import requests
 #import pymysql # for mysql 
 #import all secret parameters from parameters file
@@ -34,14 +37,9 @@ import binascii
 from functools import partial
 
 
-#Because python floating point arthmatic is a nightmare
-TWOPLACES = Decimal(10) ** -2
-
 #Here are the message lines held until sent
 messageDeque = collections.deque()
 toSend = False
-
-
 
 
 class IRCClient(threading.Thread):
@@ -302,7 +300,7 @@ class IRC_Channel(threading.Thread):
 			if (bool(re.match("^(!)?opponent(\?)?$", message.lower())) or bool(re.match("^(!)?place your bets$" , message.lower())) or bool(re.match("^(!)?opp(\?)?$", message.lower()))):
 				logging.info("Got Opponent")
 				self.gameData = GameData(ircClient= self.ircClient, parameters=self.parameters)
-				self.gameData.populateAllGameData()
+				self.gameData.getDataFromGame()
 				self.gameData.outputOpponentData()
 
 
@@ -319,7 +317,7 @@ class IRC_Channel(threading.Thread):
 
 	def gameInfo(self):
 		self.gameData = GameData(self.ircClient, parameters=self.parameters)
-		self.gameData.populateAllGameData()
+		self.gameData.getDataFromGame()
 		self.ircClient.SendPrivateMessageToIRC("Map : {}, Mod : {}, Start : {}, High Resources : {}, Automatch : {}, Slots : {}, Players : {}.".format(self.gameData.mapFullName,self.gameData.modName,self.gameData.randomStart,self.gameData.highResources, self.gameData.automatch, self.gameData.mapSize,  self.gameData.numberOfPlayers))
 
 	def testOutput(self):
@@ -363,6 +361,120 @@ class StatsRequest:
 			logging.exception("Stack : ")
 
 
+class MemoryMonitor(threading.Thread):
+
+	def __init__(self, filePath, pollInterval = 30, ircClient = None, parameters = None):
+		Thread.__init__(self)
+		try:
+			logging.info("Memory Monitor Started!")
+			self.running = True
+
+			if parameters:
+				self.parameters = parameters
+			else:
+				self.parameters = Parameters()
+
+			self.pm = None
+			self.baseAddress = None
+			self.cohRunning = None
+
+			self.ircClient = ircClient
+			self.pollInterval = int(pollInterval)
+			self.event = threading.Event()
+			self.gameData = None
+
+		except Exception as e:
+			logging.error("In FileMonitor __init__")
+			logging.error(str(e))
+
+	def run(self):
+		try:
+			while self.running:
+				self.getGameData()
+				if self.cohRunning:
+					
+					if self.gameData.cohRunning != self.cohRunning:
+						#coh was running and now its not (game over)
+						self.cohRunning = self.gameData.cohRunning
+						self.GameOver()
+				else:
+					if self.gameData.cohRunning != self.cohRunning:
+						#coh wasn't running and now it is (game started)
+						self.cohRunning = self.gameData.cohRunning
+						self.GameStarted()
+
+				self.event.wait(self.pollInterval)
+		except Exception as e:
+			logging.error("In FileMonitor run")
+			logging.error(str(e))
+
+	def getGameData(self):
+		try:
+			self.gameData = GameData(ircClient=self.ircClient, parameters=self.parameters)
+			self.gameData.getDataFromGame()
+			self.cohRunning = self.gameData.cohRunning
+		except Exception as e:
+			logging.error("In getGameData")
+			logging.info(str(e))
+			logging.exception("Stack :")
+
+	def GameStarted(self):
+		try:
+			self.gameData.outputOpponentData()
+			self.StartBets()
+
+		except Exception as e:
+			logging.info("Problem in GameStarted")
+			logging.error(str(e))
+			logging.exception("Stack :")
+
+	def GameOver(self):
+		try:
+			if (self.parameters.data.get('clearOverlayAfterGameOver')):
+				self.ircClient.queue.put("CLEAROVERLAY")
+		except Exception as e:
+			logging.info("Problem in GameOver")
+			logging.error(str(e))
+			logging.exception("Stack :")
+
+	def StartBets(self):
+		try:
+			logging.info("Size of self.gameData.playerList in StartBets {}".format(len(self.gameData.playerList)))
+			if (bool(self.parameters.data.get('writePlaceYourBetsInChat'))):
+				playerString = ""
+				outputList = []
+				if self.gameData:
+					if self.gameData.playerList:
+						if len(self.gameData.playerList) == 2: # if two player make sure the streamer is put first
+							for player in self.gameData.playerList:
+								outputList.append(player.name + " " + player.faction.name)
+							# player list does not have steam numbers. Need to aquire these from warning.log
+							playerString = "{} Vs. {}".format(outputList[1], outputList[0])	
+							if self.gameData.playerList[0].stats:
+								if (str(self.parameters.data.get('steamNumber')) == str(self.gameData.playerList[0].stats.steamNumber)):			
+									playerString = "{} Vs. {}".format(outputList[0], outputList[1])									
+						self.ircClient.SendPrivateMessageToIRC("!startbets {}".format(playerString))
+		except Exception as e:
+			logging.error("Problem in StartBets")
+			logging.error(str(e))
+			logging.exception("Stack : ")
+	
+	def close(self):
+		logging.info("Memory Monitor Closing!")
+		self.running = False
+		# break out of loops if waiting
+		if self.event:
+			self.event.set()
+
+	def find_between(self, s, first, last ):
+		try:
+			start = s.index( first ) + len( first )
+			end = s.index( last, start )
+			return s[start:end]
+		except ValueError:
+			return ""
+
+
 class FileMonitor (threading.Thread):
 
 	def __init__(self, filePath, pollInterval = 30, ircClient = None, parameters = None):
@@ -399,17 +511,13 @@ class FileMonitor (threading.Thread):
 			while self.running:
 				lines = []
 				clearOverlay = False
-				#print("current File index = : " + str(self.filePointer) + "\n")
 				f = open(self.filePath, 'r' , encoding='ISO-8859-1')
 				f.seek(self.filePointer)
 				lines = f.readlines()
 				self.filePointer = f.tell()
 				f.close()
-				#print("new File index = : " + str(self.filePointer) + "\n")
-				for line in lines:
 
-					if ("detected successful game start" in line):
-						self.GameStarted()
+				for line in lines:
 
 					if ("Win notification" in line):
 						#Check if streamer won
@@ -429,9 +537,6 @@ class FileMonitor (threading.Thread):
 								self.ircClient.queue.put("ILOST")
 							if (self.parameters.data.get('clearOverlayAfterGameOver')):
 								clearOverlay = True
-					if ('GAME -- Ending mission (Game over)' in line):
-						if (self.parameters.data.get('clearOverlayAfterGameOver')):
-								clearOverlay = True
 
 				if (self.parameters.data.get('clearOverlayAfterGameOver')):
 					if (clearOverlay):
@@ -443,43 +548,6 @@ class FileMonitor (threading.Thread):
 			logging.error("In FileMonitor run")
 			logging.error(str(e))
 
-	def GameStarted(self):
-		try:
-			self.gameData = GameData(ircClient=self.ircClient, parameters=self.parameters)
-			if self.gameData:
-				while not self.gameData.gameCurrentlyActive:
-					self.gameData.getReplayMemoryAddress()
-					self.pauseBeforeGameStart.wait(30)
-				self.gameData.populateAllGameData()
-				self.gameData.outputOpponentData()
-				self.StartBets()
-		except Exception as e:
-			logging.info("Problem in GameStarted")
-			logging.error(str(e))
-			logging.exception("Stack :")
-
-	def StartBets(self):
-		try:
-			logging.info("Size of self.gameData.playerList in StartBets {}".format(len(self.gameData.playerList)))
-			if (bool(self.parameters.data.get('writePlaceYourBetsInChat'))):
-				playerString = ""
-				outputList = []
-				if self.gameData:
-					if self.gameData.playerList:
-						if len(self.gameData.playerList) == 2: # if two player make sure the streamer is put first
-							for player in self.gameData.playerList:
-								outputList.append(player.name + " " + player.faction.name)
-							# player list does not have steam numbers. Need to aquire these from warning.log
-							playerString = "{} Vs. {}".format(outputList[1], outputList[0])	
-							if self.gameData.playerList[0].stats:
-								if (str(self.parameters.data.get('steamNumber')) == str(self.gameData.playerList[0].stats.steamNumber)):			
-									playerString = "{} Vs. {}".format(outputList[0], outputList[1])									
-						self.ircClient.SendPrivateMessageToIRC("!startbets {}".format(playerString))
-		except Exception as e:
-			logging.error("Problem in StartBets")
-			logging.error(str(e))
-			logging.exception("Stack : ")
-	
 	def close(self):
 		logging.info("File Monitor Closing!")
 		self.running = False
@@ -778,163 +846,170 @@ class GameData():
 		self.mapFullName = None
 		self.modName = None
 
-	def getCOHMemoryAddress(self):
-		
-		pid = Process.get_pid_by_name('RelicCOH.exe')
-		if pid:
-			self.cohRunning = True
-			self.cohMemoryAddress = pid
-			return pid
-		else:
-			self.cohRunning = False
-			self.cohMemoryAddress = None
-			return None
+		self.pm = None
+		self.baseAddress = None
 
-	def getReplayMemoryAddress(self):
-		# First Check if self.cohMemoryAddress is a valid handle if not try to get one.
+
+	def getDataFromGame(self):
 		try:
-			with Process.open_process(self.cohMemoryAddress) as p:
-				pass
-		except:
-			self.cohMemoryAddress = self.getCOHMemoryAddress()
+			if not self.getCOHMemoryAddress():
+				return False
 
-		try:
-			with Process.open_process(self.cohMemoryAddress) as p:
-				buff = bytes(b"COH__REC")
-				replayMemoryAddress = p.search_all_memory(buff)
-				# Check if replayMemoryAddress has been assigned if not return.
-				if len(replayMemoryAddress) != 1:
-					self.gameCurrentlyActive = False
-					return
-				# Program will get here if the program found a valid memory address for COH__REC therefore the game is active.
-				self.gameCurrentlyActive = True
-				return replayMemoryAddress
-		except:
-			return
-			
-	
-	def populateAllGameData(self):
+			mpPointerAddress = 0x00901EA8
+			mpOffsets=[0xC,0xC,0x18,0x10,0x24,0x18,0x264]
 
-		replayMemoryAddress = self.getReplayMemoryAddress()
+			muniPointerAddress = 0x00901EA8
+			muniOffsets=[0xC,0xC,0x18,0x10,0x24,0x18,0x26C]
 
-		# Check if replayMemoryAddress has been assigned if not return.
-		try:
-			assert(len(replayMemoryAddress) == 1)
-		except Exception as e:
-			self.gameCurrentlyActive = False
-			return
-		try:
-			with Process.open_process(self.cohMemoryAddress) as p:
-				# clear the playerList
-				self.playerList = []
-				self.ircStringOutputList = []
-				self.playerList.clear()
-				self.ircStringOutputList.clear()
-				#read an abitrary number of bytes from the COH__REC memory location 4000 should do this will cover the replay header and extras		
-				data_dump = p.read_memory(replayMemoryAddress[0]-4, (ctypes.c_byte * 4000)())
-				data_dump = bytearray(data_dump)
+			fuelPointerAddress = 0x00901EA8
+			fuelOffsets = [0xC,0xC,0x18,0x10,0x24,0x18,0x268]
 
-				cohinfo = COH_Replay_Parser()
-				cohinfo.data = data_dump
-				cohinfo.processData()
+			cohrecReplayAddress = 0x00902030
+			cohrecOffsets = [0x28,0x160,0x4,0x84,0x24,0x110,0x0]
 
-				self.gameStartedDate = cohinfo.localDate
+			# check game is running by accessing player mp
+			mp = self.pm.read_float(self.GetPtrAddr(self.baseAddress + mpPointerAddress, mpOffsets))
 
-				print(cohinfo)
+			# access replay data in game memory
+			replayData = self.pm.read_bytes(self.GetPtrAddr(self.baseAddress + cohrecReplayAddress, cohrecOffsets), 4000)
 
-				if self.randomStart:
-					self.randomStart = "Random"
-				else:
-					self.randomStart = "Fixed"
-				self.highResources = cohinfo.highResources
-				self.VPCount = cohinfo.VPCount
-				if cohinfo.matchType.lower() == "automatch":
-					self.automatch = True
-				else:
-					self.automatch = False
-				if cohinfo.mapNameFull:
-					self.mapFullName = cohinfo.mapNameFull
-				else:
-					self.mapFullName = cohinfo.mapName
-				self.modName = cohinfo.modName
+			cohreplayparser = COH_Replay_Parser()
+			cohreplayparser.data = bytearray(replayData)
+			cohreplayparser.processData()
+			print(cohreplayparser)	
 
-				
-				for item in cohinfo.playerList:
-					username = item['name']
-					factionString = item['faction']
-					player = Player(name=username,factionString=factionString)
-					self.playerList.append(player)
+			self.gameStartedDate = cohreplayparser.localDate
 
-				#statList = self.getStatsFromGame()
-				statList = self.getStatsFromLogFile()
+			if self.randomStart:
+				self.randomStart = "Random"
+			else:
+				self.randomStart = "Fixed"
+			self.highResources = cohreplayparser.highResources
+			self.VPCount = cohreplayparser.VPCount
+			if cohreplayparser.matchType.lower() == "automatch":
+				self.automatch = True
+			else:
+				self.automatch = False
+			if cohreplayparser.mapNameFull:
+				self.mapFullName = cohreplayparser.mapNameFull
+			else:
+				self.mapFullName = cohreplayparser.mapName
+			self.modName = cohreplayparser.modName
 
-				for player in self.playerList:
+			for item in cohreplayparser.playerList:
+				username = item['name']
+				factionString = item['faction']
+				player = Player(name=username,factionString=factionString)
+				self.playerList.append(player)
+
+			statList = self.getStatsFromGame()
+
+			print(statList)
+
+			for player in self.playerList:
+				if statList:
 					for stat in statList:
 						try:
-							if stat:
-								logging.info("userName from alias : {}".format(str(stat.alias).encode('utf-16le')))
-								logging.info("userName from game : {}".format(str(player.name).encode('utf-16le')))
-								if str(stat.alias).encode('utf-16le') == str(player.name).encode('utf-16le'):
-									player.stats = stat						
+							logging.info("userName from alias : {}".format(str(stat.alias).encode('utf-16le')))
+							logging.info("userName from game : {}".format(str(player.name).encode('utf-16le')))
+							if str(stat.alias).encode('utf-16le') == str(player.name).encode('utf-16le'):
+								player.stats = stat						
 						except Exception as e:
 							logging.error(str(e))
 							logging.exception("Stack : ")
 
 							#Assign Streamer name from steam alias and streamer steam Number 
-							if self.parameters.data.get('steamNumber') == player.stats.steamNumber:
-								self.parameters.data['steamAlias'] = player.stats.alias
-								self.parameters.save()					
+							try:
+								if self.parameters.data.get('steamNumber') == player.stats.steamNumber:
+									self.parameters.data['steamAlias'] = player.stats.alias
+									self.parameters.save()
+							except Exception as e:
+								logging.error(str(e))
+								logging.exception("Stack : ")			
 
-				self.numberOfHumans = sum(item.stats is not None for item in self.playerList)
+			self.numberOfHumans = sum(item.stats is not None for item in self.playerList)
 
-				cpuCounter = 0
-				easyCounter = 0
-				normalCounter = 0
-				hardCounter = 0
-				expertCounter = 0
+			cpuCounter = 0
+			easyCounter = 0
+			normalCounter = 0
+			hardCounter = 0
+			expertCounter = 0
 
-				for item in self.playerList:
-					if (item.stats is None):
-						if ("CPU" in item.name): 
-							cpuCounter += 1
-						if ("Easy" in item.name):
-							easyCounter += 1
-						if ("Normal" in item.name):
-							normalCounter += 1
-						if ("Hard" in item.name):
-							hardCounter += 1
-						if ("Expert" in item.name):
-							expertCounter += 1
-					
-				self.numberOfComputers = cpuCounter
-				self.numberOfPlayers = cpuCounter + self.numberOfHumans
-				self.easyCPUCount = easyCounter
-				self.normalCPUCount = normalCounter
-				self.hardCPUCount = hardCounter
-				self.expertCPUCount = expertCounter
+			for item in self.playerList:
+				if (item.stats is None):
+					if ("CPU" in item.name): 
+						cpuCounter += 1
+					if ("Easy" in item.name):
+						easyCounter += 1
+					if ("Normal" in item.name):
+						normalCounter += 1
+					if ("Hard" in item.name):
+						hardCounter += 1
+					if ("Expert" in item.name):
+						expertCounter += 1
+				
+			self.numberOfComputers = cpuCounter
+			self.numberOfPlayers = cpuCounter + self.numberOfHumans
+			self.easyCPUCount = easyCounter
+			self.normalCPUCount = normalCounter
+			self.hardCPUCount = hardCounter
+			self.expertCPUCount = expertCounter
 
-				self.mapSize = len(cohinfo.playerList)
+			self.mapSize = len(cohreplayparser.playerList)
 
-				#set the current MatchType
+			#set the current MatchType
+			self.matchType = MatchType.BASIC
+			if (int(self.numberOfComputers) > 0):
 				self.matchType = MatchType.BASIC
-				if (int(self.numberOfComputers) > 0):
-					self.matchType = MatchType.BASIC
-				if (0 <= int(self.mapSize) <= 2) and (int(self.numberOfComputers) == 0):
-					self.matchType = MatchType.ONES
-				if (3 <= int(self.mapSize) <= 4) and (int(self.numberOfComputers) == 0):
-					self.matchType = MatchType.TWOS
-				if (5 <= int(self.mapSize) <= 6) and (int(self.numberOfComputers) == 0):
-					self.matchType = MatchType.THREES
-		except Exception as e:
-			print("Problem in populateGameData")
-			print(str(e))
-			logging.info("Problem in populateGameData")
-			logging.exception("Stack")
-			logging.error(str(e))
+			if (0 <= int(self.mapSize) <= 2) and (int(self.numberOfComputers) == 0):
+				self.matchType = MatchType.ONES
+			if (3 <= int(self.mapSize) <= 4) and (int(self.numberOfComputers) == 0):
+				self.matchType = MatchType.TWOS
+			if (5 <= int(self.mapSize) <= 6) and (int(self.numberOfComputers) == 0):
+				self.matchType = MatchType.THREES
 
+			return True
+
+
+
+		except Exception as e:
+			logging.info(str(e))
+			logging.exception("Stack : ")
+			return False
+
+	def GetPtrAddr(self, base, offsets):
+		try:
+			if self.pm:
+				addr = self.pm.read_int(base)
+				for i in offsets:
+					if i != offsets[-1]:
+						addr = self.pm.read_int(addr + i)
+				return addr + offsets[-1]
+		except Exception as e:
+			logging.info(str(e))
+			logging.exception("Stack : ")
+	
+
+	def getCOHMemoryAddress(self):
+		
+		try:
+			self.pm = pymem.Pymem("RelicCOH.exe")
+			self.baseAddress = module_from_name(self.pm.process_handle, "RelicCOH.exe").lpBaseOfDll
+			self.cohRunning = True
+			return True
+		except Exception as e:
+			logging.info(str(e))
+			self.cohRunning = False
+			return False
+			
+	
+	# rewrite function below to remove memory search.
 
 	def getStatsFromGame(self):
 		try:
+
+			self.cohMemoryAddress = Process.get_pid_by_name('RelicCOH.exe')
+
 			with Process.open_process(self.cohMemoryAddress) as p:
 				steamNumberList = []
 				for player in self.playerList:
@@ -1680,7 +1755,7 @@ class UCS:
 		try:
 			if (os.path.isfile(self.ucsPath)):
 				linenumber = 1
-				with open(self.ucsPath, "r", encoding="utf-16") as f:	
+				with open(self.ucsPath, 'r',  encoding='utf16') as f:	
 					for line in f:
 						linenumber += 1
 						firstString = str(line.split('\t')[0])
