@@ -1,5 +1,5 @@
 VersionNumber = "2.0"
-BuildDate = "31-Jan-2021"
+BuildDate = "17-Apr-2021"
 
 import COHOpponentBot_Parameters
 import sys
@@ -51,6 +51,7 @@ class COHBotGUI:
 		self.useCustomPreFormat = IntVar(value = int(bool(self.parameters.data.get('useCustomPreFormat'))))
 		self.customChatOutputPreFormatString = StringVar()
 		self.logErrorsToFile = IntVar(value = int(bool(self.parameters.data.get('logErrorsToFile'))))
+		#self.steamName = 
 
 		#Start or stop logging based on the self.logErrorsToFile variable
 		self.toggleLogErrorsToFile()
@@ -61,82 +62,98 @@ class COHBotGUI:
 
 
 		tk.Label(self.master, text="Twitch Channel").grid(row=0, sticky=tk.W)
-		tk.Label(self.master, text="Bot Account Name").grid(row=1, sticky=tk.W)
-		tk.Label(self.master, text="Bot oAuth Key").grid(row=2, sticky=tk.W)
-		tk.Label(self.master, text="Steam64ID Number").grid(row=3, sticky=tk.W)
-		tk.Label(self.master, text="warning.log path").grid(row=4, sticky=tk.W)
-		tk.Label(self.master, text="RelicCOH.exe path").grid(row=5, sticky=tk.W)
+		tk.Label(self.master, text="Steam Name").grid(row=1, sticky=tk.W)
+		tk.Label(self.master, text="Bot Account Name").grid(row=2, sticky=tk.W)
+		tk.Label(self.master, text="Bot oAuth Key").grid(row=3, sticky=tk.W)
+		tk.Label(self.master, text="Steam64ID Number").grid(row=4, sticky=tk.W)
+		tk.Label(self.master, text="warning.log path").grid(row=5, sticky=tk.W)
+		tk.Label(self.master, text="RelicCOH.exe path").grid(row=6, sticky=tk.W)
 
-		self.e1 = tk.Entry(self.master, width = 70)
-		self.e2 = tk.Entry(self.master, width = 70)
-		self.e3 = tk.Entry(self.master, width = 70)
-		self.e4 = tk.Entry(self.master, width = 70)
-		self.e5 = tk.Entry(self.master, width = 70)
-		self.e6 = tk.Entry(self.master, width = 70)
+		self.entryTwitchChannel = tk.Entry(self.master, width = 70)
+		self.entrySteamName = tk.Entry(self.master, width = 70)
+		self.entryBotAccountName = tk.Entry(self.master, width = 70)
+		self.entryBotoAuthKey = tk.Entry(self.master, width = 70)
+		self.entrySteam64IDNumber = tk.Entry(self.master, width = 70)
+		self.entryWarningLogPath = tk.Entry(self.master, width = 70)
+		self.entryRelicCOHPath = tk.Entry(self.master, width = 70)
 
-		self.e1.grid(row=0, column=1)
-		self.e2.grid(row=1, column=1)
-		self.e3.grid(row=2, column=1)
-		self.e4.grid(row=3, column=1)
-		self.e5.grid(row=4, column=1)
-		self.e6.grid(row=5, column=1)
+		self.entryTwitchChannel.grid(row=0, column=1)
+		self.entrySteamName.grid(row=1, column=1)
+		self.entryBotAccountName.grid(row=2, column=1)
+		self.entryBotoAuthKey.grid(row=3, column=1)
+		self.entrySteam64IDNumber.grid(row=4, column=1)
+		self.entryWarningLogPath.grid(row=5, column=1)
+		self.entryRelicCOHPath.grid(row=6, column=1)
+
+		steamName = self.parameters.data.get('steamAlias')
+
+		if (steamName):
+			self.entrySteamName.insert(0, str(steamName))
 
 		logPath = self.parameters.data.get('logPath')
+
 		if (logPath):
-			self.e5.insert(0, str(logPath))
+			self.entryWarningLogPath.insert(0, str(logPath))
 
 		cohPath = self.parameters.data.get('cohPath')
+
 		if (cohPath):
-			self.e6.insert(0, str(cohPath))
+			self.entryRelicCOHPath.insert(0, str(cohPath))
 		
 
 		steamNumber = "enter your steam number"
+
 		if self.parameters.data.get('steamNumber'):
 			steamNumber = self.parameters.data.get('steamNumber')
 
-		self.e4.insert(0, steamNumber)
+		self.entrySteam64IDNumber.insert(0, steamNumber)
 
 		twitchName = "enter your twitch channel name"
+
 		if self.parameters.data.get('channel'):
 			twitchName = self.parameters.data.get('channel')
 
-		self.e1.insert(0, twitchName)
+		self.entryTwitchChannel.insert(0, twitchName)
 
 		if (self.parameters.data.get('botUserName')):
-			self.e2.insert(0, str(self.parameters.data.get('botUserName')))
+			self.entryBotAccountName.insert(0, str(self.parameters.data.get('botUserName')))
 
 		if (self.parameters.data.get('botOAuthKey')):
-			self.e3.insert(0, str(self.parameters.data.get('botOAuthKey')))
-		self.e3.config(show="*")
+			self.entryBotoAuthKey.insert(0, str(self.parameters.data.get('botOAuthKey')))
+		self.entryBotoAuthKey.config(show="*")
 
-		self.e1.config(state = "disabled")
-		self.e2.config(state = "disabled")
-		self.e3.config(state = "disabled")
-		self.e4.config(state = "disabled")
-		self.e5.config(state = "disabled")
-		self.e6.config(state = "disabled")
+		self.entryTwitchChannel.config(state = "disabled")
+		self.entrySteamName.config(state= "disabled")
+		self.entryBotAccountName.config(state = "disabled")
+		self.entryBotoAuthKey.config(state = "disabled")
+		self.entrySteam64IDNumber.config(state = "disabled")
+		self.entryWarningLogPath.config(state = "disabled")
+		self.entryRelicCOHPath.config(state = "disabled")
 
-		self.b1 = tk.Button(self.master, text = "edit", command = lambda: self.editTwitchName())
-		self.b1.config(width = 10)
-		self.b1.grid(row=0, column =2)
-		self.b2 = tk.Button(self.master, text = "edit", command = lambda: self.editBotName())
-		self.b2.config(width = 10)
-		self.b2.grid(row=1, column=2)
-		self.b3 = tk.Button(self.master, text = "edit", command = lambda: self.editOAuthKey())
-		self.b3.config(width = 10)
-		self.b3.grid(row=2, column=2)
-		self.b4 = tk.Button(self.master, text = "edit", command = lambda: self.editSteamNumber())
-		self.b4.config(width = 10)
-		self.b4.grid(row=3, column=2)        
-		self.b5 = tk.Button(self.master, text = "browse", command = lambda : self.locateWarningLog() )
-		self.b5.config(width = 10)
-		self.b5.grid(row=4, column=2)
+		self.buttonTwitchChannel = tk.Button(self.master, text = "edit", command = lambda: self.editTwitchName())
+		self.buttonTwitchChannel.config(width = 10)
+		self.buttonTwitchChannel.grid(row=0, column =2)
+		self.buttonSteamName = tk.Button(self.master, text = "edit", command = lambda: self.editSteamName())
+		self.buttonSteamName.config(width = 10)
+		self.buttonSteamName.grid(row=1, column =2)
+		self.buttonBotAccountName = tk.Button(self.master, text = "edit", command = lambda: self.editBotName())
+		self.buttonBotAccountName.config(width = 10)
+		self.buttonBotAccountName.grid(row=2, column=2)
+		self.buttonBotOAuthKey = tk.Button(self.master, text = "edit", command = lambda: self.editOAuthKey())
+		self.buttonBotOAuthKey.config(width = 10)
+		self.buttonBotOAuthKey.grid(row=3, column=2)
+		self.buttonSteam64IDNumber = tk.Button(self.master, text = "edit", command = lambda: self.editSteamNumber())
+		self.buttonSteam64IDNumber.config(width = 10)
+		self.buttonSteam64IDNumber.grid(row=4, column=2)        
+		self.buttonLocateWarningLog = tk.Button(self.master, text = "browse", command = lambda : self.locateWarningLog() )
+		self.buttonLocateWarningLog.config(width = 10)
+		self.buttonLocateWarningLog.grid(row=5, column=2)
 		self.cohBrowseButton = tk.Button(self.master, text = "browse", command = lambda : self.locateCOH() )
 		self.cohBrowseButton.config(width = 10)
-		self.cohBrowseButton.grid(row=5, column=2)
-		self.b6 = tk.Button(self.master, text = "options", command = self.createOptionsMenu )
-		self.b6.config(width = 10)
-		self.b6.grid(row=6, column=2)
+		self.cohBrowseButton.grid(row=6, column=2)
+		self.buttonOptions = tk.Button(self.master, text = "options", command = self.createOptionsMenu )
+		self.buttonOptions.config(width = 10)
+		self.buttonOptions.grid(row=7, column=2)
 
 		self.ircClient = None
 		self.automaticFileMonitor = None
@@ -145,29 +162,29 @@ class COHBotGUI:
 		self.style.configure('W.TButton', font = 'calibri', size = 10, foreground = 'red')
 		self.connectButton = ttk.Button(self.master, text = "Connect",style ='W.TButton', command = lambda : self.connectIRC(self.ircClient))
 
-		self.connectButton.grid(row=7, columnspan = 3, sticky = tk.W+tk.E+tk.N+tk.S, padx=30,pady=30)
+		self.connectButton.grid(row=8, columnspan = 3, sticky = tk.W+tk.E+tk.N+tk.S, padx=30,pady=30)
 
 		self.consoleDisplayBool = IntVar()
 
 		self.testButton = tk.Button(self.master, text = "Test Output", command = self.testStats )
 		self.testButton.config(width = 10)
-		self.testButton.grid(row =9, column=2 ,sticky=tk.E)
+		self.testButton.grid(row =10, column=2 ,sticky=tk.E)
 		self.testButton.config(state = DISABLED)
 
 		self.clearOverlayButton = tk.Button(self.master, text = "Clear Overlay", command = COHOpponentBot_Bot.GameData.clearOverlayHTML)
 		self.clearOverlayButton.config(width = 10)
-		self.clearOverlayButton.grid(row = 10, column=2, sticky=tk.E)
+		self.clearOverlayButton.grid(row = 11, column=2, sticky=tk.E)
 
 
 
 		tk.Label(self.master, text="Console Output:").grid(row=10, sticky=tk.W)
 		# create a Text widget
 		self.txt = tk.Text(self.master)
-		self.txt.grid(row=12, columnspan=3, sticky="nsew", padx=2, pady=2)
+		self.txt.grid(row=13, columnspan=3, sticky="nsew", padx=2, pady=2)
 
 		# create a Scrollbar and associate it with txt
 		scrollb = ttk.Scrollbar(self.master, command=self.txt.yview)
-		scrollb.grid(row=12, column=4, sticky='nsew')
+		scrollb.grid(row=13, column=4, sticky='nsew')
 		self.txt['yscrollcommand'] = scrollb.set
 
 		# import icon base64 data from separate icon.py file
@@ -501,29 +518,31 @@ class COHBotGUI:
 
 
 	def disableEverything(self):
-		self.b1.config(state = DISABLED)
-		self.b2.config(state = DISABLED)
-		self.b3.config(state = DISABLED)
-		self.b4.config(state = DISABLED)
-		self.b5.config(state = DISABLED)
-		self.b6.config(state = DISABLED)
+		self.buttonTwitchChannel.config(state = DISABLED)
+		self.buttonSteamName.config(state= DISABLED)
+		self.buttonBotAccountName.config(state = DISABLED)
+		self.buttonBotOAuthKey.config(state = DISABLED)
+		self.buttonSteam64IDNumber.config(state = DISABLED)
+		self.buttonLocateWarningLog.config(state = DISABLED)
+		self.buttonOptions.config(state = DISABLED)
 		self.cohBrowseButton.config(state = DISABLED)
-		self.e1.config(state = DISABLED)
-		self.e2.config(state = DISABLED)
-		self.e3.config(state = DISABLED)
-		self.e4.config(state = DISABLED)
-		self.e5.config(state = DISABLED)
-		self.e6.config(state = DISABLED)
+		self.entryTwitchChannel.config(state = DISABLED)
+		self.entryBotAccountName.config(state = DISABLED)
+		self.entryBotoAuthKey.config(state = DISABLED)
+		self.entrySteam64IDNumber.config(state = DISABLED)
+		self.entryWarningLogPath.config(state = DISABLED)
+		self.entryRelicCOHPath.config(state = DISABLED)
 		self.connectButton.config(state = DISABLED)
 		self.testButton.config(state = DISABLED)
 
 	def enableButtons(self):
-		self.b1.config(state = NORMAL)
-		self.b2.config(state = NORMAL)
-		self.b3.config(state = NORMAL)
-		self.b4.config(state = NORMAL)
-		self.b5.config(state = NORMAL)
-		self.b6.config(state = NORMAL)
+		self.buttonTwitchChannel.config(state = NORMAL)
+		self.buttonSteamName.config(state = NORMAL)
+		self.buttonBotAccountName.config(state = NORMAL)
+		self.buttonBotOAuthKey.config(state = NORMAL)
+		self.buttonSteam64IDNumber.config(state = NORMAL)
+		self.buttonLocateWarningLog.config(state = NORMAL)
+		self.buttonOptions.config(state = NORMAL)
 		self.cohBrowseButton.config(state = NORMAL)
 		self.connectButton.config(state = NORMAL)
 		#self.testButton.config(state = NORMAL)
@@ -531,17 +550,17 @@ class COHBotGUI:
 
 
 	def editSteamNumber(self):  
-		theState = self.e4.cget('state')
+		theState = self.entrySteam64IDNumber.cget('state')
 		if(theState == "disabled"):
 			self.disableEverything()
-			self.b4.config(state = NORMAL)
-			self.e4.config(state = NORMAL)
+			self.buttonSteam64IDNumber.config(state = NORMAL)
+			self.entrySteam64IDNumber.config(state = NORMAL)
 
 		if(theState == "normal"):
-			if self.checkSteamNumber(self.e4.get()):
-				self.e4.config(state = DISABLED)
+			if self.checkSteamNumber(self.entrySteam64IDNumber.get()):
+				self.entrySteam64IDNumber.config(state = DISABLED)
 				self.enableButtons()
-				self.parameters.data['steamNumber'] = self.e4.get()
+				self.parameters.data['steamNumber'] = self.entrySteam64IDNumber.get()
 				self.parameters.save()
 			else:
 				messagebox.showerror("Invaid Steam Number", "Please enter your steam number\nIt Should be an integer 17 characters long")
@@ -549,49 +568,63 @@ class COHBotGUI:
 			# implement check value safe
 
 	def editTwitchName(self):
-		theState = self.e1.cget('state')
+		theState = self.entryTwitchChannel.cget('state')
 		if(theState == DISABLED):
 			self.disableEverything()
-			self.e1.config(state = NORMAL)
-			self.b1.config(state = NORMAL)
+			self.entryTwitchChannel.config(state = NORMAL)
+			self.buttonTwitchChannel.config(state = NORMAL)
 
 		if(theState == NORMAL):
-			if(self.special_match(self.e1.get())):
-				self.e1.config(state = DISABLED)
+			if(self.special_match(self.entryTwitchChannel.get())):
+				self.entryTwitchChannel.config(state = DISABLED)
 				self.enableButtons()
-				self.parameters.data['channel'] = self.e1.get()
+				self.parameters.data['channel'] = self.entryTwitchChannel.get()
 				self.parameters.save()
 			else:
 				messagebox.showerror("Invalid Twitch channel", "That doesn't look like a valid channel name\nTwitch user names should be 4-24 characters long\nand only contain letters numbers and underscores.")
 
+	def editSteamName(self):
+		theState = self.entrySteamName.cget('state')
+		if(theState == DISABLED):
+			self.disableEverything()
+			self.entrySteamName.config(state = NORMAL)
+			self.buttonSteamName.config(state = NORMAL)
+
+		if(theState == NORMAL):
+			self.entrySteamName.config(state = DISABLED)
+			self.enableButtons()
+			self.parameters.data['steamAlias'] = self.entrySteamName.get()
+			self.parameters.save()
+
+
 	def editBotName(self):
-		theState = self.e2.cget('state')
+		theState = self.entryBotAccountName.cget('state')
 		if(theState == "disabled"):
 			self.disableEverything()
-			self.b2.config(state = NORMAL)
-			self.e2.config(state = NORMAL)
+			self.buttonBotAccountName.config(state = NORMAL)
+			self.entryBotAccountName.config(state = NORMAL)
 
 		if(theState == "normal"):
-			if(self.special_match(self.e2.get())):
-				self.e2.config(state = "disabled")
+			if(self.special_match(self.entryBotAccountName.get())):
+				self.entryBotAccountName.config(state = "disabled")
 				self.enableButtons()
-				self.parameters.data['botUserName'] = self.e2.get()
+				self.parameters.data['botUserName'] = self.entryBotAccountName.get()
 				self.parameters.save()
 			else:
 				messagebox.showerror("Invalid Twitch channel", "That doesn't look like a valid Twitch user name\nTwitch user names should be 4-24 characters long\nand only contain letters numbers and underscores.")
 
 	def editOAuthKey(self):  
-		theState = self.e3.cget('state')
+		theState = self.entryBotoAuthKey.cget('state')
 		if(theState == "disabled"):
 			self.disableEverything()
-			self.b3.config(state = NORMAL)
-			self.e3.config(state = NORMAL)
+			self.buttonBotOAuthKey.config(state = NORMAL)
+			self.entryBotoAuthKey.config(state = NORMAL)
 
 		if(theState == "normal"):
-			if self.checkOAuthKey(self.e3.get()):
-				self.e3.config(state = "disabled")
+			if self.checkOAuthKey(self.entryBotoAuthKey.get()):
+				self.entryBotoAuthKey.config(state = "disabled")
 				self.enableButtons()
-				self.parameters.data['botOAuthKey'] = self.e3.get()
+				self.parameters.data['botOAuthKey'] = self.entryBotoAuthKey.get()
 				self.parameters.save()
 			else:
 				messagebox.showerror("Invaid OAuth Key", "Please enter your bots OAuth Key\nIt Should be an 36 characters long and start with oauth:\n You can find it here https://twitchapps.com/tmi/")
@@ -631,12 +664,12 @@ class COHBotGUI:
 			pattern = re.compile(r"\u20A9|\uFFE6|\u00A5|\uFFE5") # replaces both Won sign varients for korean language and Yen symbol for Japanese language paths
 			theFilename = re.sub(pattern, "/", self.master.filename)
 			self.parameters.data['logPath'] = theFilename.replace("/",'\\')
-			self.e5.config(state = NORMAL)
-			self.e5.delete(0, tk.END)
+			self.entryWarningLogPath.config(state = NORMAL)
+			self.entryWarningLogPath.delete(0, tk.END)
 			logpath = self.parameters.data.get('logPath')
 			if logpath:
-				self.e5.insert(0, str(logpath))
-			self.e5.config(state = DISABLED)
+				self.entryWarningLogPath.insert(0, str(logpath))
+			self.entryWarningLogPath.config(state = DISABLED)
 			self.parameters.save()
 		self.enableButtons()
 
@@ -649,12 +682,12 @@ class COHBotGUI:
 			pattern = re.compile(r"\u20A9|\uFFE6|\u00A5|\uFFE5") # replaces both Won sign varients for korean language and Yen symbol for Japanese language paths
 			theFilename = re.sub(pattern, "/", self.master.filename)
 			self.parameters.data['logPath'] = theFilename.replace("/",'\\')
-			self.e6.config(state = NORMAL)
-			self.e6.delete(0, tk.END)
+			self.entryRelicCOHPath.config(state = NORMAL)
+			self.entryRelicCOHPath.delete(0, tk.END)
 			logpath = self.parameters.data.get('cohPath')
 			if logpath:
-				self.e6.insert(0, str(logpath))
-			self.e6.config(state = DISABLED)
+				self.entryRelicCOHPath.insert(0, str(logpath))
+			self.entryRelicCOHPath.config(state = DISABLED)
 			self.parameters.save()
 		self.enableButtons()
 
