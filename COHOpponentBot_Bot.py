@@ -363,7 +363,7 @@ class StatsRequest:
 
 class MemoryMonitor(threading.Thread):
 
-	def __init__(self, filePath, pollInterval = 30, ircClient = None, parameters = None):
+	def __init__(self, pollInterval = 30, ircClient = None, parameters = None):
 		Thread.__init__(self)
 		try:
 			logging.info("Memory Monitor Started!")

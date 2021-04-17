@@ -699,7 +699,7 @@ class COHBotGUI:
 		if self.ircClient:
 			self.automaticFileMonitor = COHOpponentBot_Bot.FileMonitor(self.parameters.data.get('logPath'), self.parameters.data.get('filePollInterval'), self.ircClient, parameters=self.parameters)
 			self.automaticFileMonitor.start()
-			self.automaticMemoryMonitor = COHOpponentBot_Bot.MemoryMonitor(pollInterval= self.parameters.data.get('filePollInterval'), ircClient= self.ircClient, parameters=self.parameters)
+			self.automaticMemoryMonitor = COHOpponentBot_Bot.MemoryMonitor(pollInterval = self.parameters.data.get('filePollInterval'), ircClient= self.ircClient, parameters=self.parameters)
 			self.automaticMemoryMonitor.start()
 
 	def closeMonitors(self):
