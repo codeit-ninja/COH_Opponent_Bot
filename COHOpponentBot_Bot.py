@@ -872,7 +872,7 @@ class GameData():
 			# access replay data in game memory
 			replayData = self.pm.read_bytes(self.GetPtrAddr(self.baseAddress + cohrecReplayAddress, cohrecOffsets), 4000)
 
-			cohreplayparser = COH_Replay_Parser()
+			cohreplayparser = COH_Replay_Parser(parameters=self.parameters)
 			cohreplayparser.data = bytearray(replayData)
 			cohreplayparser.processData()
 			print(cohreplayparser)	
@@ -1416,8 +1416,13 @@ class GameData():
 class COH_Replay_Parser:
 	"""Parses a company of heroes 1 replay to extract as much useful information from it as possible."""
 
-	def __init__(self, filePath = None) -> None:
+	def __init__(self, filePath = None, parameters = None) -> None:
 
+
+		if parameters:
+			self.parameters = parameters
+		else:
+			self.parameters = Parameters()	
 
 		self.filePath = filePath
 
@@ -1611,8 +1616,8 @@ class COH_Replay_Parser:
 		self.parseChunk(0)
 
 		#get mapname and mapdescription from ucs file if they exist there
-		self.mapNameFull = UCS().compareUCS(self.mapName)
-		self.mapDescriptionFull = UCS().compareUCS(self.mapDescription)
+		self.mapNameFull = UCS(parameters=self.parameters).compareUCS(self.mapName)
+		self.mapDescriptionFull = UCS(parameters=self.parameters).compareUCS(self.mapDescription)
 
 
 	def parseChunk(self, level):
