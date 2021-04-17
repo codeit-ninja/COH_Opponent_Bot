@@ -132,8 +132,9 @@ class Parameters:
 
 		filePath = self.data['steamFolder'] + "\\steamapps\\libraryfolders.vdf"
 		steamlibraryBases = []
-		if self.data['steamFolder']:
-			steamlibraryBases.append(self.data['steamFolder'])
+
+		#if self.data['steamFolder']:
+		#	steamlibraryBases.append(self.data['steamFolder'])
 
 		try:
 			if (os.path.isfile(filePath)):
@@ -151,7 +152,9 @@ class Parameters:
 								steamlibraryBases.append(location)
 						except Exception as e:
 							pass
+
 			print(steamlibraryBases)
+
 			for steamBase in steamlibraryBases:
 				cohPath = steamBase + "\\steamapps\\common\\Company of Heroes Relaunch\\RelicCOH.exe"
 				if (os.path.isfile(cohPath)):
