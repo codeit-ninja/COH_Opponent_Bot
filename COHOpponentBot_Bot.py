@@ -300,8 +300,8 @@ class IRC_Channel(threading.Thread):
 			if (bool(re.match("^(!)?opponent(\?)?$", message.lower())) or bool(re.match("^(!)?place your bets$" , message.lower())) or bool(re.match("^(!)?opp(\?)?$", message.lower()))):
 				logging.info("Got Opponent")
 				self.gameData = GameData(ircClient= self.ircClient, parameters=self.parameters)
-				self.gameData.getDataFromGame()
-				self.gameData.outputOpponentData()
+				if self.gameData.getDataFromGame():
+					self.gameData.outputOpponentData()
 
 
 			if (message.lower() == "test") and ((str(userName).lower() == str(self.parameters.privatedata.get('adminUserName')).lower()) or (str(userName) == str(self.parameters.data.get('channel')).lower())):
@@ -317,8 +317,8 @@ class IRC_Channel(threading.Thread):
 
 	def gameInfo(self):
 		self.gameData = GameData(self.ircClient, parameters=self.parameters)
-		self.gameData.getDataFromGame()
-		self.ircClient.SendPrivateMessageToIRC("Map : {}, Mod : {}, Start : {}, High Resources : {}, Automatch : {}, Slots : {}, Players : {}.".format(self.gameData.mapFullName,self.gameData.modName,self.gameData.randomStart,self.gameData.highResources, self.gameData.automatch, self.gameData.mapSize,  self.gameData.numberOfPlayers))
+		if self.gameData.getDataFromGame():
+			self.ircClient.SendPrivateMessageToIRC("Map : {}, Mod : {}, Start : {}, High Resources : {}, Automatch : {}, Slots : {}, Players : {}.".format(self.gameData.mapFullName,self.gameData.modName,self.gameData.randomStart,self.gameData.highResources, self.gameData.automatch, self.gameData.mapSize,  self.gameData.numberOfPlayers))
 
 	def testOutput(self):
 		if not self.gameData:
@@ -412,7 +412,6 @@ class MemoryMonitor(threading.Thread):
 		try:
 			self.gameData = GameData(ircClient=self.ircClient, parameters=self.parameters)
 			self.gameData.getDataFromGame()
-			self.cohRunning = self.gameData.cohRunning
 		except Exception as e:
 			logging.error("In getGameData")
 			logging.info(str(e))
@@ -973,6 +972,7 @@ class GameData():
 
 
 		except Exception as e:
+			logging.info("Problem in getDataFromGame")
 			logging.info(str(e))
 			logging.exception("Stack : ")
 			return False
@@ -986,6 +986,7 @@ class GameData():
 						addr = self.pm.read_int(addr + i)
 				return addr + offsets[-1]
 		except Exception as e:
+			logging.info("Problem in GetPtrAddr")
 			logging.info(str(e))
 			logging.exception("Stack : ")
 	
@@ -998,7 +999,7 @@ class GameData():
 			self.cohRunning = True
 			return True
 		except Exception as e:
-			logging.info(str(e))
+			#logging.info(str(e))
 			self.cohRunning = False
 			return False
 			
