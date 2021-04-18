@@ -1162,54 +1162,91 @@ class GameData():
 			postfixDivClose = '</div>'
 		stringFormattingDictionary = dict(self.parameters.stringFormattingDictionary)
 		#stringFormattingDictionary = {} # create a new dictionary
-		stringFormattingDictionary['$NAME$'] =  prefixDiv + '<div class = "name">' + str(player.name) + postfixDivClose + postfixDivClose
+		nameDiv = ""
+		factionDiv = ""
+		matchDiv = ""
+		countryDiv = ""
+		totalWinsDiv = ""
+		totalLossesDiv = ""
+		totalWinLossRatioDiv = ""
+		winsDiv = ""
+		lossesDiv = ""
+		disputesDiv = ""
+		streakDiv = ""
+		dropsDiv = ""
+		rankDiv = ""
+		levelDiv = ""
+		wlRatioDiv = ""
+
+		if overlay:
+			nameDiv = '<div class = "name">'
+			factionDiv = '<div class = "faction">'
+			matchDiv = '<div class = "matchtype">'
+			countryDiv = '<div class = "country">'
+			totalWinsDiv = '<div class = "totalwins">'
+			totalLossesDiv = '<div class = "totallosses">'
+			totalWinLossRatioDiv = '<div class = "totalwlratio">'
+			winsDiv = '<div class = "wins">'
+			lossesDiv = '<div class = "losses">'
+			disputesDiv = '<div class = "disputes">'
+			streakDiv = '<div class = "streak">'
+			dropsDiv = '<div class = "drops">'
+			rankDiv = '<div class = "rank">'
+			levelDiv = '<div class = "level">'
+			wlRatioDiv = '<div class = "wlratio">'
+
+		
+		stringFormattingDictionary['$NAME$'] =  prefixDiv +  + str(player.name) + postfixDivClose + postfixDivClose
 		if (bool(re.match("""^[/\.]""" , player.name))):
-			stringFormattingDictionary['$NAME$'] =  prefixDiv + '<div class = "name">' + str(player.name.rjust(len(player.name)+1)) + postfixDivClose + postfixDivClose
+			stringFormattingDictionary['$NAME$'] =  prefixDiv + nameDiv + str(player.name.rjust(len(player.name)+1)) + postfixDivClose + postfixDivClose
 		# add 1 extra whitespace to username if it starts with . or / using rjust to prevent . and / twitch chat commands causing problems
 		if overlay:
-			stringFormattingDictionary['$NAME$'] =  prefixDiv + '<div class = "name">' + str(html.escape(player.name)) + postfixDivClose + postfixDivClose
+			stringFormattingDictionary['$NAME$'] =  prefixDiv + nameDiv + str(html.escape(player.name)) + postfixDivClose + postfixDivClose
+		
+		
+		
 		if type(player.faction) is Faction:
-			stringFormattingDictionary['$FACTION$'] =  prefixDiv + '<div class = "faction">' + str(player.faction.name) + postfixDivClose + postfixDivClose
+			stringFormattingDictionary['$FACTION$'] =  prefixDiv + factionDiv + str(player.faction.name) + postfixDivClose + postfixDivClose
 
 		if (self.matchType == MatchType.BASIC):
-			stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + '<div class = "matchtype">' + "Basic" + postfixDivClose + postfixDivClose
+			stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + matchDiv + "Basic" + postfixDivClose + postfixDivClose
 		if (self.matchType == MatchType.ONES):
-			stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + '<div class = "matchtype">' + "1v1" + postfixDivClose + postfixDivClose
+			stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + matchDiv + "1v1" + postfixDivClose + postfixDivClose
 		if (self.matchType == MatchType.TWOS):
-			stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + '<div class = "matchtype">' + "2v2" + postfixDivClose + postfixDivClose
+			stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + matchDiv + "2v2" + postfixDivClose + postfixDivClose
 		if (self.matchType == MatchType.THREES):
-			stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + '<div class = "matchtype">' + "3v3" + postfixDivClose + postfixDivClose
+			stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + matchDiv + "3v3" + postfixDivClose + postfixDivClose
 
 		# if a computer it will have no stats
 		if player.stats:
-			stringFormattingDictionary['$COUNTRY$'] =  prefixDiv + '<div class = "country">' + str(player.stats.country) + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$TOTALWINS$'] =  prefixDiv + '<div class = "totalwins">' + str(player.stats.totalWins) + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$TOTALLOSSES$'] =  prefixDiv + '<div class = "totallosses">' + str(player.stats.totalLosses) + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$TOTALWLRATIO$'] =  prefixDiv + '<div class = "totalwlratio">' + str(player.stats.totalWLRatio) + postfixDivClose + postfixDivClose
+			stringFormattingDictionary['$COUNTRY$'] =  prefixDiv + countryDiv + str(player.stats.country) + postfixDivClose + postfixDivClose
+			stringFormattingDictionary['$TOTALWINS$'] =  prefixDiv + totalWinsDiv + str(player.stats.totalWins) + postfixDivClose + postfixDivClose
+			stringFormattingDictionary['$TOTALLOSSES$'] =  prefixDiv + totalLossesDiv + str(player.stats.totalLosses) + postfixDivClose + postfixDivClose
+			stringFormattingDictionary['$TOTALWLRATIO$'] =  prefixDiv + totalWinLossRatioDiv + str(player.stats.totalWLRatio) + postfixDivClose + postfixDivClose
 
 
 			#set default null values for all parameters in dictionary
-			stringFormattingDictionary['$WINS$'] =  prefixDiv + '<div class = "wins">' + "0" + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$LOSSES$'] =  prefixDiv + '<div class = "losses">' + "0" + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$DISPUTES$'] =  prefixDiv + '<div class = "disputes">' + "0" + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$STREAK$'] =  prefixDiv + '<div class = "streak">' + "0" + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$DROPS$'] =  prefixDiv + '<div class = "drops">' + "0" + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$RANK$'] =  prefixDiv + '<div class = "rank">' + "-" + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$LEVEL$'] =  prefixDiv + '<div class = "level">' + "0" + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$WLRATIO$'] =  prefixDiv + '<div class = "wlratio">' + "-" + postfixDivClose	+ postfixDivClose	
+			stringFormattingDictionary['$WINS$'] =  prefixDiv + winsDiv + "0" + postfixDivClose + postfixDivClose
+			stringFormattingDictionary['$LOSSES$'] =  prefixDiv + lossesDiv + "0" + postfixDivClose + postfixDivClose
+			stringFormattingDictionary['$DISPUTES$'] =  prefixDiv + disputesDiv + "0" + postfixDivClose + postfixDivClose
+			stringFormattingDictionary['$STREAK$'] =  prefixDiv + streakDiv + "0" + postfixDivClose + postfixDivClose
+			stringFormattingDictionary['$DROPS$'] =  prefixDiv + dropsDiv + "0" + postfixDivClose + postfixDivClose
+			stringFormattingDictionary['$RANK$'] =  prefixDiv + rankDiv + "-" + postfixDivClose + postfixDivClose
+			stringFormattingDictionary['$LEVEL$'] =  prefixDiv + levelDiv + "0" + postfixDivClose + postfixDivClose
+			stringFormattingDictionary['$WLRATIO$'] =  prefixDiv + wlRatioDiv + "-" + postfixDivClose	+ postfixDivClose	
 
 			for value in player.stats.leaderboardData:
 				if (str(player.stats.leaderboardData[value].matchType) == str(self.matchType)):
 					if (str(player.stats.leaderboardData[value].faction) == str(player.faction)):
 				
-						stringFormattingDictionary['$WINS$'] =  prefixDiv + '<div class = "wins">' + str(player.stats.leaderboardData[value].wins) + postfixDivClose + postfixDivClose
-						stringFormattingDictionary['$LOSSES$'] =  prefixDiv + '<div class = "losses">' + str(player.stats.leaderboardData[value].losses) + postfixDivClose + postfixDivClose
-						stringFormattingDictionary['$DISPUTES$'] =  prefixDiv + '<div class = "disputes">' + str(player.stats.leaderboardData[value].disputes) + postfixDivClose + postfixDivClose
-						stringFormattingDictionary['$STREAK$'] =  prefixDiv + '<div class = "streak">' + str(player.stats.leaderboardData[value].streak) + postfixDivClose + postfixDivClose
-						stringFormattingDictionary['$DROPS$'] =  prefixDiv + '<div class = "drops">' + str(player.stats.leaderboardData[value].drops) + postfixDivClose + postfixDivClose
-						stringFormattingDictionary['$RANK$'] =  prefixDiv + '<div class = "rank">' + str(player.stats.leaderboardData[value].rank) + postfixDivClose + postfixDivClose
-						stringFormattingDictionary['$LEVEL$'] =  prefixDiv + '<div class = "level">' + str(player.stats.leaderboardData[value].rankLevel) + postfixDivClose + postfixDivClose
-						stringFormattingDictionary['$WLRATIO$'] =  prefixDiv + '<div class = "wlratio">' + str(player.stats.leaderboardData[value].winLossRatio) + postfixDivClose + postfixDivClose
+						stringFormattingDictionary['$WINS$'] =  prefixDiv + winsDiv + str(player.stats.leaderboardData[value].wins) + postfixDivClose + postfixDivClose
+						stringFormattingDictionary['$LOSSES$'] =  prefixDiv + lossesDiv + str(player.stats.leaderboardData[value].losses) + postfixDivClose + postfixDivClose
+						stringFormattingDictionary['$DISPUTES$'] =  prefixDiv + disputesDiv + str(player.stats.leaderboardData[value].disputes) + postfixDivClose + postfixDivClose
+						stringFormattingDictionary['$STREAK$'] =  prefixDiv + streakDiv + str(player.stats.leaderboardData[value].streak) + postfixDivClose + postfixDivClose
+						stringFormattingDictionary['$DROPS$'] =  prefixDiv + dropsDiv + str(player.stats.leaderboardData[value].drops) + postfixDivClose + postfixDivClose
+						stringFormattingDictionary['$RANK$'] =  prefixDiv + rankDiv + str(player.stats.leaderboardData[value].rank) + postfixDivClose + postfixDivClose
+						stringFormattingDictionary['$LEVEL$'] =  prefixDiv + levelDiv + str(player.stats.leaderboardData[value].rankLevel) + postfixDivClose + postfixDivClose
+						stringFormattingDictionary['$WLRATIO$'] =  prefixDiv + wlRatioDiv + str(player.stats.leaderboardData[value].winLossRatio) + postfixDivClose + postfixDivClose
 					 
 
 		return stringFormattingDictionary
