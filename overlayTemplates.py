@@ -9,11 +9,11 @@ class OverlayTemplates:
 <meta http-equiv="refresh" content="2">
 </head>
 <body>
-<div id="container">
-<div id = "playerTeam">
+<div class="container">
+<div class = "playerTeam">
 {0}
 </div>
-<div id = "opponentTeam">
+<div class = "opponentTeam">
 {1}
 </div>
 </div>
@@ -39,56 +39,148 @@ html {
 }
   
 	
-#container{width:100%;
+.container{width:100%;
 	position: relative;
 	top: -7px;
 	font-size: 20px; 
 }
 
 
-#countryflagimg{
+.countryflagimg{
 	position: relative;
 	display: inline;
 	top: 3px;
 }
 
-#countryflagimg img{
+.countryflagimg img{
 	height:20px;
 }
 
-#factionflagimg{
+.factionflagimg{
 	position: relative;
 	display: inline;
 	top: 3px;
 }
 
-#factionflagimg img{
+.factionflagimg img{
 	height:20px;
 }
 
-#rankimg {
+.rankimg {
 	position: relative;
 	top: 5px;
 	display: inline;
 }
 
-#rankimg img {
+.rankimg img {
 	height:30px ;
 }
 
-#textVariables {
+.textVariables {
 	position: relative;
 	display: inline;
 	top: 0px;
 }
 
-#nonVariableText{
+.name {
 	position: relative;
 	display: inline;
 	top: 0px;
 }
 
-#opponentTeam {
+.faction {
+	position: relative;
+	display: inline;
+	top: 0px;
+}
+
+.matchtype {
+	position: relative;
+	display: inline;
+	top: 0px;
+}
+
+.country {
+	position: relative;
+	display: inline;
+	top: 0px;
+}
+
+.totalwins {
+	position: relative;
+	display: inline;
+	top: 0px;
+}
+
+.totallosses {
+	position: relative;
+	display: inline;
+	top: 0px;
+}
+
+.totalwlratio {
+	position: relative;
+	display: inline;
+	top: 0px;
+}
+
+.wins {
+	position: relative;
+	display: inline;
+	top: 0px;
+}
+
+.losses {
+	position: relative;
+	display: inline;
+	top: 0px;
+}
+
+.disputes {
+	position: relative;
+	display: inline;
+	top: 0px;
+}
+
+.streak {
+	position: relative;
+	display: inline;
+	top: 0px;
+}
+
+.drops {
+	position: relative;
+	display: inline;
+	top: 0px;
+}
+
+.rank {
+	position: relative;
+	display: inline;
+	top: 0px;
+}
+
+.level {
+	position: relative;
+	display: inline;
+	top: 0px;
+}
+
+.wlratio {
+	position: relative;
+	display: inline;
+	top: 0px;
+}
+
+.nonVariableText{
+	position: relative;
+	display: inline;
+	top: 0px;
+}
+
+
+
+.opponentTeam {
 
 	  position : absolute;
 	  top: 0px; 
@@ -99,7 +191,7 @@ html {
 	  text-align: left;
 	  }
   
-#playerTeam {
+.playerTeam {
 
 	  position: relative;
 	  top: 0px; 
