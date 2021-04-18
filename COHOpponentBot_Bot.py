@@ -376,7 +376,7 @@ class MemoryMonitor(threading.Thread):
 
 			self.pm = None
 			self.baseAddress = None
-			self.cohRunning = None
+			self.gameInProgress = None
 
 			self.ircClient = ircClient
 			self.pollInterval = int(pollInterval)
@@ -391,16 +391,16 @@ class MemoryMonitor(threading.Thread):
 		try:
 			while self.running:
 				self.getGameData()
-				if self.cohRunning:
+				if self.gameInProgress:
 					
-					if self.gameData.cohRunning != self.cohRunning:
+					if self.gameData.gameInProgress != self.gameInProgress:
 						#coh was running and now its not (game over)
-						self.cohRunning = self.gameData.cohRunning
+						self.gameInProgress = self.gameData.gameInProgress
 						self.GameOver()
 				else:
-					if self.gameData.cohRunning != self.cohRunning:
+					if self.gameData.gameInProgress != self.gameInProgress:
 						#coh wasn't running and now it is (game started)
-						self.cohRunning = self.gameData.cohRunning
+						self.gameInProgress = self.gameData.gameInProgress
 						self.GameStarted()
 
 				self.event.wait(self.pollInterval)
@@ -829,7 +829,7 @@ class GameData():
 		self.ircClient = ircClient
 
 		self.cohRunning = False
-		self.gameCurrentlyActive = False
+		self.gameInProgress = False
 
 		self.gameStartedDate = None
 
@@ -856,9 +856,11 @@ class GameData():
 			mpPointerAddress = 0x00901EA8
 			mpOffsets=[0xC,0xC,0x18,0x10,0x24,0x18,0x264]
 
+			# not used but for reference
 			muniPointerAddress = 0x00901EA8
 			muniOffsets=[0xC,0xC,0x18,0x10,0x24,0x18,0x26C]
 
+			# not used but for reference
 			fuelPointerAddress = 0x00901EA8
 			fuelOffsets = [0xC,0xC,0x18,0x10,0x24,0x18,0x268]
 
@@ -870,6 +872,9 @@ class GameData():
 
 			# access replay data in game memory
 			replayData = self.pm.read_bytes(self.GetPtrAddr(self.baseAddress + cohrecReplayAddress, cohrecOffsets), 4000)
+
+			# if the above executes without throwing an error then game is in progress.
+			self.gameInProgress = True
 
 			cohreplayparser = COH_Replay_Parser(parameters=self.parameters)
 			cohreplayparser.data = bytearray(replayData)
@@ -974,6 +979,7 @@ class GameData():
 			logging.info("Problem in getDataFromGame")
 			logging.info(str(e))
 			logging.exception("Stack : ")
+			self.gameInProgress = False
 			return False
 
 	def GetPtrAddr(self, base, offsets):
@@ -1404,7 +1410,7 @@ class GameData():
 
 
 		output += "COH running : {}\n".format(str(self.cohRunning)) 
-		output += "Game Active : {}\n".format(str(self.gameCurrentlyActive)) 
+		output += "Game In Progress : {}\n".format(str(self.gameInProgress)) 
 
 		return output
 
