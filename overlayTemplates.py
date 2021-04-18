@@ -25,7 +25,6 @@ class OverlayTemplates:
 	overlaycss = """
 
 
-
 body {
 	position: relative;
 	background-color: transparent;
@@ -45,36 +44,48 @@ html {
 	font-size: 20px; 
 }
 
-
 .countryflagimg{
 	position: relative;
 	display: inline;
-	top: 3px;
+	height: 20px;
+	top: 10px;
 }
 
 .countryflagimg img{
+	position: relative;
+	display: inline;
 	height:20px;
+	top: -5px;
 }
+
 
 .factionflagimg{
 	position: relative;
 	display: inline;
-	top: 3px;
+	height: 20px;
+	top: 0px;
 }
 
 .factionflagimg img{
-	height:20px;
+	position: relative;
+	height:25px;
+	top: 5px;
 }
 
 .rankimg {
 	position: relative;
-	top: 5px;
+	top: 10px;
+	height: 30px;
 	display: inline;
 }
 
-.rankimg img {
-	height:30px ;
+.rankimg img{
+	position: relative;
+	height: 30px;
+	display: inline;
 }
+
+
 
 .textVariables {
 	position: relative;
@@ -184,25 +195,24 @@ html {
 
 	  position : absolute;
 	  top: 0px; 
+	  background-color: rgba(0, 0, 0, 0.5);
 	  color: white;
 	  float: left;
 	  margin-left: 58%;
-	  background-color: rgba(0, 0, 0, 0.8);
 	  text-align: left;
+	  padding-bottom: 6px;
 	  }
   
 .playerTeam {
 
 	  position: relative;
 	  top: 0px; 
+	  background-color: rgba(0, 0, 0, 0.5);
 	  color: white;
 	  float: right;
 	  margin-right: 58%;
-	  background-color: rgba(0, 0, 0, 0.8);
 	  text-align: right;
+	  padding-bottom: 6px;
   }
-	
-
-
 
 	"""

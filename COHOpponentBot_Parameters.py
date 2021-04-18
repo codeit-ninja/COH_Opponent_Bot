@@ -59,9 +59,9 @@ class Parameters:
 		self.data['cohUCSPath'] = ""
 
 		self.data['useOverlayPreFormat'] = True
-		self.data['overlayStringPreFormatLeft'] = "$NAME$ ($FLAGICON$) $LEVELICON$ #$RANK$ $FACTIONICON$"
+		self.data['overlayStringPreFormatLeft'] = "$NAME$ ($FLAGICON$) $LEVELICON$ $RANK$ $FACTIONICON$"
 		self.data['mirrorLeftToRightOverlay'] = True
-		self.data['overlayStringPreFormatRight'] = "$FACTIONICON$ #$RANK$ $LEVELICON$ ($FLAGICON$) $NAME$"
+		self.data['overlayStringPreFormatRight'] = "$FACTIONICON$ $RANK$ $LEVELICON$ ($FLAGICON$) $NAME$"
 
 		self.data['useCustomPreFormat'] = True
 		self.data['customStringPreFormat'] = "$NAME$ : $COUNTRY$ : $FACTION$ : $MATCHTYPE$ Rank $RANK$ : lvl $LEVEL$"

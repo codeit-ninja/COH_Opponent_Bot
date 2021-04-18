@@ -1226,29 +1226,29 @@ class GameData():
 				fileExists = os.path.isfile(factionIcon)
 			logging.info(factionIcon)
 			if fileExists:
-				imageOverlayFormattingDictionary['$FACTIONICON$'] = '<div class = "factionflagimg"><img src="{0}" height = "30"></div>'.format(factionIcon)
+				imageOverlayFormattingDictionary['$FACTIONICON$'] = '<div class = "factionflagimg"><img src="{0}" ></div>'.format(factionIcon)
 				logging.info(imageOverlayFormattingDictionary.get('$FACTIONICON$'))
 			else:
-				imageOverlayFormattingDictionary['$FACTIONICON$'] = '<div class = "factionflagimg"><img height = "30"></div>'		
+				imageOverlayFormattingDictionary['$FACTIONICON$'] = '<div class = "factionflagimg"><img src="data:," alt></div>'		
 
 		# if a computer it will have no stats therefore no country flag or rank
 		if player.stats:
 			# set default values for flags and faction rank
-			imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img height = "20"></div>'
-			imageOverlayFormattingDictionary['$LEVELICON$'] = '<div class = "rankimg"><img height = "45"></div>'
+			imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="data:," alt></div>'
+			imageOverlayFormattingDictionary['$LEVELICON$'] = '<div class = "rankimg"><img src="data:," alt></div>'
 			levelIcon = "OverlayImages\\Ranks\\no_rank_yet.png"
 			fileExists = os.path.isfile(levelIcon)
 			if fileExists:
-				imageOverlayFormattingDictionary['$LEVELICON$'] =  '<div class = "rankimg"><img src="{0}" height = "45"></div>'.format(levelIcon)
+				imageOverlayFormattingDictionary['$LEVELICON$'] =  '<div class = "rankimg"><img src="{0}" ></div>'.format(levelIcon)
 
 
 			if player.stats.country:
 				countryIcon = "OverlayImages\\Flagssmall\\" + str(player.stats.country).lower() + ".png"
 				fileExists = os.path.isfile(countryIcon)
 				if fileExists:
-					imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="{0}" height = "20"></div>'.format(countryIcon)
+					imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="{0}" ></div>'.format(countryIcon)
 				else:
-					imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img height = "20"></div>'
+					imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="data:," alt></div>'
 
 			#rank icons
 			for value in player.stats.leaderboardData:
@@ -1268,14 +1268,14 @@ class GameData():
 						logging.info("levelIcon : " + str(levelIcon))
 						fileExists = os.path.isfile(levelIcon)
 						if fileExists:
-							imageOverlayFormattingDictionary['$LEVELICON$'] =  '<div class = "rankimg"><img src="{0}" height = "45"></div>'.format(levelIcon)
+							imageOverlayFormattingDictionary['$LEVELICON$'] =  '<div class = "rankimg"><img src="{0}" ></div>'.format(levelIcon)
 							logging.info(imageOverlayFormattingDictionary.get('$LEVELICON$'))
 						else:
-							imageOverlayFormattingDictionary['$LEVELICON$'] = '<div class = "rankimg"><img height = "45"></div>'
+							imageOverlayFormattingDictionary['$LEVELICON$'] = '<div class = "rankimg"><img src="data:," alt></div>'
 		else:
 			#default no image
-			imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img height = "20"></div>'
-			imageOverlayFormattingDictionary['$LEVELICON$'] = '<div class = "rankimg"><img height = "45"></div>'
+			imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="data:," alt></div>'
+			imageOverlayFormattingDictionary['$LEVELICON$'] = '<div class = "rankimg"><img src="data:," alt></div>'
 
 
 		return imageOverlayFormattingDictionary
