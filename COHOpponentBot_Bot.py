@@ -1196,7 +1196,7 @@ class GameData():
 			wlRatioDiv = '<div class = "wlratio">'
 
 		
-		stringFormattingDictionary['$NAME$'] =  prefixDiv +  + str(player.name) + postfixDivClose + postfixDivClose
+		stringFormattingDictionary['$NAME$'] =  prefixDiv + nameDiv + str(player.name) + postfixDivClose + postfixDivClose
 		if (bool(re.match("""^[/\.]""" , player.name))):
 			stringFormattingDictionary['$NAME$'] =  prefixDiv + nameDiv + str(player.name.rjust(len(player.name)+1)) + postfixDivClose + postfixDivClose
 		# add 1 extra whitespace to username if it starts with . or / using rjust to prevent . and / twitch chat commands causing problems
