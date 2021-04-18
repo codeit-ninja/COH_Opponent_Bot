@@ -63,27 +63,21 @@ class COHBotGUI:
 
 		tk.Label(self.master, text="Twitch Channel").grid(row=0, sticky=tk.W)
 		tk.Label(self.master, text="Steam Name").grid(row=1, sticky=tk.W)
-		tk.Label(self.master, text="Bot Account Name").grid(row=2, sticky=tk.W)
-		tk.Label(self.master, text="Bot oAuth Key").grid(row=3, sticky=tk.W)
-		tk.Label(self.master, text="Steam64ID Number").grid(row=4, sticky=tk.W)
-		tk.Label(self.master, text="warning.log path").grid(row=5, sticky=tk.W)
-		tk.Label(self.master, text="RelicCOH.exe path").grid(row=6, sticky=tk.W)
+		tk.Label(self.master, text="Steam64ID Number").grid(row=2, sticky=tk.W)
+		tk.Label(self.master, text="warning.log path").grid(row=3, sticky=tk.W)
+		tk.Label(self.master, text="RelicCOH.exe path").grid(row=4, sticky=tk.W)
 
 		self.entryTwitchChannel = tk.Entry(self.master, width = 70)
 		self.entrySteamName = tk.Entry(self.master, width = 70)
-		self.entryBotAccountName = tk.Entry(self.master, width = 70)
-		self.entryBotoAuthKey = tk.Entry(self.master, width = 70)
 		self.entrySteam64IDNumber = tk.Entry(self.master, width = 70)
 		self.entryWarningLogPath = tk.Entry(self.master, width = 70)
 		self.entryRelicCOHPath = tk.Entry(self.master, width = 70)
 
 		self.entryTwitchChannel.grid(row=0, column=1)
 		self.entrySteamName.grid(row=1, column=1)
-		self.entryBotAccountName.grid(row=2, column=1)
-		self.entryBotoAuthKey.grid(row=3, column=1)
-		self.entrySteam64IDNumber.grid(row=4, column=1)
-		self.entryWarningLogPath.grid(row=5, column=1)
-		self.entryRelicCOHPath.grid(row=6, column=1)
+		self.entrySteam64IDNumber.grid(row=2, column=1)
+		self.entryWarningLogPath.grid(row=3, column=1)
+		self.entryRelicCOHPath.grid(row=4, column=1)
 
 		steamName = self.parameters.data.get('steamAlias')
 
@@ -115,17 +109,8 @@ class COHBotGUI:
 
 		self.entryTwitchChannel.insert(0, twitchName)
 
-		if (self.parameters.data.get('botUserName')):
-			self.entryBotAccountName.insert(0, str(self.parameters.data.get('botUserName')))
-
-		if (self.parameters.data.get('botOAuthKey')):
-			self.entryBotoAuthKey.insert(0, str(self.parameters.data.get('botOAuthKey')))
-		self.entryBotoAuthKey.config(show="*")
-
 		self.entryTwitchChannel.config(state = "disabled")
 		self.entrySteamName.config(state= "disabled")
-		self.entryBotAccountName.config(state = "disabled")
-		self.entryBotoAuthKey.config(state = "disabled")
 		self.entrySteam64IDNumber.config(state = "disabled")
 		self.entryWarningLogPath.config(state = "disabled")
 		self.entryRelicCOHPath.config(state = "disabled")
@@ -136,24 +121,18 @@ class COHBotGUI:
 		self.buttonSteamName = tk.Button(self.master, text = "edit", command = lambda: self.editSteamName())
 		self.buttonSteamName.config(width = 10)
 		self.buttonSteamName.grid(row=1, column =2)
-		self.buttonBotAccountName = tk.Button(self.master, text = "edit", command = lambda: self.editBotName())
-		self.buttonBotAccountName.config(width = 10)
-		self.buttonBotAccountName.grid(row=2, column=2)
-		self.buttonBotOAuthKey = tk.Button(self.master, text = "edit", command = lambda: self.editOAuthKey())
-		self.buttonBotOAuthKey.config(width = 10)
-		self.buttonBotOAuthKey.grid(row=3, column=2)
 		self.buttonSteam64IDNumber = tk.Button(self.master, text = "edit", command = lambda: self.editSteamNumber())
 		self.buttonSteam64IDNumber.config(width = 10)
-		self.buttonSteam64IDNumber.grid(row=4, column=2)        
+		self.buttonSteam64IDNumber.grid(row=2, column=2)        
 		self.buttonLocateWarningLog = tk.Button(self.master, text = "browse", command = lambda : self.locateWarningLog() )
 		self.buttonLocateWarningLog.config(width = 10)
-		self.buttonLocateWarningLog.grid(row=5, column=2)
+		self.buttonLocateWarningLog.grid(row=3, column=2)
 		self.cohBrowseButton = tk.Button(self.master, text = "browse", command = lambda : self.locateCOH() )
 		self.cohBrowseButton.config(width = 10)
-		self.cohBrowseButton.grid(row=6, column=2)
+		self.cohBrowseButton.grid(row=4, column=2)
 		self.buttonOptions = tk.Button(self.master, text = "options", command = self.createOptionsMenu )
 		self.buttonOptions.config(width = 10)
-		self.buttonOptions.grid(row=7, column=2)
+		self.buttonOptions.grid(row=5, column=2)
 
 		self.ircClient = None
 		self.automaticFileMonitor = None
@@ -162,29 +141,29 @@ class COHBotGUI:
 		self.style.configure('W.TButton', font = 'calibri', size = 10, foreground = 'red')
 		self.connectButton = ttk.Button(self.master, text = "Connect",style ='W.TButton', command = lambda : self.connectIRC(self.ircClient))
 
-		self.connectButton.grid(row=8, columnspan = 3, sticky = tk.W+tk.E+tk.N+tk.S, padx=30,pady=30)
+		self.connectButton.grid(row=6, columnspan = 3, sticky = tk.W+tk.E+tk.N+tk.S, padx=30,pady=30)
 
 		self.consoleDisplayBool = IntVar()
 
 		self.testButton = tk.Button(self.master, text = "Test Output", command = self.testStats )
 		self.testButton.config(width = 10)
-		self.testButton.grid(row =10, column=2 ,sticky=tk.E)
+		self.testButton.grid(row =8, column=2 ,sticky=tk.E)
 		self.testButton.config(state = DISABLED)
 
 		self.clearOverlayButton = tk.Button(self.master, text = "Clear Overlay", command = COHOpponentBot_Bot.GameData.clearOverlayHTML)
 		self.clearOverlayButton.config(width = 10)
-		self.clearOverlayButton.grid(row = 11, column=2, sticky=tk.E)
+		self.clearOverlayButton.grid(row = 9, column=2, sticky=tk.E)
 
 
 
 		tk.Label(self.master, text="Console Output:").grid(row=10, sticky=tk.W)
 		# create a Text widget
 		self.txt = tk.Text(self.master)
-		self.txt.grid(row=13, columnspan=3, sticky="nsew", padx=2, pady=2)
+		self.txt.grid(row=11, columnspan=3, sticky="nsew", padx=2, pady=2)
 
 		# create a Scrollbar and associate it with txt
 		scrollb = ttk.Scrollbar(self.master, command=self.txt.yview)
-		scrollb.grid(row=13, column=4, sticky='nsew')
+		scrollb.grid(row=11, column=4, sticky='nsew')
 		self.txt['yscrollcommand'] = scrollb.set
 
 		# import icon base64 data from separate icon.py file
@@ -262,38 +241,39 @@ class COHBotGUI:
 			self.optionsMenu.protocol("WM_DELETE_WINDOW", self.on_close_options)
 			self.optionsMenu.title("Chat Display Options")
 
-			self.f1 = tk.LabelFrame(self.optionsMenu, padx =5, pady=5)
-			self.f1.grid()
-			self.f2 = tk.LabelFrame(self.optionsMenu, text = "Player Info", padx =5, pady=5)
-			self.f2.grid(sticky=tk.N+W+E+S)
+			self.frameReportOptions = tk.LabelFrame(self.optionsMenu, padx =5, pady=5)
+			self.frameReportOptions.grid()
+			self.framePlayerInfo = tk.LabelFrame(self.optionsMenu, text = "Player Info", padx =5, pady=5)
+			self.framePlayerInfo.grid(sticky=tk.N+W+E+S)
 
-			self.f5 = tk.LabelFrame(self.optionsMenu, text = "Auto Trigger", padx =5, pady=5)
-			self.f5.grid(sticky=tk.N+W+E)
+			self.frameAutoTrigger = tk.LabelFrame(self.optionsMenu, text = "Auto Trigger", padx =5, pady=5)
+			self.frameAutoTrigger.grid(sticky=tk.N+W+E)
 
+			self.frameCustomFormat = tk.LabelFrame(self.optionsMenu, text = "Custom Format", padx =5, pady=5)
+			self.frameCustomFormat.grid( sticky=tk.N+W+E+S) # column =1, rowspan =2,    
 
-			self.f6 = tk.LabelFrame(self.optionsMenu, text = "Custom Format", padx =5, pady=5)
-			self.f6.grid( sticky=tk.N+W+E+S) # column =1, rowspan =2,     
+			self.frameOptionalBotCredentials = tk.LabelFrame(self.optionsMenu, text= "Optional Bot Credentials", padx= 5, pady=5)
+			self.frameOptionalBotCredentials.grid(sticky=tk.N+W+E+S)
 
-
-			self.lblframeMisc = tk.LabelFrame(self.optionsMenu, text = "Misc", padx =5, pady=5)
-			self.lblframeMisc.grid( sticky = tk.N+W+E+S)   
-
-
-
-			tk.Label(self.f1, text="Report Options").grid()
+			self.frameMisc = tk.LabelFrame(self.optionsMenu, text = "Misc", padx =5, pady=5)
+			self.frameMisc.grid( sticky = tk.N+W+E+S)   
 
 
-			self.checkUseCustomChatOutput = tk.Checkbutton(self.f6, text="Use Custom Chat Output Pre-Format", variable=self.useCustomPreFormat, command = self.toggleUseCustomPreFormat)
+
+			tk.Label(self.frameReportOptions, text="Report Options").grid()
+
+
+			self.checkUseCustomChatOutput = tk.Checkbutton(self.frameCustomFormat, text="Use Custom Chat Output Pre-Format", variable=self.useCustomPreFormat, command = self.toggleUseCustomPreFormat)
 			self.checkUseCustomChatOutput.grid(sticky=tk.W)
 
-			self.customChatOutputEntry = tk.Entry(self.f6, width = 70, textvariable = self.customChatOutputPreFormatString, validate="focusout", validatecommand=self.saveCustomChatPreFormat)
+			self.customChatOutputEntry = tk.Entry(self.frameCustomFormat, width = 70, textvariable = self.customChatOutputPreFormatString, validate="focusout", validatecommand=self.saveCustomChatPreFormat)
 			self.customChatOutputEntry.grid(sticky = tk.W)
 			if self.parameters.data.get('customStringPreFormat'):
 				self.customChatOutputPreFormatString.set(self.parameters.data.get('customStringPreFormat'))
 			#self.toggleUseCustomPreFormat()
 
-			self.f7 = tk.LabelFrame(self.f6, text = "Custom Chat/Overlay Text Variables", padx= 5, pady=5)
-			self.f7.grid(sticky=tk.N+W+E)
+			self.frameCustomChatVariables = tk.LabelFrame(self.frameCustomFormat, text = "Custom Chat/Overlay Text Variables", padx= 5, pady=5)
+			self.frameCustomChatVariables.grid(sticky=tk.N+W+E)
 
 			self.stringFormatLabels = []
 			self.myLabelFrames = []
@@ -302,8 +282,8 @@ class COHBotGUI:
 			rowNumber = 0
 			for key, value in self.parameters.stringFormattingDictionary.items():
 
-				myLabelFrame = tk.LabelFrame(self.f7, padx =5, pady=5)
-				self.f7.columnconfigure(columnNumber, minsize = 100)
+				myLabelFrame = tk.LabelFrame(self.frameCustomChatVariables, padx =5, pady=5)
+				self.frameCustomChatVariables.columnconfigure(columnNumber, minsize = 100)
 				self.myLabelFrames.append(myLabelFrame)
 				myLabel = tk.Label(myLabelFrame, text=str(key))
 				myLabel.grid()
@@ -315,16 +295,16 @@ class COHBotGUI:
 					columnNumber = 0
 				self.stringFormatLabels.append(myLabel)
 
-			self.oii = tk.LabelFrame(self.f6, text = "Overlay Only Image Icons", padx= 5, pady=5)
-			self.oii.grid(sticky=tk.N+W+E)
+			self.frameOverlayImageIcons = tk.LabelFrame(self.frameCustomFormat, text = "Overlay Only Image Icons", padx= 5, pady=5)
+			self.frameOverlayImageIcons.grid(sticky=tk.N+W+E)
 
 			#create all custom icon variables from dictionary keys
 			columnNumber = 0
 			rowNumber = 0
 			for key, value in self.parameters.imageOverlayFormattingDictionary.items():
 
-				myLabelFrame = tk.LabelFrame(self.oii, padx =5, pady=5)
-				self.oii.columnconfigure(columnNumber, minsize = 100)
+				myLabelFrame = tk.LabelFrame(self.frameOverlayImageIcons, padx =5, pady=5)
+				self.frameOverlayImageIcons.columnconfigure(columnNumber, minsize = 100)
 				self.myLabelFrames.append(myLabelFrame)
 				myLabel = tk.Label(myLabelFrame, text=str(key))
 				myLabel.grid()
@@ -336,54 +316,84 @@ class COHBotGUI:
 					columnNumber = 0
 				self.stringFormatLabels.append(myLabel)
 
-			self.checkUseCustomOverlayString = tk.Checkbutton(self.f6, text="Use Custom Overlay Pre-Format", variable=self.useOverlayPreFormat, command = self.toggleUseOverlayPreFormat)
+			self.checkUseCustomOverlayString = tk.Checkbutton(self.frameCustomFormat, text="Use Custom Overlay Pre-Format", variable=self.useOverlayPreFormat, command = self.toggleUseOverlayPreFormat)
 			self.checkUseCustomOverlayString.grid(sticky=tk.W)
 
 			
 			
 
 			
-			self.customOverlayEntryLeft = tk.Entry(self.f6, width = 70, textvariable = self.customOverlayPreFormatStringLeft, validate="focusout", validatecommand=self.saveCustomOverlayPreFormatLeft)
+			self.customOverlayEntryLeft = tk.Entry(self.frameCustomFormat, width = 70, textvariable = self.customOverlayPreFormatStringLeft, validate="focusout", validatecommand=self.saveCustomOverlayPreFormatLeft)
 			
 			if self.parameters.data.get('overlayStringPreFormatLeft'):
 				self.customOverlayPreFormatStringLeft.set(self.parameters.data.get('overlayStringPreFormatLeft'))
 			
-			self.customOverlayEntryRight = tk.Entry(self.f6, width = 70, textvariable = self.customOverlayPreFormatStringRight, validate="focusout", validatecommand=self.saveCustomOverlayPreFormatRight)
+			self.customOverlayEntryRight = tk.Entry(self.frameCustomFormat, width = 70, textvariable = self.customOverlayPreFormatStringRight, validate="focusout", validatecommand=self.saveCustomOverlayPreFormatRight)
 			if self.parameters.data.get('overlayStringPreFormatRight'):
 				self.customOverlayPreFormatStringRight.set(self.parameters.data.get('overlayStringPreFormatRight'))
 
-			self.checkUseMirrorOverlay = tk.Checkbutton(self.f6, text="Mirror Left/Right Overlay", variable=self.mirrorLeftToRightOverlay, command = self.toggleMirrorLeftRightOverlay)
+			self.checkUseMirrorOverlay = tk.Checkbutton(self.frameCustomFormat, text="Mirror Left/Right Overlay", variable=self.mirrorLeftToRightOverlay, command = self.toggleMirrorLeftRightOverlay)
 			
-			tk.Label(self.f6, text="Left").grid(sticky=tk.W)
+			tk.Label(self.frameCustomFormat, text="Left").grid(sticky=tk.W)
 			self.customOverlayEntryLeft.grid(sticky = tk.W)
 
 			self.checkUseMirrorOverlay.grid(sticky =tk.W)
 
-			tk.Label(self.f6, text="Right").grid(sticky=tk.W)
+			tk.Label(self.frameCustomFormat, text="Right").grid(sticky=tk.W)
 			self.customOverlayEntryRight.grid(sticky = tk.W)
 			
 			self.toggleUseOverlayPreFormat()    
 
-			self.checkOwn = tk.Checkbutton(self.f2, text="Show Own Stats", variable=self.showOwn, command = self.saveToggles)
+			self.checkOwn = tk.Checkbutton(self.framePlayerInfo, text="Show Own Stats", variable=self.showOwn, command = self.saveToggles)
 			self.checkOwn.grid( sticky=tk.W)
-			self.checkWLRatio = tk.Checkbutton(self.f2, text="Steam Profile", variable=self.showSteamProfile, command = self.saveToggles)
+			self.checkWLRatio = tk.Checkbutton(self.framePlayerInfo, text="Steam Profile", variable=self.showSteamProfile, command = self.saveToggles)
 			self.checkWLRatio.grid( sticky=tk.W) 
 
-			self.checkAutomaticTrigger = tk.Checkbutton(self.f5, text="Automatic Trigger", variable=self.automaticTrigger, command = self.automaticTriggerToggle)
+			self.checkAutomaticTrigger = tk.Checkbutton(self.frameAutoTrigger, text="Automatic Trigger", variable=self.automaticTrigger, command = self.automaticTriggerToggle)
 			self.checkAutomaticTrigger.grid( sticky=tk.W)
-			self.checkWriteIWonLostInChat = tk.Checkbutton(self.f5, text="Win/Lose message in Chat", variable=self.writeIWonLostInChat, command = self.saveToggles)
+			self.checkWriteIWonLostInChat = tk.Checkbutton(self.frameAutoTrigger, text="Win/Lose message in Chat", variable=self.writeIWonLostInChat, command = self.saveToggles)
 			self.checkWriteIWonLostInChat.grid( sticky=tk.W)
-			self.checkWritePlaceYourBetsInChat = tk.Checkbutton(self.f5, text="Write '!Place Your Bets' in Chat at game start", variable=self.writePlaceYourBetsInChat, command = self.saveToggles)
+			self.checkWritePlaceYourBetsInChat = tk.Checkbutton(self.frameAutoTrigger, text="Write '!Place Your Bets' in Chat at game start", variable=self.writePlaceYourBetsInChat, command = self.saveToggles)
 			self.checkWritePlaceYourBetsInChat.grid(sticky=tk.W)
-			self.checkClearOverlayAfterGame = tk.Checkbutton(self.f5, text="Clear overlay after game over", variable=self.clearOverlayAfterGameOver, command = self.saveToggles)
+			self.checkClearOverlayAfterGame = tk.Checkbutton(self.frameAutoTrigger, text="Clear overlay after game over", variable=self.clearOverlayAfterGameOver, command = self.saveToggles)
 			self.checkClearOverlayAfterGame.grid( sticky=tk.W)            
 
 			self.automaticTriggerToggle() 
 			self.toggleUseCustomPreFormat() # setdisabled if custom format on first run
 			self.toggleUseOverlayPreFormat()
 			#self.automode() # setdisabled if auto on first run
+
+			#CustomBotCredientials
+			tk.Label(self.frameOptionalBotCredentials, text="Bot Account Name").grid(row=0,sticky=tk.W)
+			tk.Label(self.frameOptionalBotCredentials, text="Bot oAuth Key").grid(row=1,sticky=tk.W)
+
+			self.entryBotAccountName = tk.Entry(self.frameOptionalBotCredentials, width = 40)
+			self.entryBotoAuthKey = tk.Entry(self.frameOptionalBotCredentials, width = 40)
+
+			self.entryBotAccountName.grid(row=0,column=1)
+			self.entryBotoAuthKey.grid(row=1,column=1)
+
+			if (self.parameters.data.get('botUserName')):
+				self.entryBotAccountName.insert(0, str(self.parameters.data.get('botUserName')))
+
+			if (self.parameters.data.get('botOAuthKey')):
+				self.entryBotoAuthKey.insert(0, str(self.parameters.data.get('botOAuthKey')))
+				
+			self.entryBotoAuthKey.config(show="*")
+
+			self.entryBotAccountName.config(state = "disabled")
+			self.entryBotoAuthKey.config(state = "disabled")
+
+			self.buttonBotAccountName = tk.Button(self.frameOptionalBotCredentials, text = "edit", command = lambda: self.editBotName())
+			self.buttonBotAccountName.config(width = 10)
+			self.buttonBotAccountName.grid(row=0,column=2)
+			self.buttonBotOAuthKey = tk.Button(self.frameOptionalBotCredentials, text = "edit", command = lambda: self.editOAuthKey())
+			self.buttonBotOAuthKey.config(width = 10)
+			self.buttonBotOAuthKey.grid(row=1,column=2)
+
+
 			#Misc tickbox
-			self.checkLogErrorToFile = tk.Checkbutton(self.lblframeMisc, text="Log Errors To File", variable=self.logErrorsToFile, command = self.toggleLogErrorsToFile)
+			self.checkLogErrorToFile = tk.Checkbutton(self.frameMisc, text="Log Errors To File", variable=self.logErrorsToFile, command = self.toggleLogErrorsToFile)
 			self.checkLogErrorToFile.grid(sticky=tk.W)
 
 		try:
@@ -520,32 +530,44 @@ class COHBotGUI:
 	def disableEverything(self):
 		self.buttonTwitchChannel.config(state = DISABLED)
 		self.buttonSteamName.config(state= DISABLED)
-		self.buttonBotAccountName.config(state = DISABLED)
-		self.buttonBotOAuthKey.config(state = DISABLED)
 		self.buttonSteam64IDNumber.config(state = DISABLED)
 		self.buttonLocateWarningLog.config(state = DISABLED)
 		self.buttonOptions.config(state = DISABLED)
 		self.cohBrowseButton.config(state = DISABLED)
 		self.entryTwitchChannel.config(state = DISABLED)
-		self.entryBotAccountName.config(state = DISABLED)
-		self.entryBotoAuthKey.config(state = DISABLED)
+
 		self.entrySteam64IDNumber.config(state = DISABLED)
 		self.entryWarningLogPath.config(state = DISABLED)
 		self.entryRelicCOHPath.config(state = DISABLED)
 		self.connectButton.config(state = DISABLED)
 		self.testButton.config(state = DISABLED)
 
+		#disabled if options displayed
+		if self.optionsMenu:
+			if self.entryBotAccountName:
+				self.entryBotAccountName.config(state = DISABLED)
+			if self.entryBotoAuthKey:
+				self.entryBotoAuthKey.config(state = DISABLED)
+			if self.buttonBotAccountName:
+				self.buttonBotAccountName.config(state = DISABLED)
+			if self.buttonBotOAuthKey:
+				self.buttonBotOAuthKey.config(state = DISABLED)
+
 	def enableButtons(self):
 		self.buttonTwitchChannel.config(state = NORMAL)
 		self.buttonSteamName.config(state = NORMAL)
-		self.buttonBotAccountName.config(state = NORMAL)
-		self.buttonBotOAuthKey.config(state = NORMAL)
 		self.buttonSteam64IDNumber.config(state = NORMAL)
 		self.buttonLocateWarningLog.config(state = NORMAL)
 		self.buttonOptions.config(state = NORMAL)
 		self.cohBrowseButton.config(state = NORMAL)
 		self.connectButton.config(state = NORMAL)
-		#self.testButton.config(state = NORMAL)
+
+		#enable if option frame is showing
+		if self.optionsMenu:
+			if self.buttonBotAccountName:
+				self.buttonBotAccountName.config(state = NORMAL)
+			if self.buttonBotOAuthKey:
+				self.buttonBotOAuthKey.config(state = NORMAL)
 		
 
 

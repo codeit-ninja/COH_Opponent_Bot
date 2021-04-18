@@ -318,7 +318,7 @@ class IRC_Channel(threading.Thread):
 	def gameInfo(self):
 		self.gameData = GameData(self.ircClient, parameters=self.parameters)
 		if self.gameData.getDataFromGame():
-			self.ircClient.SendPrivateMessageToIRC("Map : {}, Mod : {}, Start : {}, High Resources : {}, Automatch : {}, Slots : {}, Players : {}.".format(self.gameData.mapFullName,self.gameData.modName,self.gameData.randomStart,self.gameData.highResources, self.gameData.automatch, self.gameData.mapSize,  self.gameData.numberOfPlayers))
+			self.ircClient.SendPrivateMessageToIRC("Map : {}, Mod : {}, Start : {}, High Resources : {}, Automatch : {}, Slots : {}, Players : {}.".format(self.gameData.mapFullName,self.gameData.modName,self.gameData.randomStart,self.gameData.highResources, self.gameData.automatch, self.gameData.slots,  self.gameData.numberOfPlayers))
 
 	def testOutput(self):
 		if not self.gameData:
@@ -823,8 +823,7 @@ class GameData():
 		self.expertCPUCount = 0
 
 		self.numberOfPlayers = 0
-		self.numberOfSlots = None
-		self.mapSize = 0
+		self.slots = 0
 
 		self.matchType = MatchType.BASIC
 		self.ircClient = ircClient
@@ -954,17 +953,17 @@ class GameData():
 			self.hardCPUCount = hardCounter
 			self.expertCPUCount = expertCounter
 
-			self.mapSize = len(cohreplayparser.playerList)
+			self.slots = len(cohreplayparser.playerList)
 
 			#set the current MatchType
 			self.matchType = MatchType.BASIC
 			if (int(self.numberOfComputers) > 0):
 				self.matchType = MatchType.BASIC
-			if (0 <= int(self.mapSize) <= 2) and (int(self.numberOfComputers) == 0):
+			if (0 <= int(self.slots) <= 2) and (int(self.numberOfComputers) == 0):
 				self.matchType = MatchType.ONES
-			if (3 <= int(self.mapSize) <= 4) and (int(self.numberOfComputers) == 0):
+			if (3 <= int(self.slots) <= 4) and (int(self.numberOfComputers) == 0):
 				self.matchType = MatchType.TWOS
-			if (5 <= int(self.mapSize) <= 6) and (int(self.numberOfComputers) == 0):
+			if (5 <= int(self.slots) <= 6) and (int(self.numberOfComputers) == 0):
 				self.matchType = MatchType.THREES
 
 			return True
@@ -1099,6 +1098,8 @@ class GameData():
 
 
 	def outputOpponentData(self):
+
+		print("In outputOpponentData")
 
 		# Prepare outputs
 		axisTeam = []
@@ -1391,7 +1392,6 @@ class GameData():
 		output = "GameData : \n"
 		output += "Time Last Game Started : {}\n".format(str(self.gameStartedDate))
 		output += "player List : {}\n".format(str(self.playerList)) 
-		output += "Slots {}\n".format(str(self.numberOfSlots)) 
 		output += "Number Of Players : {}\n".format(str(self.numberOfPlayers))
 		output += "Number Of Computers : {}\n".format(str(self.numberOfComputers)) 
 		output += "Easy CPU : {}\n".format(str(self.easyCPUCount)) 
@@ -1400,7 +1400,7 @@ class GameData():
 		output += "Expert CPU : {}\n".format(str(self.expertCPUCount))
 		output += "Number Of Humans : {}\n".format(str(self.numberOfHumans))
 		output += "Match Type : {}\n".format(str(self.matchType.name))
-		output += "Map Size : {}\n".format(str(self.mapSize))
+		output += "Slots : {}\n".format(str(self.slots))
 
 
 		output += "COH running : {}\n".format(str(self.cohRunning)) 
