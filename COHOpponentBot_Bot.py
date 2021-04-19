@@ -492,13 +492,11 @@ class FileMonitor (threading.Thread):
 			self.pollInterval = int(pollInterval)
 			self.filePath = filePath
 			self.event = threading.Event()
-			self.pauseBeforeGameStart = threading.Event()
 			f = open(self.filePath, 'r' , encoding='ISO-8859-1')
 			f.readlines()
 			self.filePointer = f.tell()
 			f.close()
 			logging.info("Initialzing with file length : " + str(self.filePointer) + "\n")
-			self.gameData = None
 
 		except Exception as e:
 			logging.error("In FileMonitor __init__")
@@ -553,8 +551,6 @@ class FileMonitor (threading.Thread):
 		# break out of loops if waiting
 		if self.event:
 			self.event.set()
-		if self.pauseBeforeGameStart:
-			self.pauseBeforeGameStart.set()
 
 	def find_between(self, s, first, last ):
 		try:
