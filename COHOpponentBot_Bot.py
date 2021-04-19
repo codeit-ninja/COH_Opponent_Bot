@@ -1412,8 +1412,9 @@ class GameData():
 				outfile.write(htmlOutput)
 				logging.info("Creating Overlay File\n")
 			#check if css file exists and if not output the default template to folder
-			if not (os.path.isfile("overlaystyle.css")):
-				with open("overlaystyle.css" , 'w' , encoding="utf-8") as outfile:
+			cssFilePath = self.parameters.data.get('overlayStyleCSSFilePath')
+			if not (os.path.isfile(cssFilePath)):
+				with open(cssFilePath , 'w' , encoding="utf-8") as outfile:
 					outfile.write(OverlayTemplates().overlaycss)
 		except Exception as e:
 			logging.error(str(e))

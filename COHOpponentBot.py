@@ -250,7 +250,10 @@ class COHBotGUI:
 			self.frameAutoTrigger.grid(sticky=tk.N+W+E)
 
 			self.frameCustomFormat = tk.LabelFrame(self.optionsMenu, text = "Custom Format", padx =5, pady=5)
-			self.frameCustomFormat.grid( sticky=tk.N+W+E+S) # column =1, rowspan =2,    
+			self.frameCustomFormat.grid( sticky=tk.N+W+E+S) 
+
+			self.frameCSSFilePath = tk.LabelFrame(self.optionsMenu, text="CSS Format File", padx=5, pady=5)
+			self.frameCSSFilePath.grid(sticky=tk.N+W+E+S)  
 
 			self.frameOptionalBotCredentials = tk.LabelFrame(self.optionsMenu, text= "Optional Bot Credentials", padx= 5, pady=5)
 			self.frameOptionalBotCredentials.grid(sticky=tk.N+W+E+S)
@@ -295,7 +298,7 @@ class COHBotGUI:
 					columnNumber = 0
 				self.stringFormatLabels.append(myLabel)
 
-			self.frameOverlayImageIcons = tk.LabelFrame(self.frameCustomFormat, text = "Overlay Only Image Icons", padx= 5, pady=5)
+			self.frameOverlayImageIcons = tk.LabelFrame(self.frameCustomFormat, text = "HTML Overlay Only Image Icons", padx= 5, pady=5)
 			self.frameOverlayImageIcons.grid(sticky=tk.N+W+E)
 
 			#create all custom icon variables from dictionary keys
@@ -316,7 +319,7 @@ class COHBotGUI:
 					columnNumber = 0
 				self.stringFormatLabels.append(myLabel)
 
-			self.checkUseCustomOverlayString = tk.Checkbutton(self.frameCustomFormat, text="Use Custom Overlay Pre-Format", variable=self.useOverlayPreFormat, command = self.toggleUseOverlayPreFormat)
+			self.checkUseCustomOverlayString = tk.Checkbutton(self.frameCustomFormat, text="Use Custom HTML Overlay Pre-Format", variable=self.useOverlayPreFormat, command = self.toggleUseOverlayPreFormat)
 			self.checkUseCustomOverlayString.grid(sticky=tk.W)
 
 			
@@ -332,7 +335,7 @@ class COHBotGUI:
 			if self.parameters.data.get('overlayStringPreFormatRight'):
 				self.customOverlayPreFormatStringRight.set(self.parameters.data.get('overlayStringPreFormatRight'))
 
-			self.checkUseMirrorOverlay = tk.Checkbutton(self.frameCustomFormat, text="Mirror Left/Right Overlay", variable=self.mirrorLeftToRightOverlay, command = self.toggleMirrorLeftRightOverlay)
+			self.checkUseMirrorOverlay = tk.Checkbutton(self.frameCustomFormat, text="Mirror Left/Right HTML Overlay", variable=self.mirrorLeftToRightOverlay, command = self.toggleMirrorLeftRightOverlay)
 			
 			tk.Label(self.frameCustomFormat, text="Left").grid(sticky=tk.W)
 			self.customOverlayEntryLeft.grid(sticky = tk.W)
@@ -362,6 +365,20 @@ class COHBotGUI:
 			self.toggleUseCustomPreFormat() # setdisabled if custom format on first run
 			self.toggleUseOverlayPreFormat()
 			#self.automode() # setdisabled if auto on first run
+
+			#CSS File Location
+			tk.Label(self.frameCSSFilePath, text="CSS Path").grid(row =0,sticky=tk.W)
+			self.entryCSSFilePath = tk.Entry(self.frameCSSFilePath, width= 49)
+			self.entryCSSFilePath.grid(row=0,column=1)
+
+			if(self.parameters.data.get('overlayStyleCSSFilePath')):
+				self.entryCSSFilePath.insert(0, str(self.parameters.data.get('overlayStyleCSSFilePath')))
+
+			self.entryCSSFilePath.config(state=DISABLED)
+
+			self.buttonCSSFilePath = tk.Button(self.frameCSSFilePath, text="Browse", command = lambda: self.browseCSSFilePathButton())
+			self.buttonCSSFilePath.config(width=10)
+			self.buttonCSSFilePath.grid(row=0, column=2, sticky=tk.W)
 
 			#CustomBotCredientials
 			tk.Label(self.frameOptionalBotCredentials, text="Bot Account Name").grid(row=0,sticky=tk.W)
@@ -552,6 +569,8 @@ class COHBotGUI:
 				self.buttonBotAccountName.config(state = DISABLED)
 			if self.buttonBotOAuthKey:
 				self.buttonBotOAuthKey.config(state = DISABLED)
+			if self.buttonCSSFilePath:
+				self.buttonCSSFilePath.config(state=DISABLED)
 
 	def enableButtons(self):
 		self.buttonTwitchChannel.config(state = NORMAL)
@@ -568,6 +587,8 @@ class COHBotGUI:
 				self.buttonBotAccountName.config(state = NORMAL)
 			if self.buttonBotOAuthKey:
 				self.buttonBotOAuthKey.config(state = NORMAL)
+			if self.buttonCSSFilePath:
+				self.buttonCSSFilePath.config(state=NORMAL)
 		
 
 
@@ -697,7 +718,7 @@ class COHBotGUI:
 
 	def locateCOH(self):
 		self.disableEverything()
-		self.master.filename =  tk.filedialog.askopenfilename(initialdir = "/",title = "Select location of RelicCOH.exe file",filetypes = (("log file","*.exe"),("all files","*.*")))
+		self.master.filename =  tk.filedialog.askopenfilename(initialdir = "/",title = "Select location of RelicCOH.exe file",filetypes = (("RelicCOH","*.exe"),("all files","*.*")))
 		logging.info("File Path : " + str(self.master.filename))
 		print("File Path : " + str(self.master.filename))
 		if(self.master.filename != ""):
@@ -710,6 +731,25 @@ class COHBotGUI:
 			if logpath:
 				self.entryRelicCOHPath.insert(0, str(logpath))
 			self.entryRelicCOHPath.config(state = DISABLED)
+			self.parameters.save()
+		self.enableButtons()
+
+	def browseCSSFilePathButton(self):
+		self.disableEverything()
+		cwd = os.getcwd()
+		self.master.filename =  tk.filedialog.askopenfilename(initialdir = cwd,title = "Select location of CSS file",filetypes = (("css file","*.css"),("all files","*.*")))
+		logging.info("File Path : " + str(self.master.filename))
+		print("File Path : " + str(self.master.filename))
+		if(self.master.filename != ""):
+			pattern = re.compile(r"\u20A9|\uFFE6|\u00A5|\uFFE5") # replaces both Won sign varients for korean language and Yen symbol for Japanese language paths
+			theFilename = re.sub(pattern, "/", self.master.filename)
+			self.parameters.data['overlayStyleCSSFilePath'] = theFilename.replace("/",'\\')
+			self.entryCSSFilePath.config(state = NORMAL)
+			self.entryCSSFilePath.delete(0, tk.END)
+			cssPath = self.parameters.data.get('overlayStyleCSSFilePath')
+			if cssPath:
+				self.entryCSSFilePath.insert(0, str(cssPath))
+			self.entryCSSFilePath.config(state = DISABLED)
 			self.parameters.save()
 		self.enableButtons()
 
