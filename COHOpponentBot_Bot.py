@@ -1191,15 +1191,11 @@ class GameData():
 			levelDiv = '<div class = "level">'
 			wlRatioDiv = '<div class = "wlratio">'
 
+		playerName = self.sanatizeUserName(player.name)
+		stringFormattingDictionary['$NAME$'] =  prefixDiv + nameDiv + str(playerName) + postfixDivClose + postfixDivClose
 		
-		stringFormattingDictionary['$NAME$'] =  prefixDiv + nameDiv + str(player.name) + postfixDivClose + postfixDivClose
-		if (bool(re.match("""^[/\.]""" , player.name))):
-			stringFormattingDictionary['$NAME$'] =  prefixDiv + nameDiv + str(player.name.rjust(len(player.name)+1)) + postfixDivClose + postfixDivClose
-		# add 1 extra whitespace to username if it starts with . or / using rjust to prevent . and / twitch chat commands causing problems
 		if overlay:
-			stringFormattingDictionary['$NAME$'] =  prefixDiv + nameDiv + str(html.escape(player.name)) + postfixDivClose + postfixDivClose
-		
-		
+			stringFormattingDictionary['$NAME$'] =  prefixDiv + nameDiv + str(html.escape(playerName)) + postfixDivClose + postfixDivClose
 		
 		if type(player.faction) is Faction:
 			stringFormattingDictionary['$FACTION$'] =  prefixDiv + factionDiv + str(player.faction.name) + postfixDivClose + postfixDivClose
@@ -1312,6 +1308,23 @@ class GameData():
 
 
 		return imageOverlayFormattingDictionary
+
+	def sanatizeUserName(self, userName):
+		try:
+			#remove ! from start of userName for example !opponent
+			if "!" == userName[0]:
+				userName = userName[1:]
+			# add 1 extra whitespace to username if it starts with . or / using rjust to prevent . and / twitch chat commands causing problems
+			if (bool(re.match("""^[/\.]""" , userName))):
+				userName = str(userName.rjust(len(userName)+1))
+			# escape any single quotes
+			userName = userName.replace("'","\'")
+			# escape any double quotes
+			userName = userName.replace('"', '\"')
+			return userName
+		except Exception as e:
+			logging.error("Problem in sanitizeUserName")
+			logging.exception("Stack :")
 
 	def formatPreFormattedString(self, theString, stringFormattingDictionary, overlay = False):
 
