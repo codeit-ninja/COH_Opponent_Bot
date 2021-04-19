@@ -1311,6 +1311,8 @@ class GameData():
 
 	def sanatizeUserName(self, userName):
 		try:
+			userName = str(userName) # ensure type of string
+			assert(len(userName) > 2) # ensure more than 2 characters
 			#remove ! from start of userName for example !opponent
 			if "!" == userName[0]:
 				userName = userName[1:]
