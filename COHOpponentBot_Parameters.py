@@ -41,7 +41,7 @@ class Parameters:
 
 		self.data['filePollInterval'] = 10
 
-		self.data['showSteamProfile'] = True
+		self.data['showSteamProfile'] = False
 
 		self.data['automaticTrigger'] = True
 
@@ -65,7 +65,7 @@ class Parameters:
 		self.data['overlayStyleCSSFilePath'] = "overlaystyle.css"
 
 		self.data['useCustomPreFormat'] = True
-		self.data['customStringPreFormat'] = "$NAME$ : $COUNTRY$ : $FACTION$ : $MATCHTYPE$ Rank $RANK$ : lvl $LEVEL$"
+		self.data['customStringPreFormat'] = "$NAME$ : $COUNTRY$ : $FACTION$ : $MATCHTYPE$ Rank $RANK$ : lvl $LEVEL$ : $STEAMPROFILE$"
 		
 
 		#your personal steam number
@@ -213,6 +213,7 @@ class Parameters:
 		self.stringFormattingDictionary['$WLRATIO$'] = None
 
 		self.stringFormattingDictionary['$MATCHTYPE$'] = None
+		self.stringFormattingDictionary['$STEAMPROFILE$'] = None
 
 		self.imageOverlayFormattingDictionary = {}
 		self.imageOverlayFormattingDictionary['$FLAGICON$'] = None

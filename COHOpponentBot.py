@@ -39,7 +39,7 @@ class COHBotGUI:
 		#checkbox string construction option bools
 
 		self.showOwn = IntVar(value = int(bool(self.parameters.data.get('showOwn'))))
-		self.showSteamProfile = IntVar(value = int(bool(self.parameters.data.get('showSteamProfile'))))
+		#self.showSteamProfile = IntVar(value = int(bool(self.parameters.data.get('showSteamProfile'))))
 		self.automaticTrigger = IntVar(value = int(bool(self.parameters.data.get('automaticTrigger'))))
 		self.writeIWonLostInChat = IntVar(value = int(bool(self.parameters.data.get('writeIWonLostInChat'))))
 		self.writePlaceYourBetsInChat = IntVar(value = int(bool(self.parameters.data.get('writePlaceYourBetsInChat'))))
@@ -349,8 +349,8 @@ class COHBotGUI:
 
 			self.checkOwn = tk.Checkbutton(self.framePlayerInfo, text="Show Own Stats", variable=self.showOwn, command = self.saveToggles)
 			self.checkOwn.grid( sticky=tk.W)
-			self.checkWLRatio = tk.Checkbutton(self.framePlayerInfo, text="Steam Profile", variable=self.showSteamProfile, command = self.saveToggles)
-			self.checkWLRatio.grid( sticky=tk.W) 
+			#self.checkWLRatio = tk.Checkbutton(self.framePlayerInfo, text="Steam Profile", variable=self.showSteamProfile, command = self.saveToggles)
+			#self.checkWLRatio.grid( sticky=tk.W) 
 
 			self.checkAutomaticTrigger = tk.Checkbutton(self.frameAutoTrigger, text="Automatic Trigger", variable=self.automaticTrigger, command = self.automaticTriggerToggle)
 			self.checkAutomaticTrigger.grid( sticky=tk.W)
@@ -511,7 +511,7 @@ class COHBotGUI:
 	def saveToggles(self):
 		self.parameters.data['showOwn'] = bool(self.showOwn.get())
 
-		self.parameters.data['showSteamProfile'] = bool(self.showSteamProfile.get())
+		#self.parameters.data['showSteamProfile'] = bool(self.showSteamProfile.get())
 
 		self.parameters.data['automaticTrigger'] = bool(self.automaticTrigger.get())
 

@@ -1146,8 +1146,9 @@ class GameData():
 		customPreFormattedOutputString = self.parameters.data.get('customStringPreFormat')
 		theString = self.formatPreFormattedString(customPreFormattedOutputString, stringFormattingDictionary)
 		outputList = list(self.split_by_n(theString, 500))
-		if (self.parameters.data.get('showSteamProfile')):
-			outputList.append("Steam profile " + str(player.stats.steamProfileAddress))
+		# removed separate message for steamProfile
+		#if (self.parameters.data.get('showSteamProfile')):
+		#	outputList.append("Steam profile " + str(player.stats.steamProfileAddress))
 		return outputList
 
 	def populateStringFormattingDictionary(self, player, overlay = False):
@@ -1157,7 +1158,7 @@ class GameData():
 			prefixDiv = '<div class = "textVariables">'
 			postfixDivClose = '</div>'
 		stringFormattingDictionary = dict(self.parameters.stringFormattingDictionary)
-		#stringFormattingDictionary = {} # create a new dictionary
+		#loads default values from parameters into stringFormattingDictionary (Key: Value:None)
 		nameDiv = ""
 		factionDiv = ""
 		matchDiv = ""
@@ -1173,6 +1174,7 @@ class GameData():
 		rankDiv = ""
 		levelDiv = ""
 		wlRatioDiv = ""
+		steamprofile = ""
 
 		if overlay:
 			nameDiv = '<div class = "name">'
@@ -1190,6 +1192,7 @@ class GameData():
 			rankDiv = '<div class = "rank">'
 			levelDiv = '<div class = "level">'
 			wlRatioDiv = '<div class = "wlratio">'
+			steamprofile = '<div class = "steamprofile">'
 
 		playerName = self.sanatizeUserName(player.name)
 		stringFormattingDictionary['$NAME$'] =  prefixDiv + nameDiv + str(playerName) + postfixDivClose + postfixDivClose
@@ -1215,6 +1218,7 @@ class GameData():
 			stringFormattingDictionary['$TOTALWINS$'] =  prefixDiv + totalWinsDiv + str(player.stats.totalWins) + postfixDivClose + postfixDivClose
 			stringFormattingDictionary['$TOTALLOSSES$'] =  prefixDiv + totalLossesDiv + str(player.stats.totalLosses) + postfixDivClose + postfixDivClose
 			stringFormattingDictionary['$TOTALWLRATIO$'] =  prefixDiv + totalWinLossRatioDiv + str(player.stats.totalWLRatio) + postfixDivClose + postfixDivClose
+			stringFormattingDictionary['$STEAMPROFILE$'] =  prefixDiv + steamprofile + str(player.stats.steamProfileAddress) + postfixDivClose + postfixDivClose
 
 
 			#set default null values for all parameters in dictionary
