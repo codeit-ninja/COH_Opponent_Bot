@@ -59,8 +59,6 @@ html {
 	display: inline;
 }
 
-
-
 .textVariables {
 	position: relative;
 	display: inline;
@@ -170,7 +168,6 @@ html {
 }
 
 
-
 .opponentTeam {
 
 	  position : absolute;
@@ -182,6 +179,12 @@ html {
 	  text-align: left;
 	  padding-bottom: 6px;
 	  }
+
+.opponentTeam .name{
+
+color: white;
+
+}
   
 .playerTeam {
 
@@ -193,4 +196,11 @@ html {
 	  margin-right: 58%;
 	  text-align: right;
 	  padding-bottom: 6px;
+
   }
+
+  .playerTeam .name{
+
+	color: white;
+	
+}

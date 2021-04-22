@@ -25,6 +25,7 @@ class OverlayTemplates:
 	overlaycss = """
 
 
+
 body {
 	position: relative;
 	background-color: transparent;
@@ -84,8 +85,6 @@ html {
 	height: 30px;
 	display: inline;
 }
-
-
 
 .textVariables {
 	position: relative;
@@ -207,6 +206,12 @@ html {
 	  text-align: left;
 	  padding-bottom: 6px;
 	  }
+
+.opponentTeam .name{
+
+color: white;
+
+}
   
 .playerTeam {
 
@@ -218,6 +223,13 @@ html {
 	  margin-right: 58%;
 	  text-align: right;
 	  padding-bottom: 6px;
+
   }
+
+  .playerTeam .name{
+
+	color: white;
+	
+}
 
 	"""
