@@ -189,6 +189,11 @@ html {
 	top: 0px;
 }
 
+.steamprofile{
+	position: relative;
+	display: inline;
+	top: 0px;
+}
 
 
 .opponentTeam {
