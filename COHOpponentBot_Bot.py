@@ -297,8 +297,9 @@ class IRC_Channel(threading.Thread):
 	def CheckForUserCommand(self, userName, message):
 		logging.info("Checking For User Comamnd")
 		try:
-			if (bool(re.match("^(!)?opponent(\?)?$", message.lower())) or bool(re.match("^(!)?place your bets$" , message.lower())) or bool(re.match("^(!)?opp(\?)?$", message.lower()))):
+			if (bool(re.match(r"^(!)?opponent(\?)?$", message.lower())) or bool(re.match(r"^(!)?place your bets$" , message.lower())) or bool(re.match(r"^(!)?opp(\?)?$", message.lower()))):
 				logging.info("Got Opponent")
+				print("Got Opponent")
 				self.gameData = GameData(ircClient= self.ircClient, parameters=self.parameters)
 				if self.gameData.getDataFromGame():
 					self.gameData.outputOpponentData()
@@ -972,9 +973,9 @@ class GameData():
 
 
 		except Exception as e:
-			logging.info("Problem in getDataFromGame")
-			logging.info(str(e))
-			logging.exception("Stack : ")
+			#logging.info("Problem in getDataFromGame")
+			#logging.info(str(e))
+			#logging.exception("Stack : ")
 			self.gameInProgress = False
 			return False
 
