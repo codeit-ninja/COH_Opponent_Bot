@@ -15,8 +15,11 @@ Make sure you have python (3) installed.
 From the command line use. "python COHOpponentBot.py" (windows) "python3 COHOpponentBot.py" (Linux)
 
 Python Dependencies :
-requests
-pyinstaller
+requests,
+pyinstaller,
+pymem,
+mem_edit.
+
 
 These can be installed using pip or pip3 using pip install pyinstaller
 
