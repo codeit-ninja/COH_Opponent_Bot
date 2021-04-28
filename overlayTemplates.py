@@ -29,182 +29,183 @@ class OverlayTemplates:
 body {
 	position: relative;
 	background-color: transparent;
-	padding: 0px;
+	padding: 0pt;
 	
   }
   
 html {
 	position: relative;
-	padding: 0px;
+	padding: 0pt;
 }
   
 	
 .container{width:100%;
 	position: relative;
-	top: -7px;
-	font-size: 20px; 
+	top: 0pt;
+	font-size: 14pt; 
 }
 
 .countryflagimg{
 	position: relative;
 	display: inline;
-	height: 20px;
-	top: 10px;
+	height: 16pt;
+	top: 0pt;
 }
 
 .countryflagimg img{
 	position: relative;
 	display: inline;
-	height:20px;
-	top: -5px;
+	height:16pt;
+	top: -3pt;
 }
 
 
 .factionflagimg{
 	position: relative;
 	display: inline;
-	height: 20px;
-	top: 0px;
+	height: 16pt;
+	top: 0pt;
 }
 
 .factionflagimg img{
 	position: relative;
-	height:25px;
-	top: 5px;
+	height:18pt;
+	top: -3pt;
 }
 
 .rankimg {
 	position: relative;
-	top: 10px;
-	height: 30px;
+	top: 10pt;
+	height: 30pt;
 	display: inline;
 }
 
 .rankimg img{
 	position: relative;
-	height: 30px;
+	height: 24pt;
 	display: inline;
+	top: -8pt;
 }
 
 .textVariables {
 	position: relative;
 	display: inline;
-	top: 0px;
+	top: -6pt;
 }
 
 .name {
 	position: relative;
 	display: inline;
-	top: 0px;
+	top: 0pt;
 }
 
 .faction {
 	position: relative;
 	display: inline;
-	top: 0px;
+	top: 0pt;
 }
 
 .matchtype {
 	position: relative;
 	display: inline;
-	top: 0px;
+	top: 0pt;
 }
 
 .country {
 	position: relative;
 	display: inline;
-	top: 0px;
+	top: 0pt;
 }
 
 .totalwins {
 	position: relative;
 	display: inline;
-	top: 0px;
+	top: 0pt;
 }
 
 .totallosses {
 	position: relative;
 	display: inline;
-	top: 0px;
+	top: 0pt;
 }
 
 .totalwlratio {
 	position: relative;
 	display: inline;
-	top: 0px;
+	top: 0pt;
 }
 
 .wins {
 	position: relative;
 	display: inline;
-	top: 0px;
+	top: 0pt;
 }
 
 .losses {
 	position: relative;
 	display: inline;
-	top: 0px;
+	top: 0pt;
 }
 
 .disputes {
 	position: relative;
 	display: inline;
-	top: 0px;
+	top: 0pt;
 }
 
 .streak {
 	position: relative;
 	display: inline;
-	top: 0px;
+	top: 0pt;
 }
 
 .drops {
 	position: relative;
 	display: inline;
-	top: 0px;
+	top: 0pt;
 }
 
 .rank {
 	position: relative;
 	display: inline;
-	top: 0px;
+	top: 0pt;
 }
 
 .level {
 	position: relative;
 	display: inline;
-	top: 0px;
+	top: 0pt;
 }
 
 .wlratio {
 	position: relative;
 	display: inline;
-	top: 0px;
+	top: 0pt;
 }
 
 .nonVariableText{
 	position: relative;
 	display: inline;
-	top: 0px;
+	top: -6pt;
 }
 
 .steamprofile{
 	position: relative;
 	display: inline;
-	top: 0px;
+	top: 0pt;
 }
 
 
 .opponentTeam {
 
 	  position : absolute;
-	  top: 0px; 
+	  top: 0pt; 
 	  background-color: rgba(0, 0, 0, 0.5);
 	  color: white;
 	  float: left;
 	  margin-left: 58%;
 	  text-align: left;
-	  padding-bottom: 6px;
+	  padding-bottom: 0pt;
 	  }
 
 .opponentTeam .name{
@@ -216,13 +217,13 @@ color: white;
 .playerTeam {
 
 	  position: relative;
-	  top: 0px; 
+	  top: 0pt; 
 	  background-color: rgba(0, 0, 0, 0.5);
 	  color: white;
 	  float: right;
 	  margin-right: 58%;
 	  text-align: right;
-	  padding-bottom: 6px;
+	  padding-bottom: 0pt;
 
   }
 
