@@ -1,0 +1,99 @@
+
+/* assign everything as a base in body: we want all text color white, margin on 0, I added some text-shadow.. and we have a base font-size. 
+Everything coming after the body will be assigned a new value. */
+
+body {
+	background-color: transparent;
+	margin: 0pt;
+	color: white;
+	font-size: 16pt;
+	text-shadow: 1pt 1pt black;
+}
+
+/* why do you even call this html? */
+html {
+	position: relative;
+}
+
+/* we dont want to do anything with this, I just say it isnt hidden now. */
+.container {
+	opacity: 1;
+}
+
+/* we want to add the padding and top to the box containing our image, not the image itself. */
+
+.countryflagimg {
+	position: relative;
+	display: inline;
+	top: 4pt;
+	padding: 2pt;
+}
+
+/* we want to do all the image resizing only to the image itself, displaying and position is irrelevant, because it just follows its div box */
+
+.countryflagimg img {
+	height: auto;
+	width: 24pt;
+}
+
+.factionflagimg {
+	position: relative;
+	display: inline;
+	top: 6pt;
+}
+
+.factionflagimg img {
+	height: auto;
+	width: 30pt;
+}
+
+.rankimg {
+	position: relative;
+	display: inline;
+	top: 6pt;
+}
+
+.rankimg img {
+	height: auto;
+	width: 20pt;
+}
+
+/* We can just use right: 58% instead of margin-right: 58%, we position it where we want it now, not using the margin. */
+
+.playerTeam {
+	position: relative;
+	background-color: rgba(0, 0, 0, 0.4);
+	float: right;
+	right: 58%;
+	text-align: right;
+	padding-bottom: 6pt;
+}
+
+.playerTeam .name, .playerTeam .textVariables, .playerTeam .faction, .playerTeam .matchtype, .playerTeam .country, .playerTeam .totalwins, .playerTeam .totallosses, .playerTeam .totalwlratio, 
+.playerTeam .wins, .playerTeam .losses, .playerTeam .disputes, .playerTeam .streak, .playerTeam .drops, .playerTeam .rank, .playerTeam .level, .playerTeam .wlratio, .playerTeam .nonVariableText, .playerTeam .steamprofile {
+	color: white;
+	display: inline;
+}
+
+/* not assigning a margin makes us able to have the position relative instead of absolute. We now can rescale our HTML to any size and it will stay at a good position and scale */
+
+.opponentTeam {
+	position: relative;
+	background-color: rgba(0, 0, 0, 0.4);
+	float: left;
+	left: 58%;
+	text-align: left;
+	padding-bottom: 6pt;
+}
+
+.opponentTeam .name, .opponentTeam .textVariables, .opponentTeam .faction, .opponentTeam .matchtype, .opponentTeam .country, .opponentTeam .totalwins, .opponentTeam .totallosses, .opponentTeam .totalwlratio, 
+.opponentTeam .wins, .opponentTeam .losses, .opponentTeam .disputes, .opponentTeam .streak, .opponentTeam .drops, .opponentTeam .rank, .opponentTeam .level, .opponentTeam .wlratio, .opponentTeam .nonVariableText, .opponentTeam .steamprofile {
+	color: white;
+	display: inline;
+}
+
+/* we can now seperate these groups I grouped  together for easier use.. I recommend to have multiple CSS for each opponent and player team. 
+Importing multiple css in HTML will make it easier to use and we can then keep out the body css and container css, which we dont want people to edit, because it will fuck up. 
+I rewrote everything to be as short as possible now and tried to remove most of the bullcrap.
+So note how everything is reduced in flickering already, but it still flickers because of the pixels being pushed around with margins and position. If I rewrite everything
+better I may fix the flickering issue all together. */

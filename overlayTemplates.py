@@ -4,17 +4,17 @@ class OverlayTemplates:
  <!DOCTYPE html>
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="overlaystyle.css">
+<link rel="stylesheet" type="text/css" href="{}">
 <meta http-equiv="content-type" content="text-html; charset=utf-8">
 <meta http-equiv="refresh" content="2">
 </head>
 <body>
 <div class="container">
 <div class = "playerTeam">
-{0}
+{}
 </div>
 <div class = "opponentTeam">
-{1}
+{}
 </div>
 </div>
 <div style="clear: both;"></div>

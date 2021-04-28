@@ -1410,17 +1410,19 @@ class GameData():
 					team1 += str(item.name) + str("<BR>") + "\n"
 				for item in team2List:
 					team2 += str(item.name) + str("<BR>") + "\n"
-				
-			htmlOutput = OverlayTemplates().overlayhtml.format(team1, team2)
+			
+			cssFilePath = self.parameters.data.get('overlayStyleCSSFilePath')
+			#check if css file exists and if not output the default template to folder
+			if not (os.path.isfile(cssFilePath)):
+				with open(cssFilePath , 'w' , encoding="utf-8") as outfile:
+					outfile.write(OverlayTemplates().overlaycss)
+
+			htmlOutput = OverlayTemplates().overlayhtml.format(cssFilePath, team1, team2)
 			# create output overlay from template
 			with open("overlay.html" , 'w', encoding="utf-8") as outfile:
 				outfile.write(htmlOutput)
 				logging.info("Creating Overlay File\n")
-			#check if css file exists and if not output the default template to folder
-			cssFilePath = self.parameters.data.get('overlayStyleCSSFilePath')
-			if not (os.path.isfile(cssFilePath)):
-				with open(cssFilePath , 'w' , encoding="utf-8") as outfile:
-					outfile.write(OverlayTemplates().overlaycss)
+
 		except Exception as e:
 			logging.error(str(e))
 
