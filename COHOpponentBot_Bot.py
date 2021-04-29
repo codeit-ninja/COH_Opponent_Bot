@@ -1429,7 +1429,8 @@ class GameData():
 	@staticmethod
 	def clearOverlayHTML():
 		try:
-			htmlOutput = OverlayTemplates().overlayhtml.format("", "")
+
+			htmlOutput = OverlayTemplates().overlayhtml.format("","", "")
 			# create output overlay from template
 			with open("overlay.html" , 'w') as outfile:
 				outfile.write(htmlOutput)
