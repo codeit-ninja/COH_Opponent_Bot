@@ -672,7 +672,7 @@ class PlayerStat:
 
 			if self.steamString:
 				self.steamNumber = str(self.steamString).replace("/steam/", "")
-				self.steamProfileAddress = "https://steamcommunity.com/profiles/" + str(self.steamNumber)
+				self.steamProfileAddress = "https://cohstats.com/?steamid=" + str(self.steamNumber)
 
 
 	
