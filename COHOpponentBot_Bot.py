@@ -265,9 +265,9 @@ class IRC_Channel(threading.Thread):
 			if (line[0] == "TEST"):
 				self.testOutput()
 			if (line[0] == "IWON"):
-				self.ircClient.SendPrivateMessageToIRC("!"+str(self.parameters.data.get('steamAlias')) +" won")
+				self.ircClient.SendPrivateMessageToIRC("!i won")
 			if (line[0] == "ILOST"):
-				self.ircClient.SendPrivateMessageToIRC("!"+str(self.parameters.data.get('steamAlias')) +" lost")
+				self.ircClient.SendPrivateMessageToIRC("!i lost")
 			if (line[0] == "CLEAROVERLAY"):
 				GameData.clearOverlayHTML()
 			if (len(line) >= 4) and ("PRIVMSG" == line[2]) and not ("jtv" in line[0]):
@@ -672,7 +672,7 @@ class PlayerStat:
 
 			if self.steamString:
 				self.steamNumber = str(self.steamString).replace("/steam/", "")
-				self.steamProfileAddress = "https://cohstats.com/?steamid=" + str(self.steamNumber)
+				self.steamProfileAddress = "playercard.cohstats.com/?steamid=" + str(self.steamNumber)
 
 
 	
