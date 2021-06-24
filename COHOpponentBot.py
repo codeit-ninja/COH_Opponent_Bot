@@ -724,12 +724,12 @@ class COHBotGUI:
 		if(self.master.filename != ""):
 			pattern = re.compile(r"\u20A9|\uFFE6|\u00A5|\uFFE5") # replaces both Won sign varients for korean language and Yen symbol for Japanese language paths
 			theFilename = re.sub(pattern, "/", self.master.filename)
-			self.parameters.data['logPath'] = theFilename.replace("/",'\\')
+			self.parameters.data['cohPath'] = theFilename.replace("/",'\\')
 			self.entryRelicCOHPath.config(state = NORMAL)
 			self.entryRelicCOHPath.delete(0, tk.END)
-			logpath = self.parameters.data.get('cohPath')
-			if logpath:
-				self.entryRelicCOHPath.insert(0, str(logpath))
+			cohpath = self.parameters.data.get('cohPath')
+			if cohpath:
+				self.entryRelicCOHPath.insert(0, str(cohpath))
 			self.entryRelicCOHPath.config(state = DISABLED)
 			self.parameters.save()
 		self.enableButtons()
