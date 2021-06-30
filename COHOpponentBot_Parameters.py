@@ -35,6 +35,8 @@ class Parameters:
 		self.data['botUserName'] = ""
 		self.data['botOAuthKey'] = ""
 
+		self.data['whisperTo'] = "xcoinbetbot"
+
 		self.data['showOwn'] = False
 
 		self.data['logErrorsToFile'] = True
@@ -54,7 +56,7 @@ class Parameters:
 		self.data['logPath'] = ""
 		self.data['temprecReplayPath'] = ""
 
-		self.data['streamFolder'] = ""
+		self.data['steamFolder'] = ""
 		self.data['cohPath'] = ""
 		self.data['cohUCSPath'] = ""
 

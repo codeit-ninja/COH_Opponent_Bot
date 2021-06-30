@@ -204,8 +204,21 @@ class IRCClient(threading.Thread):
 	# above is the send to IRC timer loop that runs every three seconds
 	
 	def SendPrivateMessageToIRC(self, message):
-		self.ircMessageBuffer.append(message)   # removed this to stop message being sent to IRC
+		#print(message)
 		self.SendToOutputField(message) # output message to text window
+		message = ("PRIVMSG " + str(self.channel) + " :" + str(message) + "\r\n")
+		#print(message)
+		self.ircMessageBuffer.append(message)   # removed this to stop message being sent to IRC
+		#print(len(self.ircMessageBuffer))
+		#print(bool(self.ircMessageBuffer))
+		
+
+	def SendWhisperToIRC(self, message, whisperTo):
+		try:
+			self.ircMessageBuffer.append("PRIVMSG " + str(self.channel) + " :/w " + str(whisperTo) + " " + str(message) + "\r\n")
+		except Exception as e:
+			logging.error("Error in SendWhisperToIRC")
+			logging.error(str(e))
 
 	def SendToOutputField(self, message):
 		try:
@@ -225,9 +238,13 @@ class IRCClient(threading.Thread):
 			logging.exception("Stack : ")
 
 	def IRCSendCalledEveryThreeSeconds(self):
+		#print("called")
 		if (self.ircMessageBuffer):
 			try:
-				self.irc.send(("PRIVMSG " + self.channel + " :" + str(self.ircMessageBuffer.popleft()) + "\r\n").encode('utf8'))
+				#print("Buffered")
+				stringToSend = str(self.ircMessageBuffer.popleft())
+				print("string to send : " + stringToSend)
+				self.irc.send((stringToSend).encode('utf8'))
 			except Exception as e:
 				logging.error("IRC send error:")
 				logging.error("In IRCSendCalledEveryThreeSeconds")
@@ -307,10 +324,17 @@ class IRC_Channel(threading.Thread):
 
 			if (message.lower() == "test") and ((str(userName).lower() == str(self.parameters.privatedata.get('adminUserName')).lower()) or (str(userName) == str(self.parameters.data.get('channel')).lower())):
 				self.ircClient.SendPrivateMessageToIRC("I'm here! Pls give me mod to prevent twitch from autobanning me for spam if I have to send a few messages quickly.")
+				self.ircClient.SendWhisperToIRC("Whisper Test", "xcoinbetbot")
 				self.ircClient.output.insert(END, "Oh hi again, I heard you in the " +self.channel[1:] + " channel.\n")
 
 			if (bool(re.match("^(!)?gameinfo(\?)?$", message.lower()))):
 				self.gameInfo()
+
+			if (bool(re.match("^(!)?story(\?)?$", message.lower()))):
+				self.story()			
+
+
+
 		except Exception as e:
 			logging.error("Problem in CheckForUserCommand")
 			logging.error(str(e))
@@ -320,6 +344,12 @@ class IRC_Channel(threading.Thread):
 		self.gameData = GameData(self.ircClient, parameters=self.parameters)
 		if self.gameData.getDataFromGame():
 			self.ircClient.SendPrivateMessageToIRC("Map : {}, Mod : {}, Start : {}, High Resources : {}, Automatch : {}, Slots : {}, Players : {}.".format(self.gameData.mapFullName,self.gameData.modName,self.gameData.randomStart,self.gameData.highResources, self.gameData.automatch, self.gameData.slots,  self.gameData.numberOfPlayers))
+
+	def story(self):
+		self.gameData = GameData(self.ircClient, parameters=self.parameters)
+		if self.gameData.getDataFromGame():
+			self.ircClient.SendPrivateMessageToIRC("{}.".format(self.gameData.mapDescription))
+
 
 	def testOutput(self):
 		if not self.gameData:
@@ -840,6 +870,7 @@ class GameData():
 		self.automatch = None
 		self.mapFullName = None
 		self.modName = None
+		self.mapDescription = ""
 
 		self.pm = None
 		self.baseAddress = None
@@ -881,9 +912,9 @@ class GameData():
 			self.gameStartedDate = cohreplayparser.localDate
 
 			if self.randomStart:
-				self.randomStart = "Random"
+				self.randomStart = True
 			else:
-				self.randomStart = "Fixed"
+				self.randomStart = False
 			self.highResources = cohreplayparser.highResources
 			self.VPCount = cohreplayparser.VPCount
 			if cohreplayparser.matchType.lower() == "automatch":
@@ -895,6 +926,8 @@ class GameData():
 			else:
 				self.mapFullName = cohreplayparser.mapName
 			self.modName = cohreplayparser.modName
+
+			self.mapDescription = cohreplayparser.mapDescription
 
 			for item in cohreplayparser.playerList:
 				username = item['name']
@@ -968,6 +1001,8 @@ class GameData():
 			if (5 <= int(self.slots) <= 6) and (int(self.numberOfComputers) == 0):
 				self.matchType = MatchType.THREES
 
+
+
 			return True
 
 
@@ -988,9 +1023,11 @@ class GameData():
 						addr = self.pm.read_int(addr + i)
 				return addr + offsets[-1]
 		except Exception as e:
-			logging.info("Problem in GetPtrAddr")
-			logging.info(str(e))
-			logging.exception("Stack : ")
+			#logging.info("Problem in GetPtrAddr")
+			#logging.info(str(e))
+			#logging.exception("Stack : ")
+			#' Error routinely thrown when Pointer not found
+			pass
 	
 
 	def getCOHMemoryAddress(self):
@@ -1140,6 +1177,45 @@ class GameData():
 							self.ircStringOutputList = self.ircStringOutputList + self.createCustomOutput(item)					
 				for item in self.ircStringOutputList:
 					self.ircClient.SendPrivateMessageToIRC(str(item)) # outputs the information to IRC
+
+		# Output Whisper to XcoinsBetBot 
+		try:
+			whisperTo = self.parameters.data['whisperTo']
+			channelName = self.parameters.data['channel']
+			numberOfHumans = str(int(self.numberOfHumans))
+			numberOfComputers = str(int(self.numberOfComputers))
+			numberOfPlayers = str(int(self.numberOfPlayers))
+			slots = str(int(self.slots))
+			randomStart = str(int(self.randomStart))
+			highResources = str(int(self.highResources))
+			VPCount = str(int(self.VPCount))
+			automatch = str(int(self.automatch))
+			mapFullName = str(self.mapFullName)
+			modName = str(self.modName)
+			message = "!start,{},{},{},{},{},{},{},{},{},{},{}".format(channelName,numberOfHumans,numberOfComputers,numberOfPlayers,slots,randomStart,highResources,VPCount,automatch,mapFullName,modName)
+			for count , item in enumerate(self.playerList):
+				steamNumber = ""
+				if item.stats:
+					steamNumber = item.stats.steamNumber
+				else:
+					steamNumber = item.name
+
+				faction = ""
+				if item.faction:
+					faction = item.faction.name
+				team = "0"
+				if count >= (len(self.playerList)/2):
+					team = "1"
+
+				message += ",{},{},{}".format(str(steamNumber), str(faction), str(team))
+			
+			print("Before sending")
+			self.ircClient.SendWhisperToIRC(str(message),str(whisperTo))
+		except Exception as e:
+			logging.error("Problem in Sending Whisper")
+			logging.exception("Exception : ")
+			logging.error(str(e))
+
 
 
 	def createCustomOutput(self, player):
@@ -1330,7 +1406,7 @@ class GameData():
 			userName = userName.replace('"', '\"')
 			return userName
 		except Exception as e:
-			logging.error("Problem in sanitizeUserName")
+			logging.info("In sanitizeUserName username less than 2 chars")
 			logging.exception("Stack :")
 
 	def formatPreFormattedString(self, theString, stringFormattingDictionary, overlay = False):
@@ -1781,6 +1857,7 @@ class COH_Replay_Parser:
 			faction = self.read_LengthASCIIString()
 			self.read_UnsignedLong4Bytes()
 			self.read_UnsignedLong4Bytes()
+
 			self.playerList.append({'name':userName,'faction':faction})
 
 
