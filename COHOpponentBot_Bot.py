@@ -385,7 +385,7 @@ class StatsRequest:
 			if (statdata['result']['message'] == "SUCCESS"):
 				logging.info ("statdata load succeeded")
 				playerStats = PlayerStat(statdata, statnumber)
-			return playerStats
+				return playerStats
 		except Exception as e:
 			logging.info("Problem in returnStats")
 			logging.info(str(e))
@@ -702,7 +702,7 @@ class PlayerStat:
 
 			if self.steamString:
 				self.steamNumber = str(self.steamString).replace("/steam/", "")
-				self.steamProfileAddress = "playercard.cohstats.com/?steamid=" + str(self.steamNumber)
+				self.steamProfileAddress = "cohstats.com/i?d=" + str(self.steamNumber)
 
 
 	
@@ -937,7 +937,7 @@ class GameData():
 
 			statList = self.getStatsFromGame()
 
-			print(statList)
+			#print(statList)
 
 			for player in self.playerList:
 				if statList:
@@ -1038,7 +1038,7 @@ class GameData():
 			self.cohRunning = True
 			return True
 		except Exception as e:
-			#logging.info(str(e))
+			logging.info(str(e))
 			self.cohRunning = False
 			return False
 			
