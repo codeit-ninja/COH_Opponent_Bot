@@ -589,8 +589,6 @@ class COHBotGUI:
 				self.buttonBotOAuthKey.config(state = NORMAL)
 			if self.buttonCSSFilePath:
 				self.buttonCSSFilePath.config(state=NORMAL)
-		
-
 
 	def editSteamNumber(self):  
 		theState = self.entrySteam64IDNumber.cget('state')
@@ -767,8 +765,7 @@ class COHBotGUI:
 
 				except Exception as e:
 					logging.error('Exception : ' + str(e))
-				while (threading.active_count() > 1):
-					pass
+
 				self.testButton.config(state = DISABLED)
 				self.enableButtons()
 				self.connectButton.config(text = "Connect")
