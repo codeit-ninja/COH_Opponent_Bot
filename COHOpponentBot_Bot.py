@@ -1038,7 +1038,7 @@ class GameData():
 				mapFullName = str(self.mapFullName)
 				modName = str(self.modName)
 				gameStarted = str(self.gameStartedDate)
-				message = "!start,{},{},{},{},{},{},{},{},{},{},{}".format(channelName,gameStarted,numberOfHumans,numberOfComputers,numberOfPlayers,slots,randomStart,highResources,VPCount,automatch,mapFullName,modName)
+				message = "!start,{},{},{},{},{},{},{},{},{},{},{},{}".format(channelName,gameStarted,numberOfHumans,numberOfComputers,numberOfPlayers,slots,randomStart,highResources,VPCount,automatch,mapFullName,modName)
 				for count , item in enumerate(self.playerList):
 					steamNumber = ""
 					if item.stats:
