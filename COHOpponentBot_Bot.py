@@ -1591,6 +1591,7 @@ class COH_Replay_Parser:
 		self.highResources = None
 		self.VPCount = None
 		self.matchType = None
+		self.localDateString = None
 		self.localDate = None
 		self.unknownDate = None
 		self.replayName = None
@@ -1738,7 +1739,10 @@ class COH_Replay_Parser:
 
 		cohrec = self.read_ASCIIString(stringLength= 8)
 
-		self.localDate = self.read_NULLTerminated_2ByteString()
+		self.localDateString = self.read_NULLTerminated_2ByteString()
+
+		# Parse localDateString as a datetime object
+		self.localDate = self.decodeDate(self.localDateString)
 
 		self.seek(76,0)
 
@@ -1883,6 +1887,65 @@ class COH_Replay_Parser:
 
 		self.seek(chunkStart + chunkLength, 0)
 
+
+	def decodeDate(self, timeString) -> datetime:
+		"""
+		Processes the date string that is in a different format depending on the game locale (US, EURO and ASIAN dates strings follow a different string format)
+		"""
+		#24hr: DD-MM-YYYY HH:mm
+		reEuro = re.compile(r"(\d\d).(\d\d).(\d\d\d\d)\s(\d\d).(\d\d)")
+		match =  re.match(reEuro, timeString)
+		if match:
+			print("Euro String")
+			print(match.groups())
+			try:
+				day = int(match.group(1))
+				month = int(match.group(2))
+				year = int(match.group(3))
+				hour = int(match.group(4))
+				minute = int(match.group(5))
+				return datetime.datetime(year = year, month=month, day = day, hour = hour, minute = minute)
+			except Exception as e:
+				logging.error(str(e))
+				logging.exception("Exception : ")
+
+		#12hr: MM/DD/YYYY hh:mm XM *numbers are not 0-padded
+		reUS = re.compile(r"(\d{1,2}).(\d{1,2}).(\d\d\d\d)\s(\d{1,2}).(\d{1,2}).*?(\w)M")
+		match = re.match(reUS, timeString) 
+		if match:
+			print("US String")
+			print(match.groups())
+			try:
+				day = int(match.group(2))
+				month = int(match.group(1))
+				year = int(match.group(3))
+				hour = int(match.group(4))
+				minute = int(match.group(5))
+				meridiem = str(match.group(6))
+				if "p" in meridiem.lower():
+					hour = hour + 12
+				return datetime.datetime(year = year, month=month, day = day, hour = hour, minute = minute)
+			except Exception as e:
+				logging.error(str(e))
+				logging.exception("Exception : ")
+		
+		#YYYY/MM/DD HH:MM
+		reAsian = re.compile(r"(\d\d\d\d).(\d\d).(\d\d)\s(\d\d).(\d\d)")
+		match = re.match(reAsian, (" ".join(  (str(timeString).encode("ascii", "ignore").decode()).split() ) ) )
+		if match:
+			print("Asian String")
+			print(match.groups())
+			try:
+				day = int(match.group(3))
+				month = int(match.group(2))
+				year = int(match.group(1))
+				hour = int(match.group(4))
+				minute = int(match.group(5))
+				return datetime.datetime(year = year, month=month, day = day, hour = hour, minute = minute)
+			except Exception as e:
+				logging.error(str(e))
+				logging.exception("Exception : ")
+
 	def __str__(self) -> str:
 		output = "Data:\n"
 		output += "fileVersion : {}\n".format(self.fileVersion)
@@ -1891,6 +1954,7 @@ class COH_Replay_Parser:
 		output += "highResources : {}\n".format(self.highResources)
 		output += "VPCount : {}\n".format(self.VPCount)
 		output += "matchType : {}\n".format(self.matchType)
+		output += "localDateString : {}\n".format(self.localDateString)
 		output += "localDate : {}\n".format(self.localDate)
 		output += "unknownDate : {}\n".format(self.unknownDate)
 		output += "replayName : {}\n".format(self.replayName)

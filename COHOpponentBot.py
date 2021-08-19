@@ -283,6 +283,7 @@ class COHBotGUI:
 			#create all custom variables from dictionary keys
 			columnNumber = 0
 			rowNumber = 0
+			
 			for key, value in self.parameters.stringFormattingDictionary.items():
 
 				myLabelFrame = tk.LabelFrame(self.frameCustomChatVariables, padx =5, pady=5)
