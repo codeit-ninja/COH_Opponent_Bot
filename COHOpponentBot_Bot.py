@@ -23,7 +23,7 @@ from COHOpponentBot_Parameters import Parameters
 from tkinter import *
 import threading
 from threading import Thread
-from datetime import datetime
+import datetime
 from enum import Enum
 from queue import Queue # to talk to the threads
 import logging
