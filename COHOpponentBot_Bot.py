@@ -935,10 +935,8 @@ class GameData():
 
 			self.gameStartedDate = cohreplayparser.localDate
 
-			if self.randomStart:
-				self.randomStart = True
-			else:
-				self.randomStart = False
+			self.randomStart = cohreplayparser.randomStart
+
 			self.highResources = cohreplayparser.highResources
 			self.VPCount = cohreplayparser.VPCount
 			if cohreplayparser.matchType.lower() == "automatch":

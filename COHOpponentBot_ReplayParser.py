@@ -274,7 +274,8 @@ class COH_Replay_Parser:
 
 			self.seek(16, 1)
 
-			self.randomStart = (self.read_UnsignedLong4Bytes() == 0)
+			self.randomStart = True
+			self.randomStart = not (self.read_UnsignedLong4Bytes() == 0) # 0 is fixed 1 is random
 			
 			COLS = self.read_UnsignedLong4Bytes()
 			
