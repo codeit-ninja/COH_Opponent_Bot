@@ -1,5 +1,5 @@
-VersionNumber = "2.0"
-BuildDate = "17-Apr-2021"
+VersionNumber = "2.1"
+BuildDate = "31-Aug-2021"
 
 import COHOpponentBot_Parameters
 import sys

@@ -260,7 +260,7 @@ class IRCClient(threading.Thread):
 
 
 class IRC_Channel(threading.Thread):
-	def __init__(self, ircClient, irc, queue, channel, parameters = None):
+	def __init__(self, ircClient : IRCClient, irc, queue, channel, parameters = None):
 		Thread.__init__(self)
 		self.ircClient = ircClient
 		self.running = True
@@ -403,7 +403,7 @@ class StatsRequest:
 
 class MemoryMonitor(threading.Thread):
 
-	def __init__(self, pollInterval = 30, ircClient = None, parameters = None):
+	def __init__(self, pollInterval = 30, ircClient : IRCClient = None , parameters = None):
 		Thread.__init__(self)
 		try:
 			logging.info("Memory Monitor Started!")
@@ -474,6 +474,7 @@ class MemoryMonitor(threading.Thread):
 		try:
 			message = self.gameData.gameDescriptionString
 			self.ircClient.SendMessageToOpponentBotChannelIRC(message)
+
 		except Exception as e:
 			logging.error("Problem in PostData")
 			logging.error(str(e))
@@ -492,6 +493,7 @@ class MemoryMonitor(threading.Thread):
 		try:
 			logging.info("Size of self.gameData.playerList in StartBets {}".format(len(self.gameData.playerList)))
 			if (bool(self.parameters.data.get('writePlaceYourBetsInChat'))):
+
 				playerString = ""
 				outputList = []
 				if self.gameData:
@@ -895,6 +897,7 @@ class GameData():
 		self.mapDescription = ""
 
 		self.gameDescriptionString = ""
+		#self.placeBetsString = ""
 
 		self.pm = None
 		self.baseAddress = None
@@ -1055,6 +1058,7 @@ class GameData():
 					message += ",{},{},{}".format(str(steamNumber), str(faction), str(team))
 				
 				self.gameDescriptionString = message
+				#self.placeBetsString = "!OppStartBets,{}".format(channelName)
 
 			except Exception as e:
 				logging.error("Problem Creating Game Description")
