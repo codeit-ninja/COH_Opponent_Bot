@@ -99,8 +99,14 @@ class IRCClient(threading.Thread):
 
 		self.CheckIRCSendBufferEveryThreeSeconds() # only call this once.	
 		
-
-		self.irc.connect((self.server, self.port))
+		try:
+			self.irc.connect((self.server, self.port))
+		except Exception as e:
+			logging.error("A problem occurred trying to connect")
+			logging.error("In IRCClient")
+			logging.error(str(e))
+			self.irc.close()
+			sys.exit(0)			
 
 		#sends variables for connection to twitch chat
 		self.irc.send(('PASS ' + self.password + '\r\n').encode("utf8"))
