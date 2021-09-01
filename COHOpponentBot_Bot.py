@@ -467,6 +467,7 @@ class MemoryMonitor(threading.Thread):
 	def GameStarted(self):
 		try:
 			self.gameData.outputOpponentData()
+			self.PostSteamNumber()
 			self.PostData()
 			self.StartBets()
 
@@ -475,6 +476,15 @@ class MemoryMonitor(threading.Thread):
 			logging.info("Problem in GameStarted")
 			logging.error(str(e))
 			logging.exception("Stack :")
+
+	def PostSteamNumber(self):
+		try:
+			message = "!setsteam,{},{}".format(str(self.parameters.data['channel']), str(self.parameters.data['steamNumber']))
+			self.ircClient.SendMessageToOpponentBotChannelIRC(message)
+		except Exception as e:
+			logging.error("Problem in PostSteamNumber")
+			logging.exception("Exception : ")
+			logging.error(str(e))
 
 	def PostData(self):
 		try:
