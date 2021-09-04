@@ -402,8 +402,8 @@ class StatsRequest:
 				playerStats = PlayerStat(statdata, statnumber)
 				return playerStats
 		except Exception as e:
-			logging.info("Problem in returnStats")
-			logging.info(str(e))
+			logging.error("Problem in returnStats")
+			logging.error(str(e))
 			logging.exception("Stack : ")
 
 
@@ -1207,9 +1207,18 @@ class GameData():
 		statsList = []
 
 		statRequest = StatsRequest(parameters= self.parameters)
+		stat = None
 		for steamNumber in steamNumberList:
-			stat = statRequest.returnStats(str(steamNumber))
-			statsList.append(stat)
+			attempts = 0
+			while attempts < 4:
+				stat = statRequest.returnStats(str(steamNumber))
+				attempts += 1
+				if stat:
+					statsList.append(stat)
+					break
+				else:
+					time.sleep(5) # 5 second wait before retrying to get stats from server
+
 
 		return statsList
 
