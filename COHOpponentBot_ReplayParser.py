@@ -430,4 +430,4 @@ class UCS:
 								return " ".join(line.split()[1:])
 		except Exception as e:
 			logging.error(str(e))
-			logging.exception("Stack : ")
+			logging.exception("Exception : ")
