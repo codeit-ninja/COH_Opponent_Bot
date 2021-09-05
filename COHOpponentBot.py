@@ -684,7 +684,8 @@ class COHBotGUI:
 				return True
 			return False
 		except Exception as e:
-			logging.error('Exception : ' + str(e))
+			logging.error(str(e))
+			logging.exception("Exception : ")
 			return False
 
 	def checkSteamNumber(self, number):
@@ -695,7 +696,8 @@ class COHBotGUI:
 					return True
 			return False
 		except Exception as e:
-			logging.error('Exception : ' + str(e))
+			logging.error(str(e))
+			logging.exception("Exception : ")
 
 	def locateWarningLog(self):
 		self.disableEverything()
@@ -765,7 +767,8 @@ class COHBotGUI:
 					self.closeMonitors()
 
 				except Exception as e:
-					logging.error('Exception : ' + str(e))
+					logging.error(str(e))
+					logging.exception("Exception : ")
 
 				self.testButton.config(state = DISABLED)
 				self.enableButtons()
@@ -808,7 +811,8 @@ class COHBotGUI:
 				self.ircClient.close()
 			self.closeMonitors()
 		except Exception as e:
-			logging.exception('Exception : ' + str(e))
+			logging.error(str(e))
+			logging.exception("Exception : ")
 		while (threading.active_count() > 1):
 			pass
 		logging.info("Exiting main thread")

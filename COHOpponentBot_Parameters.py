@@ -99,8 +99,10 @@ class Parameters:
 							self.data['steamNumber'] = steamNumber
 				except Exception as e:
 					logging.error(str(e))
+					logging.exception("Exception : ")
 		except Exception as e:
 			logging.error(str(e))
+			logging.exception("Exception : ")
 
 
 		try:
@@ -128,7 +130,7 @@ class Parameters:
 
 		except Exception as e:
 			logging.error(str(e))
-			logging.exception("Stack : ")
+			logging.exception("Exception : ")
 
 		#get cohLocation
 		#print(self.data['steamFolder'])
@@ -169,6 +171,7 @@ class Parameters:
 		except Exception as e:
 			logging.error("Problem in load")
 			logging.error(str(e))
+			logging.exception("Exception : ")
 
 
 
@@ -176,6 +179,7 @@ class Parameters:
 			self.data['temprecReplayPath'] = self.data.get('logPath').replace("warnings.log" , "playback\\temp.rec")
 		except Exception as e:
 			logging.error(str(e))
+			logging.exception("Exception : ")
 		
 		
 		#attempt to get userName from steamNumber
@@ -196,6 +200,7 @@ class Parameters:
 								self.data['steamAlias'] = value['alias']
 		except Exception as e:
 			logging.error(str(e))
+			logging.exception("Exception : ")
 
 		self.stringFormattingDictionary = {}
 		self.stringFormattingDictionary['$NAME$'] = None
@@ -241,6 +246,7 @@ class Parameters:
 		except Exception as e:
 			logging.error("Problem in load")
 			logging.error(str(e))
+			logging.exception("Exception : ")
 
 	def checkDataIntegrity(self, data):
 		success = True
@@ -258,6 +264,7 @@ class Parameters:
 		except Exception as e:
 			logging.error("Problem in save")
 			logging.error(str(e))
+			logging.exception("Exception : ")
 			
 	def find_between(self, s, first, last ):
 		try:

@@ -86,6 +86,7 @@ class IRCClient(threading.Thread):
 			logging.error("A problem occurred trying to connect")
 			logging.error("In IRCClient")
 			logging.error(str(e))
+			logging.exception("Exception : ")			
 			self.irc.close()
 			sys.exit(0)
 		
@@ -105,6 +106,7 @@ class IRCClient(threading.Thread):
 			logging.error("A problem occurred trying to connect")
 			logging.error("In IRCClient")
 			logging.error(str(e))
+			logging.exception("Exception : ")
 			self.irc.close()
 			sys.exit(0)			
 
@@ -161,6 +163,7 @@ class IRCClient(threading.Thread):
 						except Exception as e:
 							logging.error("In run")
 							logging.error(str(e))
+							logging.exception("Exception : ")
 
 					if (len(line) >= 3) and ("JOIN" == line[1]) and (":"+self.nick.lower()+"!"+self.nick.lower()+"@"+self.nick.lower()+".tmi.twitch.tv" == line[0]):
 						#cancel auto closing the thread
@@ -172,7 +175,7 @@ class IRCClient(threading.Thread):
 							self.SendToOutputField(message)
 						except Exception as e:
 							logging.error(str(e))
-							logging.exception("Stack : ")
+							logging.exception("Exception : ")
 
 					if(line[0]=="PING"):
 						self.irc.send(("PONG %s\r\n" % line[0]).encode("utf8"))
@@ -185,7 +188,7 @@ class IRCClient(threading.Thread):
 			self.SendToOutputField(message)
 		except Exception as e:
 			logging.error(str(e))
-			logging.exception("Stack : ")
+			logging.exception("Exception : ")
 		self.close()
 
 	def close(self):
@@ -200,6 +203,7 @@ class IRCClient(threading.Thread):
 		except Exception as e:
 			logging.error("In close")
 			logging.error(str(e))
+			logging.exception("Exception : ")
 			
 	def AssurePathExists(self, path):
 		dir = os.path.dirname(path)
@@ -224,6 +228,7 @@ class IRCClient(threading.Thread):
 		except Exception as e:
 			logging.error("Error in SendWhisperToIRC")
 			logging.error(str(e))
+			logging.exception("Exception : ")
 
 	def SendMessageToOpponentBotChannelIRC(self, message):
 		try:
@@ -231,6 +236,7 @@ class IRCClient(threading.Thread):
 		except Exception as e:
 			logging.error("Error in SendMessageToOpponentBotChannelIRC")
 			logging.error(str(e))
+			logging.exception("Exception : ")
 
 	def SendToOutputField(self, message):
 		try:
@@ -242,12 +248,12 @@ class IRCClient(threading.Thread):
 			message = char_list
 		except Exception as e:
 			logging.error(str(e))
-			logging.exception("Stack : ")
+			logging.exception("Exception : ")
 		try:
 			self.output.insert(END, message + "\n")
 		except Exception as e:
 			logging.error(str(e))
-			logging.exception("Stack : ")
+			logging.exception("Exception : ")
 
 	def IRCSendCalledEveryThreeSeconds(self):
 		#print("called")
@@ -261,6 +267,7 @@ class IRCClient(threading.Thread):
 				logging.error("IRC send error:")
 				logging.error("In IRCSendCalledEveryThreeSeconds")
 				logging.error(str(e))
+				logging.exception("Exception : ")
 	#above is called by the timer every three seconds and checks for items in buffer to be sent, if there is one it'll send it
 
 
@@ -327,8 +334,7 @@ class IRC_Channel(threading.Thread):
 		logging.info("Checking For User Comamnd")
 		try:
 			if (bool(re.match(r"^(!)?opponent(\?)?$", message.lower())) or bool(re.match(r"^(!)?place your bets$" , message.lower())) or bool(re.match(r"^(!)?opp(\?)?$", message.lower()))):
-				logging.info("Got Opponent")
-				print("Got Opponent")
+
 				self.gameData = GameData(ircClient= self.ircClient, parameters=self.parameters)
 				if self.gameData.getDataFromGame():
 					self.gameData.outputOpponentData()
@@ -353,7 +359,7 @@ class IRC_Channel(threading.Thread):
 		except Exception as e:
 			logging.error("Problem in CheckForUserCommand")
 			logging.error(str(e))
-			logging.exception("Stack :")
+			logging.exception("Exception : ")
 
 	def gameInfo(self):
 		self.gameData = GameData(self.ircClient, parameters=self.parameters)
@@ -404,7 +410,7 @@ class StatsRequest:
 		except Exception as e:
 			logging.error("Problem in returnStats")
 			logging.error(str(e))
-			logging.exception("Stack : ")
+			logging.exception("Exception : ")
 
 
 class MemoryMonitor(threading.Thread):
@@ -432,6 +438,7 @@ class MemoryMonitor(threading.Thread):
 		except Exception as e:
 			logging.error("In FileMonitor __init__")
 			logging.error(str(e))
+			logging.exception("Exception : ")
 
 	def run(self):
 		try:
@@ -454,6 +461,7 @@ class MemoryMonitor(threading.Thread):
 		except Exception as e:
 			logging.error("In FileMonitor run")
 			logging.error(str(e))
+			logging.exception("Exception : ")
 
 	def getGameData(self):
 		try:
@@ -462,7 +470,7 @@ class MemoryMonitor(threading.Thread):
 		except Exception as e:
 			logging.error("In getGameData")
 			logging.info(str(e))
-			logging.exception("Stack :")
+			logging.exception("Exception : ")
 
 	def GameStarted(self):
 		try:
@@ -475,7 +483,7 @@ class MemoryMonitor(threading.Thread):
 		except Exception as e:
 			logging.info("Problem in GameStarted")
 			logging.error(str(e))
-			logging.exception("Stack :")
+			logging.exception("Exception : ")
 
 	def PostSteamNumber(self):
 		try:
@@ -494,7 +502,7 @@ class MemoryMonitor(threading.Thread):
 		except Exception as e:
 			logging.error("Problem in PostData")
 			logging.error(str(e))
-			logging.exception("Stack :")
+			logging.exception("Exception : ")
 
 	def GameOver(self):
 		try:
@@ -503,7 +511,7 @@ class MemoryMonitor(threading.Thread):
 		except Exception as e:
 			logging.info("Problem in GameOver")
 			logging.error(str(e))
-			logging.exception("Stack :")
+			logging.exception("Exception : ")
 
 	def StartBets(self):
 		try:
@@ -526,7 +534,7 @@ class MemoryMonitor(threading.Thread):
 		except Exception as e:
 			logging.error("Problem in StartBets")
 			logging.error(str(e))
-			logging.exception("Stack : ")
+			logging.exception("Exception : ")
 	
 	def close(self):
 		logging.info("Memory Monitor Closing!")
@@ -571,6 +579,7 @@ class FileMonitor (threading.Thread):
 		except Exception as e:
 			logging.error("In FileMonitor __init__")
 			logging.error(str(e))
+			logging.exception("Exception : ")
 
 	def run(self):
 		try:
@@ -615,6 +624,7 @@ class FileMonitor (threading.Thread):
 		except Exception as e:
 			logging.error("In FileMonitor run")
 			logging.error(str(e))
+			logging.exception("Exception : ")
 
 	def close(self):
 		logging.info("File Monitor Closing!")
@@ -737,8 +747,9 @@ class PlayerStat:
 					self.totalWLRatio = str(round(int(self.totalWins)/int(self.totalLosses), 2))
 
 			except Exception as e:
-				logging.exception("In cohStat creating totalWLRatio")
+				logging.error("In cohStat creating totalWLRatio")
 				logging.error(str(e))
+				logging.exception("Exception : ")
 
 			if self.steamString:
 				self.steamNumber = str(self.steamString).replace("/steam/", "")
@@ -803,8 +814,9 @@ class factionResult:
 				ts = int(self.lastMatch)
 				self.lastTime = str(datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'))
 		except Exception as e:
-			#logging.exception("In factionResult Creating timestamp")
+			logging.error("In factionResult Creating timestamp")
 			logging.error(str(e))
+			logging.exception("Exception : ")
 		try:
 			if (int(self.losses) != 0):
 				self.winLossRatio = str(round(int(self.wins)/int(self.losses), 2))
@@ -814,6 +826,7 @@ class factionResult:
 		except Exception as e:
 			logging.error("In factionResult Creating winLossRatio")
 			logging.error(str(e))	
+			logging.exception("Exception : ")
 
 
 	def __str__(self):
@@ -1084,10 +1097,6 @@ class GameData():
 			return True
 
 		except Exception as e:
-			#logging.info("Problem in getDataFromGame")
-			#logging.info(str(e))
-			#logging.exception("Stack : ")
-			print(str(e))
 			self.gameInProgress = False
 			return False
 
@@ -1115,7 +1124,7 @@ class GameData():
 			self.cohRunning = True
 			return True
 		except Exception as e:
-			logging.info(str(e))
+			#logging.info(str(e))
 			self.cohRunning = False
 			return False
 			
@@ -1158,7 +1167,7 @@ class GameData():
 				return statList
 		except Exception as e:
 			logging.error(str(e))
-			logging.exception("Stack : ")
+			logging.exception("Exception : ")
 
 	def testOutput(self):
 		steamNumber = self.parameters.data.get('steamNumber')
@@ -1455,7 +1464,7 @@ class GameData():
 			return userName
 		except Exception as e:
 			logging.info("In sanitizeUserName username less than 2 chars")
-			logging.exception("Stack :")
+			logging.exception("Exception : ")
 
 	def formatPreFormattedString(self, theString, stringFormattingDictionary, overlay = False):
 
@@ -1503,7 +1512,7 @@ class GameData():
 			for item in axisTeamList:
 				if item.stats:
 					if (str(self.parameters.data.get('steamNumber')) == str(item.stats.steamNumber)):
-						logging.info ("Player team is AXIS")
+						#logging.info ("Player team is AXIS")
 						team1List = axisTeamList
 						team2List = alliesTeamList
 
@@ -1545,10 +1554,11 @@ class GameData():
 			# create output overlay from template
 			with open("overlay.html" , 'w', encoding="utf-8") as outfile:
 				outfile.write(htmlOutput)
-				logging.info("Creating Overlay File\n")
+				#logging.info("Creating Overlay File\n")
 
 		except Exception as e:
 			logging.error(str(e))
+			logging.exception("Exception : ")
 
 	@staticmethod
 	def clearOverlayHTML():
@@ -1560,6 +1570,7 @@ class GameData():
 				outfile.write(htmlOutput)
 		except Exception as e:
 			logging.error(str(e))
+			logging.exception("Exception : ")
 
 	def split_by_n(self, seq, n):
 		'''A generator to divide a sequence into chunks of n units.'''
