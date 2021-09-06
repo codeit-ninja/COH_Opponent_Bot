@@ -1219,10 +1219,13 @@ class GameData():
 		stat = None
 		for steamNumber in steamNumberList:
 			attempts = 0
-			while attempts < 4:
-				stat = statRequest.returnStats(str(steamNumber))
+			while attempts < 10:
+				try:
+					stat = statRequest.returnStats(str(steamNumber))
+				except Exception as e:
+					pass
 				attempts += 1
-				if stat:
+				if not (stat['statGroups'][0]['members'][0]['alias'] == ""):
 					statsList.append(stat)
 					break
 				else:
