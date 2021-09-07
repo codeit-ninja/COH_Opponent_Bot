@@ -1138,6 +1138,7 @@ class GameData():
 
 			with Process.open_process(self.cohMemoryAddress) as p:
 				steamNumberList = []
+				steamNumberList.append(self.parameters.data['steamNumber']) # add default value incase it isn't found
 				for player in self.playerList:
 					name = bytearray(str(player.name).encode('utf-16le'))
 					buff = bytes(name)
