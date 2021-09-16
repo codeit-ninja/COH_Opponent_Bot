@@ -1068,7 +1068,14 @@ class GameData():
 				automatch = str(int(self.automatch))
 				mapFullName = str(self.mapFullName)
 				modName = str(self.modName)
-				gameStarted = str(self.gameStartedDate)
+
+				offset = time.timezone if (time.localtime().tm_isdst == 0) else time.altzone
+				offset = offset / 60 / 60 * -1
+				hours = offset
+				hours_added = datetime.timedelta(hours = hours)
+				UTC_corrected_start_time = self.gameStartedDate + hours_added
+
+				gameStarted = str(UTC_corrected_start_time)
 				message = "!start,{},{},{},{},{},{},{},{},{},{},{},{}".format(channelName,gameStarted,numberOfHumans,numberOfComputers,numberOfPlayers,slots,randomStart,highResources,VPCount,automatch,mapFullName,modName)
 				for count , item in enumerate(self.playerList):
 					steamNumber = ""
