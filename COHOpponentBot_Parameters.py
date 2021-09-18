@@ -220,6 +220,7 @@ class Parameters:
 		self.stringFormattingDictionary['$WLRATIO$'] = None
 
 		self.stringFormattingDictionary['$MATCHTYPE$'] = None
+		self.stringFormattingDictionary['$COHSTATSLINK$'] = None
 		self.stringFormattingDictionary['$STEAMPROFILE$'] = None
 
 		self.imageOverlayFormattingDictionary = {}

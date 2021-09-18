@@ -195,6 +195,11 @@ html {
 	top: 0pt;
 }
 
+.cohstatslink{
+position: relative;
+display: inline;
+top: 0pt;
+}
 
 .opponentTeam {
 

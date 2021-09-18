@@ -658,6 +658,7 @@ class PlayerStat:
 		self.country = None
 		self.steamString = None
 		self.steamProfileAddress = None
+		self.cohstatsLink = None
 		
 		statString = "/steam/"+str(steamNumber)
 
@@ -753,7 +754,8 @@ class PlayerStat:
 
 			if self.steamString:
 				self.steamNumber = str(self.steamString).replace("/steam/", "")
-				self.steamProfileAddress = "cohstats.com/i?d=" + str(self.steamNumber)
+				self.steamProfileAddress = "steamcommunity.com/profiles/" + str(self.steamNumber)
+				self.cohstatsLink = "playercard.cohstats.com/?steamid="+ str(self.steamNumber)
 
 
 	
@@ -769,6 +771,8 @@ class PlayerStat:
 		output += "country : " + str(self.country) + "\n"
 		output += "steamString : " + str(self.steamString) + "\n"
 		output += "steamProfileAddress : " + str(self.steamProfileAddress) + "\n"
+		output += "cohstatsLink : " + str(self.cohstatsLink) + "\n"
+
 
 		output += "Totals\n"
 		output += "Wins : " + str(self.totalWins) + "\n"
@@ -1320,6 +1324,7 @@ class GameData():
 		levelDiv = ""
 		wlRatioDiv = ""
 		steamprofile = ""
+		cohstatslink = ""
 
 		if overlay:
 			nameDiv = '<div class = "name">'
@@ -1338,6 +1343,7 @@ class GameData():
 			levelDiv = '<div class = "level">'
 			wlRatioDiv = '<div class = "wlratio">'
 			steamprofile = '<div class = "steamprofile">'
+			cohstatslink = '<div class = "cohstatslink">'
 
 		playerName = self.sanatizeUserName(player.name)
 		stringFormattingDictionary['$NAME$'] =  prefixDiv + nameDiv + str(playerName) + postfixDivClose + postfixDivClose
@@ -1364,6 +1370,7 @@ class GameData():
 			stringFormattingDictionary['$TOTALLOSSES$'] =  prefixDiv + totalLossesDiv + str(player.stats.totalLosses) + postfixDivClose + postfixDivClose
 			stringFormattingDictionary['$TOTALWLRATIO$'] =  prefixDiv + totalWinLossRatioDiv + str(player.stats.totalWLRatio) + postfixDivClose + postfixDivClose
 			stringFormattingDictionary['$STEAMPROFILE$'] =  prefixDiv + steamprofile + str(player.stats.steamProfileAddress) + postfixDivClose + postfixDivClose
+			stringFormattingDictionary['$COHSTATSLINK$'] =  prefixDiv + cohstatslink + str(player.stats.cohstatsLink) + postfixDivClose + postfixDivClose
 
 
 			#set default null values for all parameters in dictionary
@@ -1410,16 +1417,20 @@ class GameData():
 				imageOverlayFormattingDictionary['$FACTIONICON$'] = '<div class = "factionflagimg"><img src="data:," alt></div>'		
 
 		# if a computer it will have no stats therefore no country flag or rank
+		# set default values for flags and faction rank	
+		imageOverlayFormattingDictionary['$LEVELICON$'] = '<div class = "rankimg"><img src="data:," alt></div>'
+		levelIcon = "OverlayImages\\Ranks\\no_rank_yet.png"
+		fileExists = os.path.isfile(levelIcon)
+		if fileExists:
+			imageOverlayFormattingDictionary['$LEVELICON$'] =  '<div class = "rankimg"><img src="{0}" ></div>'.format(levelIcon)
+
+		imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="data:," alt></div>'
+		defaultFlagIcon = "OverlayImages\\Flagssmall\\unknown_flag.png"
+		fileExists = os.path.isfile(defaultFlagIcon)
+		if fileExists:
+			imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="{0}" ></div>'.format(defaultFlagIcon)
+
 		if player.stats:
-			# set default values for flags and faction rank
-			imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="data:," alt></div>'
-			imageOverlayFormattingDictionary['$LEVELICON$'] = '<div class = "rankimg"><img src="data:," alt></div>'
-			levelIcon = "OverlayImages\\Ranks\\no_rank_yet.png"
-			fileExists = os.path.isfile(levelIcon)
-			if fileExists:
-				imageOverlayFormattingDictionary['$LEVELICON$'] =  '<div class = "rankimg"><img src="{0}" ></div>'.format(levelIcon)
-
-
 			if player.stats.country:
 				countryIcon = "OverlayImages\\Flagssmall\\" + str(player.stats.country).lower() + ".png"
 				fileExists = os.path.isfile(countryIcon)
@@ -1450,11 +1461,6 @@ class GameData():
 							logging.info(imageOverlayFormattingDictionary.get('$LEVELICON$'))
 						else:
 							imageOverlayFormattingDictionary['$LEVELICON$'] = '<div class = "rankimg"><img src="data:," alt></div>'
-		else:
-			#default no image
-			imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="data:," alt></div>'
-			imageOverlayFormattingDictionary['$LEVELICON$'] = '<div class = "rankimg"><img src="data:," alt></div>'
-
 
 		return imageOverlayFormattingDictionary
 
