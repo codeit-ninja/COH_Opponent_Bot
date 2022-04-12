@@ -5,9 +5,9 @@ import os
 import datetime
 from functools import partial
 
+from Classes.COHOpponentBot_UCS import UCS
 
-
-class COH_Replay_Parser:
+class ReplayParser:
 	"""Parses a company of heroes 1 replay to extract as much useful information from it as possible."""
 
 	def __init__(self, filePath = None, parameters = None) -> None:
@@ -407,27 +407,3 @@ class COH_Replay_Parser:
 		output += "playerList : {}\n".format(self.playerList)
 		return output
 
-class UCS:
-	def __init__(self, parameters = None) -> None:
-		
-		if parameters:
-			self.parameters = parameters
-		else:
-			self.parameters = Parameters()	
-
-		self.ucsPath = self.parameters.data.get('cohUCSPath')
-
-	def compareUCS(self, compareString):
-		try:
-			if (os.path.isfile(self.ucsPath)):
-				linenumber = 1
-				with open(self.ucsPath, 'r',  encoding='utf16') as f:	
-					for line in f:
-						linenumber += 1
-						firstString = str(line.split('\t')[0])
-						if str(compareString[1:].strip()) == str(firstString):
-							if len(line.split('\t')) > 1:
-								return " ".join(line.split()[1:])
-		except Exception as e:
-			logging.error(str(e))
-			logging.exception("Exception : ")
