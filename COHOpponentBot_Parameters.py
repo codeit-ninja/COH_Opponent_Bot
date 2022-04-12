@@ -26,8 +26,8 @@ class Parameters:
 		self.privatedata['IRCpassword'] = "oauth:6lwp9xs2oye948hx2hpv5hilldl68g"		#The default password used to connect to IRC using the username above. # yes I know you shouldn't post oauth codes to git hub but I don't think this matter because this is a multi-user throw away account... lets see what happens.
 		self.privatedata['IRCserver'] = 'irc.twitch.tv'
 		self.privatedata['IRCport'] = 6667
-		self.privatedata['adminUserName'] = 'xereborn'
-		self.privatedata['relicServerProxy'] = 'https://xcoins.co.uk/secreturl.php?steamUserID='
+		self.privatedata['adminUserName'] = 'xcomreborn'
+		self.privatedata['relicServerProxy'] = 'https://xcoins.co.uk/relicLink.php?token=example&steamUserID='
 
 		#custom display toggles
 		# what to show in stat string constuct
