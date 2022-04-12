@@ -106,7 +106,9 @@ class IRC_Channel(threading.Thread):
 
 	def story(self):
 		self.gameData = GameData(self.ircClient, parameters=self.parameters)
+		print(str(self.gameData))
 		if self.gameData.getDataFromGame():
+			print(str(self.gameData))
 			self.ircClient.SendPrivateMessageToIRC("{}.".format(self.gameData.mapDescription))
 
 

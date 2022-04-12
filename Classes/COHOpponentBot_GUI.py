@@ -1,6 +1,3 @@
-
-from Classes.COHOpponentBot_GameData import GameData
-import Classes.COHOpponentBot_Parameters as COHOpponentBot_Parameters
 import sys
 import tkinter as tk
 from tkinter import messagebox
@@ -15,9 +12,14 @@ from tkinter.ttk import *
 from tkinter import ttk
 import base64
 import os
-from Classes.COHOpponentBot_Icon import Icon
-
 import logging # For logging information and warnings about opperation errors
+
+from Classes.COHOpponentBot_Icon import Icon
+from Classes.COHOpponentBot_GameData import GameData
+from Classes.COHOpponentBot_MemoryMonitor import MemoryMonitor
+import Classes.COHOpponentBot_Parameters as COHOpponentBot_Parameters
+
+
 
 class GUI:
 
@@ -781,7 +783,7 @@ class GUI:
 				self.disableEverything()
 				self.connectButton.config(text = "Disconnect")
 				self.testButton.config(state = NORMAL)
-				self.ircClient = COHOpponentBot_IRC_Client.IRCClient(self.txt, bool(self.consoleDisplayBool.get()), parameters=self.parameters)
+				self.ircClient = COHOpponentBot_IRC_Client.IRC_Client(self.txt, bool(self.consoleDisplayBool.get()), parameters=self.parameters)
 				self.ircClient.start()
 				if (bool(self.parameters.data.get('automaticTrigger'))):
 					self.startMonitors()
@@ -794,7 +796,7 @@ class GUI:
 		self.closeMonitors()
 		#Create Monitor Threads and start them.
 		if self.ircClient:
-			self.automaticMemoryMonitor = COHOpponentBot_IRC_Client.MemoryMonitor(pollInterval = self.parameters.data.get('filePollInterval'), ircClient= self.ircClient, parameters=self.parameters)
+			self.automaticMemoryMonitor = MemoryMonitor(pollInterval = self.parameters.data.get('filePollInterval'), ircClient= self.ircClient, parameters=self.parameters)
 			self.automaticMemoryMonitor.start()
 
 	def closeMonitors(self):

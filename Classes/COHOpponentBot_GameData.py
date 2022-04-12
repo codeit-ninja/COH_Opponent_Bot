@@ -3,11 +3,35 @@ import datetime
 import html
 from importlib.util import module_from_spec
 import logging
-from multiprocessing import Process
+#from multiprocessing import Process
+from mem_edit import Process
 import os
 import re
 import time
 import pymem
+
+import ctypes
+import ctypes.util
+import functools
+import logging
+import platform
+import struct
+import sys
+
+import pymem.exception
+import pymem.memory
+import pymem.process
+import pymem.ressources.kernel32
+import pymem.ressources.structure
+import pymem.ressources.psapi
+import pymem.thread
+import pymem.pattern
+import pymem
+
+from pymem.ressources.structure import MODULEINFO
+
+from pymem.process import base_module
+
 from Classes.COHOpponentBot_Faction import Faction
 from Classes.COHOpponentBot_MatchType import MatchType
 from Classes.COHOpponentBot_Parameters import Parameters
@@ -66,6 +90,9 @@ class GameData():
 
 	def getDataFromGame(self):
 		try:
+			
+			print(str(self.getCOHMemoryAddress()))
+
 			if not self.getCOHMemoryAddress():
 				return False
 
@@ -259,11 +286,16 @@ class GameData():
 		
 		try:
 			self.pm = pymem.Pymem("RelicCOH.exe")
-			self.baseAddress = module_from_spec(self.pm.process_handle, "RelicCOH.exe").lpBaseOfDll
+			self.baseAddress = self.pm.process_base
+			#self.baseAddress = Process.get_pid_by_name('RelicCOH.exe').
+			#self.baseAddress = pymem.process.base_address(self.pm.process_id)
+			print ("baseAddress : " + str(self.baseAddress))
+			
 			self.cohRunning = True
 			return True
 		except Exception as e:
-			#logging.info(str(e))
+			print ("baseAddress : " + str(self.baseAddress))
+			print(str(e))
 			self.cohRunning = False
 			return False
 			

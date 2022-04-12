@@ -1,9 +1,9 @@
 import logging
 import threading
 
-from COHOpponentBot_IRC_Client import IRC_Client
 from Classes.COHOpponentBot_Parameters import Parameters
 from Classes.COHOpponentBot_GameData import GameData
+from Classes.COHOpponentBot_IRC_Client import IRC_Client
 
 
 class MemoryMonitor(threading.Thread):
