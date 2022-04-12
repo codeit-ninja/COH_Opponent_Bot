@@ -137,7 +137,6 @@ class GUI:
 		self.buttonOptions.grid(row=5, column=2)
 
 		self.ircClient = None
-		self.automaticFileMonitor = None
 		self.automaticMemoryMonitor = None
 
 		self.style.configure('W.TButton', font = 'calibri', size = 10, foreground = 'red')
@@ -795,14 +794,10 @@ class GUI:
 		self.closeMonitors()
 		#Create Monitor Threads and start them.
 		if self.ircClient:
-			self.automaticFileMonitor = COHOpponentBot_IRC_Client.FileMonitor(self.parameters.data.get('logPath'), self.parameters.data.get('filePollInterval'), self.ircClient, parameters=self.parameters)
-			self.automaticFileMonitor.start()
 			self.automaticMemoryMonitor = COHOpponentBot_IRC_Client.MemoryMonitor(pollInterval = self.parameters.data.get('filePollInterval'), ircClient= self.ircClient, parameters=self.parameters)
 			self.automaticMemoryMonitor.start()
 
 	def closeMonitors(self):
-		if self.automaticFileMonitor:
-			self.automaticFileMonitor.close()
 		if self.automaticMemoryMonitor:
 			self.automaticMemoryMonitor.close()
 

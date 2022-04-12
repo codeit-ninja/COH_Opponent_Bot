@@ -2,7 +2,7 @@ import re
 import logging
 import datetime
 
-class factionResult:
+class FactionResult():
 
 	def __init__(self, faction = None, matchType = '-1',name = '-1', nameShort = '-1',leaderboard_id = '-1', wins = '-1', losses = '-1', streak = '-1', disputes = '-1', drops = '-1', rank = '-1', rankLevel = '-1', lastMatch = '-1'):
 		self.faction = faction 
