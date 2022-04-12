@@ -40,3 +40,4 @@ overlayTemplates.pyo
 .vscode/settings.json
 data.jsonbak
 overlay.html
+dist
