@@ -18,8 +18,8 @@ from pymem.process import module_from_name # required for urllib certificates
 import requests
 #import pymysql # for mysql 
 #import all secret parameters from parameters file
-from COHOpponentBot_Parameters import Parameters
-from COHOpponentBot_ReplayParser import COH_Replay_Parser
+from Classes.COHOpponentBot_Parameters import Parameters
+from Classes.COHOpponentBot_ReplayParser import COH_Replay_Parser
 #import the GUI
 from tkinter import *
 import threading
@@ -29,7 +29,7 @@ from enum import Enum
 from queue import Queue # to talk to the threads
 import logging
 import re
-from overlayTemplates import OverlayTemplates
+from Classes.COHOpponentBot_OverlayTemplates import OverlayTemplates
 import html
 import ctypes
 from mem_edit import Process

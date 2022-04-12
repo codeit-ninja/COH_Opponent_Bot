@@ -1,14 +1,14 @@
 VersionNumber = "3.0"
 BuildDate = "12-Apr-2022"
 
-import COHOpponentBot_Parameters
+import Classes.COHOpponentBot_Parameters as COHOpponentBot_Parameters
 import sys
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import filedialog
 import re
 import os.path
-import COHOpponentBot_Bot
+import Classes.COHOpponentBot_Bot as COHOpponentBot_Bot
 import threading
 from queue import Queue # to talk to the threads
 from tkinter import *
@@ -16,7 +16,7 @@ from tkinter.ttk import *
 from tkinter import ttk
 import base64
 import os
-from icon import Icon
+from Classes.COHOpponentBot_Icon import Icon
 
 import logging # For logging information and warnings about opperation errors
 

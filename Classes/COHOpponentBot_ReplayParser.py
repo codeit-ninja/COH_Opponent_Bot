@@ -1,5 +1,5 @@
 import logging
-from COHOpponentBot_Parameters import Parameters
+from Classes.COHOpponentBot_Parameters import Parameters
 import re
 import os
 import datetime
