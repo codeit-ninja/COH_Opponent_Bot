@@ -64,7 +64,7 @@ class Parameters:
 		self.data['overlayStringPreFormatLeft'] = "$NAME$ ($FLAGICON$) $LEVELICON$ $RANK$ $FACTIONICON$"
 		self.data['mirrorLeftToRightOverlay'] = True
 		self.data['overlayStringPreFormatRight'] = "$FACTIONICON$ $RANK$ $LEVELICON$ ($FLAGICON$) $NAME$"
-		self.data['overlayStyleCSSFilePath'] = "overlaystyle.css"
+		self.data['overlayStyleCSSFilePath'] = os.path.normpath("Styles/OverlayStyle.css")
 
 		self.data['useCustomPreFormat'] = True
 		self.data['customStringPreFormat'] = "$NAME$ : $COUNTRY$ : $FACTION$ : $MATCHTYPE$ Rank $RANK$ : lvl $LEVEL$ : $STEAMPROFILE$"
