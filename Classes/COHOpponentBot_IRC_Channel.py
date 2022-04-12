@@ -1,42 +1,17 @@
-from json import encoder
-import time
-import socket
-import string
-import sys
-import json
-from typing import Match # for loading json's for emoticons
-import urllib.request # more for loadings jsons from urls
-import collections # for deque
 from decimal import *
-import operator # for sorting dictionary by value
 from random import choice
-import os # to allow directory exists checking etc.
-import os.path
-import ssl
-import pymem
 from pymem.process import module_from_name # required for urllib certificates
-import requests
 from tkinter import *
 import threading
 from threading import Thread
-import datetime
-from enum import Enum
-from queue import Queue # to talk to the threads
 import logging
 import re
-import html
-import ctypes
-from mem_edit import Process
-import mem_edit
-import binascii
-from functools import partial
 
 from Classes.COHOpponentBot_Parameters import Parameters
-from Classes.COHOpponentBot_IRC_Client import IRC_Client
 from Classes.COHOpponentBot_GameData import GameData
 
 class IRC_Channel(threading.Thread):
-	def __init__(self, ircClient : IRC_Client, irc, queue, channel, parameters = None):
+	def __init__(self, ircClient, irc, queue, channel, parameters = None):
 		Thread.__init__(self)
 		self.ircClient = ircClient
 		self.running = True

@@ -7,10 +7,7 @@ except Exception as e:
 import json # for loading and saving data to a convenient json file
 import os.path
 import ssl # required for urllib certificates
-import requests
 import urllib.request # more for loadings jsons from urls
-import string
-import sys
 import winreg #  to get steamlocation automatically
 
 

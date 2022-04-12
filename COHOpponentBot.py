@@ -1,6 +1,7 @@
 VersionNumber = "3.0"
 BuildDate = "12-Apr-2022"
 
+from Classes.COHOpponentBot_GameData import GameData
 import Classes.COHOpponentBot_Parameters as COHOpponentBot_Parameters
 import sys
 import tkinter as tk
@@ -8,7 +9,7 @@ from tkinter import messagebox
 from tkinter import filedialog
 import re
 import os.path
-import Classes.COHOpponentBot_Bot as COHOpponentBot_Bot
+import Classes.COHOpponentBot_IRC_Client as COHOpponentBot_IRC_Client
 import threading
 from queue import Queue # to talk to the threads
 from tkinter import *
@@ -150,7 +151,7 @@ class COHBotGUI:
 		self.testButton.grid(row =8, column=2 ,sticky=tk.E)
 		self.testButton.config(state = DISABLED)
 
-		self.clearOverlayButton = tk.Button(self.master, text = "Clear Overlay", command = COHOpponentBot_Bot.GameData.clearOverlayHTML)
+		self.clearOverlayButton = tk.Button(self.master, text = "Clear Overlay", command = GameData.clearOverlayHTML)
 		self.clearOverlayButton.config(width = 10)
 		self.clearOverlayButton.grid(row = 9, column=2, sticky=tk.E)
 
@@ -780,7 +781,7 @@ class COHBotGUI:
 				self.disableEverything()
 				self.connectButton.config(text = "Disconnect")
 				self.testButton.config(state = NORMAL)
-				self.ircClient = COHOpponentBot_Bot.IRCClient(self.txt, bool(self.consoleDisplayBool.get()), parameters=self.parameters)
+				self.ircClient = COHOpponentBot_IRC_Client.IRCClient(self.txt, bool(self.consoleDisplayBool.get()), parameters=self.parameters)
 				self.ircClient.start()
 				if (bool(self.parameters.data.get('automaticTrigger'))):
 					self.startMonitors()
@@ -793,9 +794,9 @@ class COHBotGUI:
 		self.closeMonitors()
 		#Create Monitor Threads and start them.
 		if self.ircClient:
-			self.automaticFileMonitor = COHOpponentBot_Bot.FileMonitor(self.parameters.data.get('logPath'), self.parameters.data.get('filePollInterval'), self.ircClient, parameters=self.parameters)
+			self.automaticFileMonitor = COHOpponentBot_IRC_Client.FileMonitor(self.parameters.data.get('logPath'), self.parameters.data.get('filePollInterval'), self.ircClient, parameters=self.parameters)
 			self.automaticFileMonitor.start()
-			self.automaticMemoryMonitor = COHOpponentBot_Bot.MemoryMonitor(pollInterval = self.parameters.data.get('filePollInterval'), ircClient= self.ircClient, parameters=self.parameters)
+			self.automaticMemoryMonitor = COHOpponentBot_IRC_Client.MemoryMonitor(pollInterval = self.parameters.data.get('filePollInterval'), ircClient= self.ircClient, parameters=self.parameters)
 			self.automaticMemoryMonitor.start()
 
 	def closeMonitors(self):
@@ -826,6 +827,6 @@ for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
 logging.basicConfig(format='%(asctime)s (%(threadName)-10s) [%(levelname)s] %(message)s', filename= 'COH_Opponent_Bot.log',filemode = "w", level=logging.INFO)
 
-COHOpponentBot_Bot.GameData.clearOverlayHTML()
+GameData.clearOverlayHTML()
 
 main = COHBotGUI()
