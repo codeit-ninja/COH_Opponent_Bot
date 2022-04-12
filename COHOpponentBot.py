@@ -171,11 +171,11 @@ class COHBotGUI:
 
 		icondata = base64.b64decode(icon)
 		## The temp file is icon.ico
-		tempFile= "icon.ico"
-		iconfile= open(tempFile,"wb")
+		tempFile= "Icon.ico"
+		iconfileHandle= open(tempFile,"wb")
 		## Extract the icon
-		iconfile.write(icondata)
-		iconfile.close()
+		iconfileHandle.write(icondata)
+		iconfileHandle.close()
 		self.master.wm_iconbitmap(tempFile)
 		## Delete the tempfile
 		os.remove(tempFile)
