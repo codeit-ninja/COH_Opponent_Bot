@@ -21,9 +21,10 @@ class FactionResult():
 		self.lastTime = None
 		self.winLossRatio = None
 		try:
-			if self.lastMatch and (self.lastMatch != ""):
-				ts = int(self.lastMatch)
-				self.lastTime = str(datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'))
+			if self.lastMatch:
+				if ((self.lastMatch != "None") or (self.lastMatch != "")):
+					ts = int(self.lastMatch)
+					self.lastTime = str(datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'))
 		except Exception as e:
 			logging.error("In factionResult Creating timestamp")
 			logging.error(str(e))
