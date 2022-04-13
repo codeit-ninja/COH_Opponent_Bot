@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script>
+        var previousDate;
+        var backgroundScript = setInterval(checkIfFileHasChanged, 5000);
+
+        function checkIfFileHasChanged() {
+            date = new Date(window.location.pathname.lastModified);
+            if (previousDate != null) {
+                if (date.getTime() !== previousDate.getTime()) {
+                    window.location.reload();
+                }
+            }
+            previousDate = date;
+        }
+    </script>
+</head>
+
+<body>
+
+    made a modification s54564
+    <!--
+    <input type="file" multiple id="fileInput" />
+    -->
+    <br /><br /> previousDate
+    <div id="previousDate"></div>
+    <br /><br /> currentDate
+
+    <div id="currentDate">info</div>
+    <br /><br />
+
+    <div id="demo"></div>
+
+
+
+</body>
+
+</html>

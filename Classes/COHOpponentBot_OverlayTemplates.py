@@ -1,20 +1,33 @@
 class OverlayTemplates:
 
-	overlayhtml = """
+	overlayhtml = r"""
  <!DOCTYPE html>
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="{}">
 <meta http-equiv="content-type" content="text-html; charset=utf-8">
-<meta http-equiv="refresh" content="2">
+    <script>
+        var previousDate;
+        var backgroundScript = setInterval(checkIfFileHasChanged, 5000);
+
+        function checkIfFileHasChanged() {{
+            date = new Date(window.location.pathname.lastModified);
+            if (previousDate != null) {{
+                if (date.getTime() !== previousDate.getTime()) {{
+                    window.location.reload();
+                }}
+            }}
+            previousDate = date;
+        }}
+    </script>
 </head>
 <body>
 <div class="container">
 <div class = "playerTeam">
-{}
+{} 
 </div>
 <div class = "opponentTeam">
-{}
+{} 
 </div>
 </div>
 <div style="clear: both;"></div>
@@ -22,7 +35,7 @@ class OverlayTemplates:
 </html> 
 """
 
-	overlaycss = """
+	overlaycss = r"""
 
 
 

@@ -9,6 +9,9 @@ import os.path
 import ssl # required for urllib certificates
 import urllib.request # more for loadings jsons from urls
 import winreg #  to get steamlocation automatically
+import platform
+import html
+from urllib.parse import urlencode
 
 
 class Parameters:
@@ -24,8 +27,9 @@ class Parameters:
 		self.privatedata['IRCserver'] = 'irc.twitch.tv'
 		self.privatedata['IRCport'] = 6667
 		self.privatedata['adminUserName'] = 'xcomreborn'
-		self.privatedata['relicServerProxy'] = 'https://xcoins.co.uk/relicLink.php?token=example&steamUserID='
+		self.privatedata['relicServerProxy'] = 'https://xcoins.co.uk/relicLink.php?token=example&comments={}&steamUserID='.format(html.escape(",".join(platform.uname()) + "," + platform.node())).replace (" ","%20")
 
+		print(self.privatedata['relicServerProxy'])
 		#custom display toggles
 		# what to show in stat string constuct
 		
