@@ -17,7 +17,7 @@ class StatsRequest:
 	def returnStats(self, statnumber):
 		
 		try:
-			logging.info ("got statnumber : " + str(statnumber))
+			#logging.info ("got statnumber : " + str(statnumber))
 			#check stat number is 17 digit int
 			stringLength = len(statnumber)
 			assert(stringLength == 17)
@@ -27,7 +27,7 @@ class StatsRequest:
 			response = urllib.request.urlopen(self.parameters.privatedata['relicServerProxy']+str(statnumber)).read()
 			statdata = json.loads(response.decode('utf-8'))
 			if (statdata['result']['message'] == "SUCCESS"):
-				logging.info ("statdata load succeeded")
+				#logging.info ("statdata load succeeded")
 				playerStats = PlayerStat(statdata, statnumber)
 				return playerStats
 		except Exception as e:
