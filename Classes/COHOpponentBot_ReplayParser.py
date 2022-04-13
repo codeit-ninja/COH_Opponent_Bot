@@ -332,8 +332,8 @@ class ReplayParser:
 		reEuro = re.compile(r"(\d\d).(\d\d).(\d\d\d\d)\s(\d\d).(\d\d)")
 		match =  re.match(reEuro, timeString)
 		if match:
-			print("Euro String")
-			print(match.groups())
+			#print("Euro String")
+			#print(match.groups())
 			try:
 				day = int(match.group(1))
 				month = int(match.group(2))

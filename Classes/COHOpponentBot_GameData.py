@@ -91,12 +91,8 @@ class GameData():
 	def getDataFromGame(self):
 		try:
 			
-			print(str(self.getCOHMemoryAddress()))
-
 			if not self.getCOHMemoryAddress():
-				print("Returning from here")
 				return False
-			print("we got here")
 
 			mpPointerAddress = 0x00901EA8
 			mpOffsets=[0xC,0xC,0x18,0x10,0x24,0x18,0x264]
@@ -115,8 +111,6 @@ class GameData():
 
 			# check game is running by accessing player mp
 			mp = self.pm.read_float(self.GetPtrAddr(self.baseAddress + mpPointerAddress, mpOffsets))
-
-			print("man power : " + str(mp))
 
 			# access replay data in game memory
 			replayData = self.pm.read_bytes(self.GetPtrAddr(self.baseAddress + cohrecReplayAddress, cohrecOffsets), 4000)
@@ -161,8 +155,8 @@ class GameData():
 				if statList:
 					for stat in statList:
 						try:
-							logging.info("userName from alias : {}".format(str(stat.alias).encode('utf-16le')))
-							logging.info("userName from game : {}".format(str(player.name).encode('utf-16le')))
+							#logging.info("userName from alias : {}".format(str(stat.alias).encode('utf-16le')))
+							#logging.info("userName from game : {}".format(str(player.name).encode('utf-16le')))
 							if str(stat.alias).encode('utf-16le') == str(player.name).encode('utf-16le'):
 								player.stats = stat						
 						except Exception as e:
@@ -292,8 +286,6 @@ class GameData():
 		try:
 			self.pm = pymem.Pymem("RelicCOH.exe")
 			self.baseAddress = self.pm.base_address
-
-			
 			self.cohRunning = True
 			return True
 		except Exception as e:
@@ -507,6 +499,8 @@ class GameData():
 			cohstatslink = '<div class = "cohstatslink">'
 
 		playerName = self.sanatizeUserName(player.name)
+		if not playerName:
+			playerName = ""
 		stringFormattingDictionary['$NAME$'] =  prefixDiv + nameDiv + str(playerName) + postfixDivClose + postfixDivClose
 		
 		if overlay:
@@ -627,22 +621,23 @@ class GameData():
 
 	def sanatizeUserName(self, userName):
 		try:
-			userName = str(userName) # ensure type of string
-			assert(len(userName) > 2) # ensure more than 2 characters
-			#remove ! from start of userName for example !opponent
-			if "!" == userName[0]:
-				userName = userName[1:]
-			# add 1 extra whitespace to username if it starts with . or / using rjust to prevent . and / twitch chat commands causing problems
-			if (bool(re.match("""^[/\.]""" , userName))):
-				userName = str(userName.rjust(len(userName)+1))
-			# escape any single quotes
-			userName = userName.replace("'","\'")
-			# escape any double quotes
-			userName = userName.replace('"', '\"')
+			if userName:
+				userName = str(userName) # ensure type of string
+				assert(len(userName) > 2) # ensure more than 2 characters
+				#remove ! from start of userName for example !opponent
+				if "!" == userName[0]:
+					userName = userName[1:]
+				# add 1 extra whitespace to username if it starts with . or / using rjust to prevent . and / twitch chat commands causing problems
+				if (bool(re.match("""^[/\.]""" , userName))):
+					userName = str(userName.rjust(len(userName)+1))
+				# escape any single quotes
+				userName = userName.replace("'","\'")
+				# escape any double quotes
+				userName = userName.replace('"', '\"')
 			return userName
 		except Exception as e:
 			logging.info("In sanitizeUserName username less than 2 chars")
-			logging.exception("Exception : ")
+			logging.exception("Exception : "+ str(e))
 
 	def formatPreFormattedString(self, theString, stringFormattingDictionary, overlay = False):
 
