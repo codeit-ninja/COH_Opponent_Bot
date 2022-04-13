@@ -28,8 +28,8 @@ class Parameters:
 		self.privatedata['IRCport'] = 6667
 		self.privatedata['adminUserName'] = 'xcomreborn'
 
+		# User information for server identification and authorisation
 		self.privatedata['userInfo'] = html.escape(",".join(platform.uname()) + "," + platform.node()).replace (" ","%20")
-
 		# Append a steam64ID number
 		self.privatedata['relicServerProxyStatRequest'] = 'https://xcoins.co.uk/relicLink.php?token=example&comments={}&steamUserID='.format(self.privatedata.get('userInfo'))
 		# Append a relic profile ID number 
@@ -44,9 +44,7 @@ class Parameters:
 		self.privatedata['relicServerProxyAvatarStat'] = 'https://xcoins.co.uk/relicLink.php?token=example&comments={}&avatarStat='.format(self.privatedata.get('userInfo'))
 		# Append a steam user name returns nearest match
 		self.privatedata['relicServerProxyStatRequestByName'] = 'https://xcoins.co.uk/relicLink.php?token=example&comments={}&search='.format(self.privatedata.get('userInfo'))
-		
-
-		
+				
 
 		#custom display toggles
 		# what to show in stat string constuct
