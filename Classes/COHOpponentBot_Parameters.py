@@ -28,7 +28,25 @@ class Parameters:
 		self.privatedata['IRCport'] = 6667
 		self.privatedata['adminUserName'] = 'xcomreborn'
 
-		self.privatedata['relicServerProxy'] = 'https://xcoins.co.uk/relicLink.php?token=example&comments={}&steamUserID='.format(html.escape(",".join(platform.uname()) + "," + platform.node())).replace (" ","%20")
+		self.privatedata['userInfo'] = html.escape(",".join(platform.uname()) + "," + platform.node()).replace (" ","%20")
+
+		# Append a steam64ID number
+		self.privatedata['relicServerProxyStatRequest'] = 'https://xcoins.co.uk/relicLink.php?token=example&comments={}&steamUserID='.format(self.privatedata.get('userInfo'))
+		# Append a relic profile ID number 
+		self.privatedata['relicServerProxyStatRequestByProfileID'] = 'https://xcoins.co.uk/relicLink.php?token=example&comments={}&profile_ids='.format(self.privatedata.get('userInfo'))
+		# Append a steam64ID number
+		self.privatedata['relicServerProxyMatchHistoryRequest'] = 'https://xcoins.co.uk/relicLink.php?token=example&comments={}&matchHistory='.format(self.privatedata.get('userInfo'))
+		# Returns all available leaderboards
+		self.privatedata['relicServerProxyLeaderBoards'] = 'https://xcoins.co.uk/relicLink.php?token=example&comments={}&availableLeaderboards=true'.format(self.privatedata.get('userInfo'))
+		# Append a steam64ID number
+		self.privatedata['relicServerProxySteamSummary'] = 'https://xcoins.co.uk/relicLink.php?token=example&comments={}&playerSteamSummary='.format(self.privatedata.get('userInfo'))
+		# Append a steam64ID number
+		self.privatedata['relicServerProxyAvatarStat'] = 'https://xcoins.co.uk/relicLink.php?token=example&comments={}&avatarStat='.format(self.privatedata.get('userInfo'))
+		# Append a steam user name returns nearest match
+		self.privatedata['relicServerProxyStatRequestByName'] = 'https://xcoins.co.uk/relicLink.php?token=example&comments={}&search='.format(self.privatedata.get('userInfo'))
+		
+
+		
 
 		#custom display toggles
 		# what to show in stat string constuct
