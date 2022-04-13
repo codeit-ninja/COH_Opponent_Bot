@@ -318,7 +318,7 @@ class GameData():
 								data_dump = bytearray(data_dump)
 								steamNumber = data_dump.decode('utf-16le').strip()
 								if "/steam/" in steamNumber:
-									print(steamNumber[7:24])
+									#print(steamNumber[7:24])
 									int(steamNumber[7:24]) # throws exception if steam number is not a number
 									steamNumberList.append(str(steamNumber[7:24]))
 									break
@@ -401,8 +401,6 @@ class GameData():
 
 
 	def outputOpponentData(self):
-
-		print("In outputOpponentData")
 
 		# Prepare outputs
 		axisTeam = []
