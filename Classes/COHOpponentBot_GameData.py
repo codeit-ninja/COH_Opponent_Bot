@@ -8,7 +8,6 @@ from mem_edit import Process
 import os
 import re
 import time
-import pymem
 
 import ctypes
 import ctypes.util
@@ -17,6 +16,7 @@ import logging
 import platform
 import struct
 import sys
+
 
 import pymem.exception
 import pymem.memory
@@ -94,7 +94,9 @@ class GameData():
 			print(str(self.getCOHMemoryAddress()))
 
 			if not self.getCOHMemoryAddress():
+				print("Returning from here")
 				return False
+			print("we got here")
 
 			mpPointerAddress = 0x00901EA8
 			mpOffsets=[0xC,0xC,0x18,0x10,0x24,0x18,0x264]
@@ -110,8 +112,11 @@ class GameData():
 			cohrecReplayAddress = 0x00902030
 			cohrecOffsets = [0x28,0x160,0x4,0x84,0x24,0x110,0x0]
 
+
 			# check game is running by accessing player mp
 			mp = self.pm.read_float(self.GetPtrAddr(self.baseAddress + mpPointerAddress, mpOffsets))
+
+			print("man power : " + str(mp))
 
 			# access replay data in game memory
 			replayData = self.pm.read_bytes(self.GetPtrAddr(self.baseAddress + cohrecReplayAddress, cohrecOffsets), 4000)
@@ -286,16 +291,12 @@ class GameData():
 		
 		try:
 			self.pm = pymem.Pymem("RelicCOH.exe")
-			self.baseAddress = self.pm.process_base
-			#self.baseAddress = Process.get_pid_by_name('RelicCOH.exe').
-			#self.baseAddress = pymem.process.base_address(self.pm.process_id)
-			print ("baseAddress : " + str(self.baseAddress))
+			self.baseAddress = self.pm.base_address
+
 			
 			self.cohRunning = True
 			return True
 		except Exception as e:
-			print ("baseAddress : " + str(self.baseAddress))
-			print(str(e))
 			self.cohRunning = False
 			return False
 			

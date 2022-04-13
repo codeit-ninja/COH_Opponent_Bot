@@ -16,11 +16,9 @@ import logging
 from Classes.COHOpponentBot_Parameters import Parameters
 from Classes.COHOpponentBot_IRC_Channel import IRC_Channel
 
-
 #Here are the message lines held until sent
 messageDeque = collections.deque()
 toSend = False
-
 
 class IRC_Client(threading.Thread):
 	
@@ -38,7 +36,6 @@ class IRC_Client(threading.Thread):
 			self.parameters = Parameters()	
 
 		self.adminUserName = self.parameters.privatedata.get('adminUserName')	# This username will be able to use admin commands, exit the program and bypass some limits.
-		
 
 		#use botusername or get default if not set
 		if (self.parameters.data.get('botUserName') == ""):
@@ -74,7 +71,6 @@ class IRC_Client(threading.Thread):
 
 		self.running = True
 		
-
 		# Start checking send buffer every 3 seconds.
 
 		self.CheckIRCSendBufferEveryThreeSeconds() # only call this once.	
@@ -97,9 +93,6 @@ class IRC_Client(threading.Thread):
 		self.irc.send(('CAP REQ :twitch.tv/tags'+ '\r\n').encode("utf8")) # sends a twitch specific request for extra data contained in the PRIVMSG changes the way it is parsed
 		self.irc.send(('CAP REQ :twitch.tv/commands' + '\r\n').encode("utf8")) # supposidly adds whispers
 		
-
-
-
 		#start sub thread that uses shared Queue to communicate 
 		# pass it irc for messaging, channel to join and queue
 		self.queue = Queue()
@@ -111,8 +104,6 @@ class IRC_Client(threading.Thread):
 		#
 		#threads = {}
 		#threads[self.channel] = self.channelThread
-		
-		
 		
 	def run(self):
 		self.running = True
@@ -248,4 +239,3 @@ class IRC_Client(threading.Thread):
 				logging.error(str(e))
 				logging.exception("Exception : ")
 	#above is called by the timer every three seconds and checks for items in buffer to be sent, if there is one it'll send it
-

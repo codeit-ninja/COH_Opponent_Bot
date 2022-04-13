@@ -13,6 +13,7 @@ from tkinter import ttk
 import base64
 import os
 import logging # For logging information and warnings about opperation errors
+from os.path import relpath
 
 from Classes.COHOpponentBot_Icon import Icon
 from Classes.COHOpponentBot_GameData import GameData
@@ -742,6 +743,7 @@ class GUI:
 		self.disableEverything()
 		cwd = os.getcwd()
 		self.master.filename =  tk.filedialog.askopenfilename(initialdir = cwd,title = "Select location of CSS file",filetypes = (("css file","*.css"),("all files","*.*")))
+		self.master.filename = relpath(self.master.filename, cwd)
 		logging.info("File Path : " + str(self.master.filename))
 		print("File Path : " + str(self.master.filename))
 		if(self.master.filename != ""):
