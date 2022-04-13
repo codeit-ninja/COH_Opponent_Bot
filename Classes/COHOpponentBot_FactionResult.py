@@ -21,8 +21,9 @@ class FactionResult():
 		self.lastTime = None
 		self.winLossRatio = None
 		try:
-			if self.lastMatch:
-				if ((self.lastMatch != "None") or (self.lastMatch != "")):
+			if isinstance(self.lastMatch, str):
+				if ((str(self.lastMatch) != "None") and (str(self.lastMatch) != "")):
+					logging.info("self.lastMatch : " + str(self.lastMatch))
 					ts = int(self.lastMatch)
 					self.lastTime = str(datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'))
 		except Exception as e:
