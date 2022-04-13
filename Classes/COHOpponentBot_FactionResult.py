@@ -6,22 +6,22 @@ class FactionResult():
 
 	def __init__(self, faction = None, matchType = '-1',name = '-1', nameShort = '-1',leaderboard_id = '-1', wins = '-1', losses = '-1', streak = '-1', disputes = '-1', drops = '-1', rank = '-1', rankLevel = '-1', lastMatch = '-1'):
 		self.faction = faction 
-		self.matchType = re.sub(r"^-1\b", "None", str(matchType))
+		self.matchType = re.sub(r"^-1\b", "", str(matchType))
 		self.name = name
 		self.nameShort = nameShort
 		self.id = leaderboard_id
-		self.wins = re.sub(r"^-1\b", "None" ,str(wins))
-		self.losses = re.sub(r"^-1\b", "None" ,str(losses))
-		self.streak = re.sub(r"^-1\b", "None" ,str(streak))
-		self.disputes = re.sub(r"^-1\b", "None" ,str(disputes))
-		self.drops = re.sub(r"^-1\b", "None" ,str(drops))
-		self.rank = re.sub(r"^-1\b", "None" ,str(rank))
-		self.rankLevel = re.sub(r"^-1\b", "None" ,str(rankLevel))
-		self.lastMatch = re.sub(r"^-1\b", "None" ,str(lastMatch))
+		self.wins = re.sub(r"^-1\b", "" ,str(wins))
+		self.losses = re.sub(r"^-1\b", "" ,str(losses))
+		self.streak = re.sub(r"^-1\b", "" ,str(streak))
+		self.disputes = re.sub(r"^-1\b", "" ,str(disputes))
+		self.drops = re.sub(r"^-1\b", "" ,str(drops))
+		self.rank = re.sub(r"^-1\b", "" ,str(rank))
+		self.rankLevel = re.sub(r"^-1\b", "" ,str(rankLevel))
+		self.lastMatch = re.sub(r"^-1\b", "" ,str(lastMatch))
 		self.lastTime = None
 		self.winLossRatio = None
 		try:
-			if self.lastMatch and (self.lastMatch != "None"):
+			if self.lastMatch and (self.lastMatch != ""):
 				ts = int(self.lastMatch)
 				self.lastTime = str(datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'))
 		except Exception as e:
