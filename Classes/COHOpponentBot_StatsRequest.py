@@ -81,8 +81,6 @@ class StatsRequest:
 					userSteam64Number = self.parameters.data.get('steamNumber')
 				if userSteam64Number:
 					playersProfileID = self.getProfileIDFromProfilesBySteamNumber(userSteam64Number)
-					print("userSteam64Number : "+ str(userSteam64Number))
-					print("playersProfileID : "+ str(playersProfileID))
 					mostRecentMatch = self.getMostRecentMatch()
 					if mostRecentMatch:
 						for item in mostRecentMatch['matchhistoryreportresults']:
