@@ -18,6 +18,8 @@ class Parameters:
 	
 	def __init__(self):
 
+
+		# Set default Variables
 		self.data = {}
 		self.privatedata = {}
 
@@ -96,6 +98,33 @@ class Parameters:
 		CSIDL_PERSONAL = 5       # My Documents
 		SHGFP_TYPE_CURRENT = 0   # Get current, not default value
 
+		self.stringFormattingDictionary = {}
+		self.stringFormattingDictionary['$NAME$'] = None
+		self.stringFormattingDictionary['$FACTION$'] = None
+		self.stringFormattingDictionary['$COUNTRY$'] = None
+		self.stringFormattingDictionary['$TOTALWINS$'] = None
+		self.stringFormattingDictionary['$TOTALLOSSES$'] = None
+		self.stringFormattingDictionary['$TOTALWLRATIO$'] = None
+
+		self.stringFormattingDictionary['$WINS$'] = None
+		self.stringFormattingDictionary['$LOSSES$'] = None
+		self.stringFormattingDictionary['$DISPUTES$'] = None
+		self.stringFormattingDictionary['$STREAK$'] = None
+		self.stringFormattingDictionary['$DROPS$'] = None
+		self.stringFormattingDictionary['$RANK$'] = None
+		self.stringFormattingDictionary['$LEVEL$'] = None
+		self.stringFormattingDictionary['$WLRATIO$'] = None
+
+		self.stringFormattingDictionary['$MATCHTYPE$'] = None
+		self.stringFormattingDictionary['$COHSTATSLINK$'] = None
+		self.stringFormattingDictionary['$STEAMPROFILE$'] = None
+
+		self.imageOverlayFormattingDictionary = {}
+		self.imageOverlayFormattingDictionary['$FLAGICON$'] = None
+		self.imageOverlayFormattingDictionary['$FACTIONICON$'] = None
+		self.imageOverlayFormattingDictionary['$LEVELICON$'] = None
+
+		
 
 		# the following is windows specific code using ctypes.win will not compile on linux
 		try:
@@ -114,6 +143,7 @@ class Parameters:
 						if ("RLINK -- Found profile:") in item:
 							steamNumber = self.find_between(item, "steam/", "\n")
 							self.data['steamNumber'] = steamNumber
+							#print("SteamNumber : " + str(steamNumber))
 				except Exception as e:
 					logging.error(str(e))
 					logging.exception("Exception : ")
@@ -149,9 +179,6 @@ class Parameters:
 			logging.error(str(e))
 			logging.exception("Exception : ")
 
-		#get cohLocation
-		#print(self.data['steamFolder'])
-
 		filePath = self.data['steamFolder'] + "\\steamapps\\libraryfolders.vdf"
 		steamlibraryBases = []
 
@@ -175,8 +202,6 @@ class Parameters:
 						except Exception as e:
 							pass
 
-			#print(steamlibraryBases)
-
 			for steamBase in steamlibraryBases:
 				cohPath = steamBase + "\\steamapps\\common\\Company of Heroes Relaunch\\RelicCOH.exe"
 				if (os.path.isfile(cohPath)):
@@ -190,8 +215,6 @@ class Parameters:
 			logging.error(str(e))
 			logging.exception("Exception : ")
 
-
-
 		try:
 			self.data['temprecReplayPath'] = self.data.get('logPath').replace("warnings.log" , "playback\\temp.rec")
 		except Exception as e:
@@ -204,6 +227,13 @@ class Parameters:
 			statString = "/steam/" + str(self.data['steamNumber'])
 			if (not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None)):
 				ssl._create_default_https_context = ssl._create_unverified_context
+			# ensure steam64Number is valid
+			#check stat number is 17 digit and can be converted to int if not int
+			steam64ID = str(self.data['steamNumber'])
+			stringLength = len(steam64ID)
+			assert(stringLength == 17)
+			assert(int(steam64ID))			
+
 			response = urllib.request.urlopen(str(self.privatedata.get('relicServerProxyStatRequest'))+str(self.data['steamNumber'])).read()
 			statdata = json.loads(response.decode('utf-8'))
 			#print(statdata)
@@ -219,35 +249,7 @@ class Parameters:
 			logging.error(str(e))
 			logging.exception("Exception : ")
 
-		self.stringFormattingDictionary = {}
-		self.stringFormattingDictionary['$NAME$'] = None
-		self.stringFormattingDictionary['$FACTION$'] = None
-		self.stringFormattingDictionary['$COUNTRY$'] = None
-		self.stringFormattingDictionary['$TOTALWINS$'] = None
-		self.stringFormattingDictionary['$TOTALLOSSES$'] = None
-		self.stringFormattingDictionary['$TOTALWLRATIO$'] = None
-
-		self.stringFormattingDictionary['$WINS$'] = None
-		self.stringFormattingDictionary['$LOSSES$'] = None
-		self.stringFormattingDictionary['$DISPUTES$'] = None
-		self.stringFormattingDictionary['$STREAK$'] = None
-		self.stringFormattingDictionary['$DROPS$'] = None
-		self.stringFormattingDictionary['$RANK$'] = None
-		self.stringFormattingDictionary['$LEVEL$'] = None
-		self.stringFormattingDictionary['$WLRATIO$'] = None
-
-		self.stringFormattingDictionary['$MATCHTYPE$'] = None
-		self.stringFormattingDictionary['$COHSTATSLINK$'] = None
-		self.stringFormattingDictionary['$STEAMPROFILE$'] = None
-
-		self.imageOverlayFormattingDictionary = {}
-		self.imageOverlayFormattingDictionary['$FLAGICON$'] = None
-		self.imageOverlayFormattingDictionary['$FACTIONICON$'] = None
-		self.imageOverlayFormattingDictionary['$LEVELICON$'] = None
-
-		#finally call load at end of Initialization
 		self.load()
- 
 		
 	
 	def load(self, filePath = "data.json"):
@@ -259,8 +261,10 @@ class Parameters:
 					if success:
 						self.data = data
 						logging.info("data loaded sucessfully")
+						return True
 					else:
 						logging.info("data not loaded")
+						return False
 		except Exception as e:
 			logging.error("Problem in load")
 			logging.error(str(e))

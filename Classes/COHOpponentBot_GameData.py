@@ -80,6 +80,7 @@ class GameData():
 		self.mapFullName = None
 		self.modName = None
 		self.mapDescription = ""
+		self.mapDescriptionFull = ""
 
 		self.gameDescriptionString = ""
 		#self.placeBetsString = ""
@@ -140,6 +141,7 @@ class GameData():
 			self.modName = cohreplayparser.modName
 
 			self.mapDescription = cohreplayparser.mapDescription
+			self.mapDescriptionFull = cohreplayparser.mapDescriptionFull
 
 			for item in cohreplayparser.playerList:
 				username = item['name']

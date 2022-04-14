@@ -120,9 +120,9 @@ class MemoryMonitor(threading.Thread):
 			statRequest.getMatchHistoryFromServer(statnumber)
 			mostRecentWin = statRequest.getPlayerWinLoseLastMatch(statnumber)
 			if mostRecentWin:
-				self.ircClient.SendMessageToOpponentBotChannelIRC("!I won")
+				self.ircClient.SendPrivateMessageToIRC("!I won")
 			else:
-				self.ircClient.SendMessageToOpponentBotChannelIRC("!I lost")
+				self.ircClient.SendPrivateMessageToIRC("!I lost")
 
 		except Exception as e:
 			logging.info("Problem in GetWinLose")

@@ -102,14 +102,13 @@ class IRC_Channel(threading.Thread):
 	def gameInfo(self):
 		self.gameData = GameData(self.ircClient, parameters=self.parameters)
 		if self.gameData.getDataFromGame():
-			self.ircClient.SendPrivateMessageToIRC("Map : {}, Mod : {}, Start : {}, High Resources : {}, Automatch : {}, Slots : {}, Players : {}.".format(self.gameData.mapFullName,self.gameData.modName,self.gameData.randomStart,self.gameData.highResources, self.gameData.automatch, self.gameData.slots,  self.gameData.numberOfPlayers))
-
+			self.ircClient.SendPrivateMessageToIRC(f"Map : {self.gameData.mapFullName}, High Resources : {self.gameData.highResources}, Automatch : {self.gameData.automatch}, Slots : {self.gameData.slots}, Players : {self.gameData.numberOfPlayers}.")
 	def story(self):
 		self.gameData = GameData(self.ircClient, parameters=self.parameters)
 		print(str(self.gameData))
 		if self.gameData.getDataFromGame():
 			print(str(self.gameData))
-			self.ircClient.SendPrivateMessageToIRC("{}.".format(self.gameData.mapDescription))
+			self.ircClient.SendPrivateMessageToIRC("{}.".format(self.gameData.mapDescriptionFull))
 
 
 	def testOutput(self):
