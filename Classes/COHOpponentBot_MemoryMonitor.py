@@ -4,6 +4,7 @@ import threading
 from Classes.COHOpponentBot_Parameters import Parameters
 from Classes.COHOpponentBot_GameData import GameData
 from Classes.COHOpponentBot_IRC_Client import IRC_Client
+from Classes.COHOpponentBot_StatsRequest import StatsRequest
 
 
 class MemoryMonitor(threading.Thread):
@@ -27,6 +28,7 @@ class MemoryMonitor(threading.Thread):
 			self.pollInterval = int(pollInterval)
 			self.event = threading.Event()
 			self.gameData = None
+			self.winLostTimer = None
 
 		except Exception as e:
 			logging.error("In FileMonitor __init__")
@@ -99,10 +101,31 @@ class MemoryMonitor(threading.Thread):
 
 	def GameOver(self):
 		try:
+			# Get Win/Lose from server after 30 seconds
+			if self.parameters.data.get('writeIWonLostInChat'):
+				self.winLostTimer = threading.Timer(30.0 , self.GetWinLose)
+				self.winLostTimer.start()
+			# Clear the overlay
 			if (self.parameters.data.get('clearOverlayAfterGameOver')):
 				self.ircClient.queue.put("CLEAROVERLAY")
 		except Exception as e:
 			logging.info("Problem in GameOver")
+			logging.error(str(e))
+			logging.exception("Exception : ")
+
+	def GetWinLose(self):
+		try:
+			statnumber = self.parameters.data.get('steamNumber')
+			statRequest = StatsRequest()
+			statRequest.getMatchHistoryFromServer(statnumber)
+			mostRecentWin = statRequest.getPlayerWinLoseLastMatch(statnumber)
+			if mostRecentWin:
+				self.ircClient.SendMessageToOpponentBotChannelIRC("!I won")
+			else:
+				self.ircClient.SendMessageToOpponentBotChannelIRC("!I lost")
+
+		except Exception as e:
+			logging.info("Problem in GetWinLose")
 			logging.error(str(e))
 			logging.exception("Exception : ")
 
@@ -135,6 +158,10 @@ class MemoryMonitor(threading.Thread):
 		# break out of loops if waiting
 		if self.event:
 			self.event.set()
+		# if timer is running and program is closed then cancel the timer and call getwinlose early.
+		if self.winLostTimer:
+			self.winLostTimer.cancel()
+			self.GetWinLose()
 
 	def find_between(self, s, first, last ):
 		try:

@@ -175,7 +175,7 @@ class Parameters:
 						except Exception as e:
 							pass
 
-			print(steamlibraryBases)
+			#print(steamlibraryBases)
 
 			for steamBase in steamlibraryBases:
 				cohPath = steamBase + "\\steamapps\\common\\Company of Heroes Relaunch\\RelicCOH.exe"
@@ -204,7 +204,7 @@ class Parameters:
 			statString = "/steam/" + str(self.data['steamNumber'])
 			if (not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None)):
 				ssl._create_default_https_context = ssl._create_unverified_context
-			response = urllib.request.urlopen(str(self.privatedata.get('relicServerProxy'))+str(self.data['steamNumber'])).read()
+			response = urllib.request.urlopen(str(self.privatedata.get('relicServerProxyStatRequest'))+str(self.data['steamNumber'])).read()
 			statdata = json.loads(response.decode('utf-8'))
 			#print(statdata)
 			if (statdata['result']['message'] == "SUCCESS"):

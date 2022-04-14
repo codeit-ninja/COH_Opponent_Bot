@@ -232,7 +232,8 @@ class IRC_Client(threading.Thread):
 				#print("Buffered")
 				stringToSend = str(self.ircMessageBuffer.popleft())
 				print("string to send : " + stringToSend)
-				self.irc.send((stringToSend).encode('utf8'))
+				if self.irc:
+					self.irc.send((stringToSend).encode('utf8'))
 			except Exception as e:
 				logging.error("IRC send error:")
 				logging.error("In IRCSendCalledEveryThreeSeconds")
