@@ -415,9 +415,11 @@ class GameData():
 		if self.playerList:
 			for item in self.playerList:
 				if (str(item.faction) == str(Faction.US)) or (str(item.faction)== str(Faction.CW)):
-					alliesTeam.append(item)
+					if item.name != "":
+						alliesTeam.append(item)
 				if (str(item.faction) == str(Faction.WM)) or (str(item.faction)== str(Faction.PE)):
-					axisTeam.append(item)
+					if item.name != "":
+						axisTeam.append(item)
 
 			#logging.info("players in allies team : " +str(len(alliesTeam)))
 			#logging.info("players in axis team : " + str(len(axisTeam)))
