@@ -180,29 +180,28 @@ class Parameters:
 			logging.exception("Exception : ")
 
 		filePath = self.data['steamFolder'] + "\\steamapps\\libraryfolders.vdf"
+		#print(filePath)
 		steamlibraryBases = []
 
 		if self.data['steamFolder']:
 			steamlibraryBases.append(self.data['steamFolder'])
 
+		# Get all steam library install locations
 		try:
 			if (os.path.isfile(filePath)):
 				with open(filePath) as f:
 					for line in f:
 						words = line.split()
-						#print(words)
 						try:
-							number = words[0].replace('"',"")
-							location = " ".join(words[1:]).replace('"',"")
-							#print(number.strip())
-							number = int(number.strip())
-							if type(number) is int:
-								#print(location)
+							if "path" in line:  
+								location = " ".join(words[1:]).replace('"',"")
 								steamlibraryBases.append(location)
 						except Exception as e:
 							pass
 
+			# Assign check each library install file for the location of cohPath
 			for steamBase in steamlibraryBases:
+				#print(steamBase)
 				cohPath = steamBase + "\\steamapps\\common\\Company of Heroes Relaunch\\RelicCOH.exe"
 				if (os.path.isfile(cohPath)):
 					self.data['cohPath'] = cohPath
