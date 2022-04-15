@@ -174,7 +174,7 @@ class GUI:
 		icon = Icon.icon
 
 		icondata = base64.b64decode(icon)
-		## The temp file is icon.ico
+		# The temp file is icon.ico
 		tempFile= "Icon.ico"
 		iconfileHandle= open(tempFile,"wb")
 		## Extract the icon

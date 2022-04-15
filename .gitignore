@@ -42,3 +42,5 @@ data.jsonbak
 overlay.html
 dist
 TODO.txt
+build2.bat
+build/COHOpponentBot/pyimod00_crypto_key.py
