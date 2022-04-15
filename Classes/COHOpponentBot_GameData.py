@@ -17,20 +17,8 @@ import platform
 import struct
 import sys
 
-
-import pymem.exception
-import pymem.memory
+from pymem import *
 import pymem.process
-import pymem.ressources.kernel32
-import pymem.ressources.structure
-import pymem.ressources.psapi
-import pymem.thread
-import pymem.pattern
-import pymem
-
-from pymem.ressources.structure import MODULEINFO
-
-from pymem.process import base_module
 
 from Classes.COHOpponentBot_Faction import Faction
 from Classes.COHOpponentBot_MatchType import MatchType
@@ -88,11 +76,33 @@ class GameData():
 		self.pm = None
 		self.baseAddress = None
 
+	def getGameInProgress(self):
+		try:
+			# try to get COH__REC string from static pointer of replay in memory to tell if game in progress
+			cohrecReplayAddress = 0x00902030
+			cohrecOffsets = [0x28,0x160,0x4,0x84,0x24,0x110,0x0]
+			memoryAddress = self.GetPtrAddr(int(self.baseAddress) + int(cohrecReplayAddress), cohrecOffsets)
+			if memoryAddress:
+				replayHeaderStringIdentifer = self.pm.read_bytes(memoryAddress + 4, 8)
+				if replayHeaderStringIdentifer == "COH__REC".encode():
+					self.gameInProgress = True
+					return True
+			return False
+		except Exception as e:
+			self.gameInProgress = False
+			logging.exception("Exception : ")
+			return False
+
 
 	def getDataFromGame(self):
 		try:
 			
+			# Check if company of heroes is running if not return false
 			if not self.getCOHMemoryAddress():
+				return False
+
+			# Check if a game is currently in progress if not return false.
+			if not self.getGameInProgress():
 				return False
 
 			mpPointerAddress = 0x00901EA8
@@ -109,9 +119,14 @@ class GameData():
 			cohrecReplayAddress = 0x00902030
 			cohrecOffsets = [0x28,0x160,0x4,0x84,0x24,0x110,0x0]
 
+			#print(f"baseAddress{self.baseAddress}")
+			#print(f"baseAddress{mpPointerAddress}")
+
+			#print(f"baseAddress{str(int(self.baseAddress))}")
+			#print(f"baseAddress{str(int(mpPointerAddress))}")
 
 			# check game is running by accessing player mp
-			mp = self.pm.read_float(self.GetPtrAddr(self.baseAddress + mpPointerAddress, mpOffsets))
+			#mp = self.pm.read_float(self.GetPtrAddr(int(self.baseAddress) + int(mpPointerAddress), mpOffsets))
 
 			# access replay data in game memory
 			replayData = self.pm.read_bytes(self.GetPtrAddr(self.baseAddress + cohrecReplayAddress, cohrecOffsets), 4000)
@@ -261,9 +276,13 @@ class GameData():
 				logging.exception("Exception : ")
 				logging.error(str(e))
 
+			#print(self)
 			return True
 
 		except Exception as e:
+			logging.error("Problem in Paradice")
+			logging.exception("Exception : ")
+			logging.error(str(e))
 			self.gameInProgress = False
 			return False
 
@@ -286,8 +305,8 @@ class GameData():
 	def getCOHMemoryAddress(self):
 		
 		try:
-			self.pm = pymem.Pymem("RelicCOH.exe")
-			self.baseAddress = self.pm.base_address
+			self.pm = Pymem("RelicCOH.exe")
+			self.baseAddress = pymem.process.module_from_name(self.pm.process_handle , "RelicCOH.exe").lpBaseOfDll
 			self.cohRunning = True
 			return True
 		except Exception as e:
@@ -404,13 +423,12 @@ class GameData():
 
 	def outputOpponentData(self):
 
+		logging.info("In output opponent data")
+		logging.info(str(self))
+
 		# Prepare outputs
 		axisTeam = []
 		alliesTeam = []
-
-		#not sure if they need clearing but apparently the lists are sometimes persistent?
-		axisTeam.clear()
-		alliesTeam.clear()
 
 		if self.playerList:
 			for item in self.playerList:
@@ -575,11 +593,7 @@ class GameData():
 
 		# if a computer it will have no stats therefore no country flag or rank
 		# set default values for flags and faction rank	
-		imageOverlayFormattingDictionary['$LEVELICON$'] = '<div class = "rankimg"><img src="data:," alt></div>'
-		levelIcon = "OverlayImages\\Ranks\\no_rank_yet.png"
-		fileExists = os.path.isfile(levelIcon)
-		if fileExists:
-			imageOverlayFormattingDictionary['$LEVELICON$'] =  '<div class = "rankimg"><img src="{0}" ></div>'.format(levelIcon)
+
 
 		imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="data:," alt></div>'
 		defaultFlagIcon = "OverlayImages\\Flagssmall\\unknown_flag.png"
@@ -618,6 +632,9 @@ class GameData():
 							logging.info(imageOverlayFormattingDictionary.get('$LEVELICON$'))
 						else:
 							imageOverlayFormattingDictionary['$LEVELICON$'] = '<div class = "rankimg"><img src="data:," alt></div>'
+							levelIcon = "OverlayImages\\Ranks\\no_rank_yet.png"
+							if os.path.isfile(levelIcon):
+								imageOverlayFormattingDictionary['$LEVELICON$'] =  '<div class = "rankimg"><img src="{0}" ></div>'.format(levelIcon)
 
 		return imageOverlayFormattingDictionary
 
