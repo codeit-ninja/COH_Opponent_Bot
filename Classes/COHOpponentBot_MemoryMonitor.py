@@ -43,14 +43,13 @@ class MemoryMonitor(threading.Thread):
 					
 					if self.gameData.gameInProgress != self.gameInProgress:
 						#coh was running and now its not (game over)
-						#self.gameInProgress = self.gameData.gameInProgress
 						self.GameOver()
 				else:
 					if self.gameData.gameInProgress != self.gameInProgress:
 						#coh wasn't running and now it is (game started)
-						#self.gameInProgress = self.gameData.gameInProgress
 						self.GameStarted()
-						
+
+				# set local gameInProgress flag to it can be compared with any changes to it in the next loop		
 				self.gameInProgress = self.gameData.gameInProgress
 				self.event.wait(self.pollInterval)
 			#self.join()
@@ -70,7 +69,7 @@ class MemoryMonitor(threading.Thread):
 
 	def GameStarted(self):
 		try:
-			self.getGameData()
+			#self.getGameData()
 			self.gameData.outputOpponentData()
 			self.PostSteamNumber()
 			self.PostData()
