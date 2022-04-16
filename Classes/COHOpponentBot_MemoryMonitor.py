@@ -9,7 +9,7 @@ from Classes.COHOpponentBot_StatsRequest import StatsRequest
 
 class MemoryMonitor(threading.Thread):
 
-	def __init__(self, pollInterval = 30, ircClient : IRC_Client = None , parameters = None):
+	def __init__(self, pollInterval = 10, ircClient : IRC_Client = None , parameters = None):
 		threading.Thread.__init__(self)
 		try:
 			logging.info("Memory Monitor Started!")
@@ -102,9 +102,9 @@ class MemoryMonitor(threading.Thread):
 
 	def GameOver(self):
 		try:
-			# Get Win/Lose from server after 30 seconds
+			# Get Win/Lose from server after 50 seconds
 			if self.parameters.data.get('writeIWonLostInChat'):
-				self.winLostTimer = threading.Timer(30.0 , self.GetWinLose)
+				self.winLostTimer = threading.Timer(50.0 , self.GetWinLose)
 				self.winLostTimer.start()
 			# Clear the overlay
 			if (self.parameters.data.get('clearOverlayAfterGameOver')):
@@ -162,7 +162,7 @@ class MemoryMonitor(threading.Thread):
 		# if timer is running and program is closed then cancel the timer and call getwinlose early.
 		if self.winLostTimer:
 			self.winLostTimer.cancel()
-			self.GetWinLose()
+			#self.GetWinLose()
 
 	def find_between(self, s, first, last ):
 		try:

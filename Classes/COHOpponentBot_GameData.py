@@ -81,14 +81,20 @@ class GameData():
 			# try to get COH__REC string from static pointer of replay in memory to tell if game in progress
 			cohrecReplayAddress = 0x00902030
 			cohrecOffsets = [0x28,0x160,0x4,0x84,0x24,0x110,0x0]
+			logging.info(f"baseAddress : {str(self.baseAddress)}")
 			memoryAddress = self.GetPtrAddr(int(self.baseAddress) + int(cohrecReplayAddress), cohrecOffsets)
+			logging.info(f"got memory address from pointer : {str(memoryAddress)}")
 			if memoryAddress:
 				replayHeaderStringIdentifer = self.pm.read_bytes(memoryAddress + 4, 8)
 				if replayHeaderStringIdentifer == "COH__REC".encode():
+					logging.info("Contains COH__REC")
 					self.gameInProgress = True
 					return True
+			logging.info("Could Not find COH__REC")
+			self.gameInProgress = False
 			return False
 		except Exception as e:
+			logging.info("Could Not find COH__REC")
 			self.gameInProgress = False
 			logging.exception("Exception : ")
 			return False
@@ -306,11 +312,15 @@ class GameData():
 		
 		try:
 			self.pm = Pymem("RelicCOH.exe")
+			logging.info(f"getCOHMemoryAddress self.pm : {str(self.pm)}")
 			self.baseAddress = pymem.process.module_from_name(self.pm.process_handle , "RelicCOH.exe").lpBaseOfDll
+			logging.info(f"getCOHMemoryAddress self.baseAddress : {str(self.baseAddress)}")
 			self.cohRunning = True
+			logging.info(f"self.cohRunning {self.cohRunning}")
 			return True
 		except Exception as e:
 			self.cohRunning = False
+			logging.info(f"self.cohRunning {self.cohRunning}")
 			return False
 			
 	
