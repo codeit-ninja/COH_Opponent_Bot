@@ -22,7 +22,7 @@ class MemoryMonitor(threading.Thread):
 
 			self.pm = None
 			self.baseAddress = None
-			self.gameInProgress = None
+			self.gameInProgress = False
 
 			self.ircClient = ircClient
 			self.pollInterval = int(pollInterval)
@@ -43,14 +43,15 @@ class MemoryMonitor(threading.Thread):
 					
 					if self.gameData.gameInProgress != self.gameInProgress:
 						#coh was running and now its not (game over)
-						self.gameInProgress = self.gameData.gameInProgress
+						#self.gameInProgress = self.gameData.gameInProgress
 						self.GameOver()
 				else:
 					if self.gameData.gameInProgress != self.gameInProgress:
 						#coh wasn't running and now it is (game started)
-						self.gameInProgress = self.gameData.gameInProgress
+						#self.gameInProgress = self.gameData.gameInProgress
 						self.GameStarted()
-
+						
+				self.gameInProgress = self.gameData.gameInProgress
 				self.event.wait(self.pollInterval)
 			#self.join()
 		except Exception as e:
