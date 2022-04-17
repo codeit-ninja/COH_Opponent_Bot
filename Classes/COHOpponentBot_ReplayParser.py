@@ -213,9 +213,6 @@ class ReplayParser:
 		self.parseChunk(0)
 		self.parseChunk(0)
 
-		self.mapNameFull = None 
-		self.mapDescriptionFull = None 
-
 	def ResolveMapNameFullAndMapDescriptionFromUCS(self):
 		# mapNameFull and mapDescriptionFull will be None until resolved this takes time because file reading so moved to separate function call
 		#get mapNameFull and mapDescriptionFull from ucs file if they exist there

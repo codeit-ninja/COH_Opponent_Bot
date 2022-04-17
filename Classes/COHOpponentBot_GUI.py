@@ -1,3 +1,4 @@
+from fileinput import filename
 import sys
 import tkinter as tk
 from tkinter import messagebox
@@ -727,9 +728,13 @@ class GUI:
 		logging.info("File Path : " + str(self.master.filename))
 		print("File Path : " + str(self.master.filename))
 		if(self.master.filename != ""):
-			pattern = re.compile(r"\u20A9|\uFFE6|\u00A5|\uFFE5") # replaces both Won sign varients for korean language and Yen symbol for Japanese language paths
-			theFilename = re.sub(pattern, "/", self.master.filename)
-			self.parameters.data['cohPath'] = theFilename.replace("/",'\\')
+			# set cohPath
+			if (os.path.isfile(self.master.filename)):
+				self.parameters.data['cohPath'] = self.master.filename
+			# set ucsPath
+			ucsPath = os.path.dirname(self.master.filename) + "\\CoH\\Engine\\Locale\\English\\RelicCOH.English.ucs"
+			if (os.path.isfile(ucsPath)):
+				self.parameters.data['cohUCSPath'] = ucsPath
 			self.entryRelicCOHPath.config(state = NORMAL)
 			self.entryRelicCOHPath.delete(0, tk.END)
 			cohpath = self.parameters.data.get('cohPath')
@@ -803,7 +808,7 @@ class GUI:
 
 	def closeMonitors(self):
 		if self.automaticMemoryMonitor:
-			self.automaticMemoryMonitor.close()
+			self.automaticMemoryMonitor.Close()
 
 	def on_closing(self):
 		logging.info("In on_closing program (Closing)")

@@ -124,9 +124,9 @@ class Parameters:
 		self.imageOverlayFormattingDictionary['$FACTIONICON$'] = None
 		self.imageOverlayFormattingDictionary['$LEVELICON$'] = None
 
-		
 
 		# the following is windows specific code using ctypes.win will not compile on linux
+		# sets logpath from my documents folder location
 		try:
 			buf= ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
 			ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
@@ -151,39 +151,35 @@ class Parameters:
 			logging.error(str(e))
 			logging.exception("Exception : ")
 
+		# Set the locatoin of cohPath from all steam folder installations
 
-		try:
-			if self.data['cohPath'] == "":
-				#connecting to key in registry
-				try:
-					#64 bit windows
-					access_registry = winreg.ConnectRegistry(None,winreg.HKEY_LOCAL_MACHINE)
-					access_key = winreg.OpenKey(access_registry,r"SOFTWARE\WOW6432Node\Valve\Steam")
-					steam_path = winreg.QueryValueEx(access_key, "InstallPath")
-					if steam_path:
-						self.data['steamFolder'] = steam_path[0]
-				except:
-					pass
+		if (not self.data.get('cohPath')) or (not self.data.get('cohUCSPath')):
+			#connecting to key in registry
+			try:
+				#64 bit windows
+				access_registry = winreg.ConnectRegistry(None,winreg.HKEY_LOCAL_MACHINE)
+				access_key = winreg.OpenKey(access_registry,r"SOFTWARE\WOW6432Node\Valve\Steam")
+				steam_path = winreg.QueryValueEx(access_key, "InstallPath")
+				if steam_path:
+					self.data['steamFolder'] = steam_path[0]
+			except:
+				pass
 
-				try:
-					#32 bit windows
-					access_registry = winreg.ConnectRegistry(None,winreg.HKEY_LOCAL_MACHINE)
-					access_key = winreg.OpenKey(access_registry,r"SOFTWARE\Valve\Steam")
-					steam_path = winreg.QueryValueEx(access_key, "InstallPath")
-					if steam_path:
-						self.data['steamFolder'] = steam_path[0]
-				except:
-					pass
+			try:
+				#32 bit windows
+				access_registry = winreg.ConnectRegistry(None,winreg.HKEY_LOCAL_MACHINE)
+				access_key = winreg.OpenKey(access_registry,r"SOFTWARE\Valve\Steam")
+				steam_path = winreg.QueryValueEx(access_key, "InstallPath")
+				if steam_path:
+					self.data['steamFolder'] = steam_path[0]
+			except:
+				pass
 
-		except Exception as e:
-			logging.error(str(e))
-			logging.exception("Exception : ")
-
-		filePath = self.data['steamFolder'] + "\\steamapps\\libraryfolders.vdf"
+		filePath = self.data.get('steamFolder') + "\\steamapps\\libraryfolders.vdf"
 		#print(filePath)
 		steamlibraryBases = []
 
-		if self.data['steamFolder']:
+		if self.data.get('steamFolder'):
 			steamlibraryBases.append(self.data['steamFolder'])
 
 		# Get all steam library install locations
@@ -208,6 +204,7 @@ class Parameters:
 					ucsPath = steamBase + "\\steamapps\\common\\Company of Heroes Relaunch\\CoH\\Engine\\Locale\\English\\RelicCOH.English.ucs"
 					if (os.path.isfile(ucsPath)):
 						self.data['cohUCSPath'] = ucsPath
+						logging.info(f"ucsPath {ucsPath}")
 
 		except Exception as e:
 			logging.error("Problem in load")
@@ -248,8 +245,9 @@ class Parameters:
 			logging.error(str(e))
 			logging.exception("Exception : ")
 
+		# override values from file
 		self.load()
-		
+
 	
 	def load(self, filePath = "data.json"):
 		try:

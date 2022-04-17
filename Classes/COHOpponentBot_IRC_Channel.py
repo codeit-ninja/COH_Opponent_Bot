@@ -74,8 +74,10 @@ class IRC_Channel(threading.Thread):
 			if (bool(re.match(r"^(!)?opponent(\?)?$", message.lower())) or bool(re.match(r"^(!)?place your bets$" , message.lower())) or bool(re.match(r"^(!)?opp(\?)?$", message.lower()))):
 
 				self.gameData = GameData(ircClient= self.ircClient, parameters=self.parameters)
-				if self.gameData.getDataFromGame():
+				if self.gameData.GetDataFromGame():
 					self.gameData.outputOpponentData()
+				else:
+					self.ircClient.SendPrivateMessageToIRC("Can't find the opponent right now.")
 
 
 			if (message.lower() == "test") and ((str(userName).lower() == str(self.parameters.privatedata.get('adminUserName')).lower()) or (str(userName) == str(self.parameters.data.get('channel')).lower())):
@@ -89,8 +91,8 @@ class IRC_Channel(threading.Thread):
 			if (bool(re.match("^(!)?story(\?)?$", message.lower()))):
 				self.story()
 
-			if (bool(re.match("^(!)?testoutput(\?)?$", message.lower()))):
-				self.ircClient.SendMessageToOpponentBotChannelIRC("!start,Test Message.")
+			if (bool(re.match("^(!)?debug(\?)?$", message.lower()))):
+				self.PrintInfoToDebug()
 
 
 
@@ -99,15 +101,29 @@ class IRC_Channel(threading.Thread):
 			logging.error(str(e))
 			logging.exception("Exception : ")
 
+	def PrintInfoToDebug(self):
+		try:
+			self.gameData = GameData(self.ircClient, parameters=self.parameters)
+			self.gameData.GetDataFromGame()
+			self.gameData.GetMapDescriptionFromUCSFile()
+			self.gameData.GetMapNameFullFromUCSFile()
+			logging.info(self.gameData)
+			self.ircClient.SendPrivateMessageToIRC("GameData saved to log file.")
+		except Exception as e:
+			logging.error("Problem in PrintInfoToDebug")
+			logging.error(str(e))
+			logging.exception("Exception : ")			
+
+
 	def gameInfo(self):
 		self.gameData = GameData(self.ircClient, parameters=self.parameters)
-		if self.gameData.getDataFromGame():
+		if self.gameData.GetDataFromGame():
 			self.ircClient.SendPrivateMessageToIRC(f"Map : {self.gameData.mapNameFull}, High Resources : {self.gameData.highResources}, Automatch : {self.gameData.automatch}, Slots : {self.gameData.slots}, Players : {self.gameData.numberOfPlayers}.")
 
 	def story(self):
 		self.gameData = GameData(self.ircClient, parameters=self.parameters)
 		logging.info(str(self.gameData))
-		if self.gameData.getDataFromGame():
+		if self.gameData.GetDataFromGame():
 			logging.info(str(self.gameData))
 			# Requires parsing the map description from the UCS file this takes time so must be done first
 			self.gameData.GetMapDescriptionFromUCSFile()
@@ -115,8 +131,9 @@ class IRC_Channel(threading.Thread):
 
 	def testOutput(self):
 		if not self.gameData:
-			self.gameData = GameData(self.ircClient)
-		self.gameData.testOutput()
+			self.gameData = GameData(self.ircClient, parameters=self.parameters)
+			self.gameData.GetDataFromGame()
+		self.gameData.TestOutput()
 
 	def close(self):
 		self.running = False

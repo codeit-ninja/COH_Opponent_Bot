@@ -1,6 +1,7 @@
-from inspect import Parameter
 import logging
 import os
+
+from Classes.COHOpponentBot_Parameters import Parameters
 
 
 class UCS:
@@ -9,9 +10,10 @@ class UCS:
 		if parameters:
 			self.parameters = parameters
 		else:
-			self.parameters = Parameter()	
+			self.parameters = Parameters()	
 
 		self.ucsPath = self.parameters.data.get('cohUCSPath')
+		#print(self.ucsPath)
 
 	def compareUCS(self, compareString):
 		try:

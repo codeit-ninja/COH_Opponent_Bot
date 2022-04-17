@@ -67,13 +67,12 @@ class GameData():
 		self.VPCount = None
 		self.automatch = None
 		self.mapName = None
-		self.mapNameFull = None
+		self.mapNameFull = ""
 		self.modName = None
-		self.mapDescription = ""
+		self.mapDescription = None
 		self.mapDescriptionFull = ""
 
 		self.gameDescriptionString = ""
-		#self.placeBetsString = ""
 
 		self.pm = None
 		self.baseAddress = None
@@ -157,9 +156,8 @@ class GameData():
 				self.automatch = False
 
 			self.mapName = cohreplayparser.mapName
-			self.mapNameFull = cohreplayparser.mapNameFull
-			self.modName = cohreplayparser.modName
 			self.mapDescription = cohreplayparser.mapDescription
+			self.modName = cohreplayparser.modName
 
 			for item in cohreplayparser.playerList:
 				username = item['name']
@@ -387,7 +385,7 @@ class GameData():
 			logging.error(str(e))
 			logging.exception("Exception : ")
 
-	def testOutput(self):
+	def TestOutput(self):
 		steamNumber = self.parameters.data.get('steamNumber')
 		statsRequest = StatsRequest(parameters=self.parameters)
 		streamerStats = statsRequest.returnStats(str(steamNumber))
@@ -411,47 +409,6 @@ class GameData():
 								self.ircClient.SendToOutputField(item)
 		else:
 			self.ircClient.SendToOutputField("I could not get stats from the stat server using steam# {} it might be down or the steam# might be invalid.".format(steamNumber))
-
-
-	def getStatsFromLogFile(self):
-
-		steamNumberList = []
-
-		with open(self.parameters.data.get('logPath') , encoding='ISO-8859-1') as f:
-			content = f.readlines()
-
-		for item in content:
-
-			if ('detected successful game start' in item):
-				steamNumberList = []
-
-			if ("match started") in item.lower():
-				logging.info (item)
-				# dictionary containing player number linked to steamnumber
-				steamNumber = self.find_between(item, "steam/", "]")
-				steamNumberList.append(steamNumber)			
-
-		statsList = []
-
-		statRequest = StatsRequest(parameters= self.parameters)
-		stat = None
-		for steamNumber in steamNumberList:
-			attempts = 0
-			while attempts < 10:
-				try:
-					stat = statRequest.returnStats(str(steamNumber))
-				except Exception as e:
-					pass
-				attempts += 1
-				if not (stat['statGroups'][0]['members'][0]['alias'] == ""):
-					statsList.append(stat)
-					break
-				else:
-					time.sleep(5) # 5 second wait before retrying to get stats from server
-
-
-		return statsList
-
 
 	def outputOpponentData(self):
 
@@ -492,7 +449,6 @@ class GameData():
 							self.ircStringOutputList = self.ircStringOutputList + self.createCustomOutput(item)					
 				for item in self.ircStringOutputList:
 					self.ircClient.SendPrivateMessageToIRC(str(item)) # outputs the information to IRC
-
 
 
 	def createCustomOutput(self, player):
@@ -813,7 +769,7 @@ class GameData():
 		output = "GameData : \n"
 		output += "Time Last Game Started : {}\n".format(str(self.gameStartedDate))
 		output += "player List : {}\n".format(str(self.playerList)) 
-		output += "Number Of Players : {}\n".format(str(self.numberOfPlayers))
+		output += "numberOfPlayers : {}\n".format(str(self.numberOfPlayers))
 		output += "Number Of Computers : {}\n".format(str(self.numberOfComputers)) 
 		output += "Easy CPU : {}\n".format(str(self.easyCPUCount)) 
 		output += "Normal CPU : {}\n".format(str(self.normalCPUCount)) 
@@ -821,11 +777,22 @@ class GameData():
 		output += "Expert CPU : {}\n".format(str(self.expertCPUCount))
 		output += "Number Of Humans : {}\n".format(str(self.numberOfHumans))
 		output += "Match Type : {}\n".format(str(self.matchType.name))
-		output += "Slots : {}\n".format(str(self.slots))
-
-
+		output += "slots : {}\n".format(str(self.slots))
+		output += "mapName : {}\n".format(str(self.mapName))
+		output += "mapNameFull : {}\n".format(str(self.mapNameFull))
+		output += "mapDescription : {}\n".format(str(self.mapDescription))
+		output += "mapDescriptionFull : {}\n".format(str(self.mapDescriptionFull))
+		output += "randomStart : {}\n".format(str(self.randomStart)) 
+		output += "highResources : {}\n".format(str(self.highResources)) 
+		output += "VPCount : {}\n".format(str(self.VPCount))
+		output += "automatch : {}\n".format(str(self.automatch))
+		output += "modName : {}\n".format(str(self.modName))
 		output += "COH running : {}\n".format(str(self.cohRunning)) 
 		output += "Game In Progress : {}\n".format(str(self.gameInProgress)) 
+		output += "gameStartedDate : {}\n".format(str(self.gameStartedDate)) 
+		output += "cohMemoryAddress : {}\n".format(str(self.cohMemoryAddress)) 
+		output += "baseAddress : {}\n".format(str(self.baseAddress)) 
+		output += "gameDescriptionString : {}\n".format(str(self.gameDescriptionString)) 
 
 		return output
 

@@ -38,7 +38,7 @@ class MemoryMonitor(threading.Thread):
 	def run(self):
 		try:
 			while self.running:
-				self.getGameData()
+				self.GetGameData()
 				if self.gameInProgress:
 					
 					if self.gameData.gameInProgress != self.gameInProgress:
@@ -58,10 +58,10 @@ class MemoryMonitor(threading.Thread):
 			logging.error(str(e))
 			logging.exception("Exception : ")
 
-	def getGameData(self):
+	def GetGameData(self):
 		try:
 			self.gameData = GameData(ircClient=self.ircClient, parameters=self.parameters)
-			self.gameData.getDataFromGame()
+			self.gameData.GetDataFromGame()
 		except Exception as e:
 			logging.error("In getGameData")
 			logging.info(str(e))
