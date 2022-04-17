@@ -27,6 +27,7 @@ from Classes.COHOpponentBot_Player import Player
 from Classes.COHOpponentBot_ReplayParser import ReplayParser
 from Classes.COHOpponentBot_StatsRequest import StatsRequest
 from Classes.COHOpponentBot_OverlayTemplates import OverlayTemplates
+from Classes.COHOpponentBot_UCS import UCS
 
 
 class GameData():
@@ -65,7 +66,8 @@ class GameData():
 		self.highResources = None
 		self.VPCount = None
 		self.automatch = None
-		self.mapFullName = None
+		self.mapName = None
+		self.mapNameFull = None
 		self.modName = None
 		self.mapDescription = ""
 		self.mapDescriptionFull = ""
@@ -76,7 +78,7 @@ class GameData():
 		self.pm = None
 		self.baseAddress = None
 
-	def getGameInProgress(self):
+	def GetGameInProgress(self):
 		try:
 			# try to get COH__REC string from static pointer of replay in memory to tell if game in progress
 			cohrecReplayAddress = 0x00902030
@@ -100,15 +102,15 @@ class GameData():
 			return False
 
 
-	def getDataFromGame(self):
+	def GetDataFromGame(self):
 		try:
 			
 			# Check if company of heroes is running if not return false
-			if not self.getCOHMemoryAddress():
+			if not self.GetCOHMemoryAddress():
 				return False
 
 			# Check if a game is currently in progress if not return false.
-			if not self.getGameInProgress():
+			if not self.GetGameInProgress():
 				return False
 
 			mpPointerAddress = 0x00901EA8
@@ -143,10 +145,8 @@ class GameData():
 			cohreplayparser = ReplayParser(parameters=self.parameters)
 			cohreplayparser.data = bytearray(replayData)
 			cohreplayparser.processData()
-			#print(cohreplayparser)	
 
 			self.gameStartedDate = cohreplayparser.localDate
-
 			self.randomStart = cohreplayparser.randomStart
 
 			self.highResources = cohreplayparser.highResources
@@ -155,14 +155,11 @@ class GameData():
 				self.automatch = True
 			else:
 				self.automatch = False
-			if cohreplayparser.mapNameFull:
-				self.mapFullName = cohreplayparser.mapNameFull
-			else:
-				self.mapFullName = cohreplayparser.mapName
-			self.modName = cohreplayparser.modName
 
+			self.mapName = cohreplayparser.mapName
+			self.mapNameFull = cohreplayparser.mapNameFull
+			self.modName = cohreplayparser.modName
 			self.mapDescription = cohreplayparser.mapDescription
-			self.mapDescriptionFull = cohreplayparser.mapDescriptionFull
 
 			for item in cohreplayparser.playerList:
 				username = item['name']
@@ -171,8 +168,6 @@ class GameData():
 				self.playerList.append(player)
 
 			statList = self.getStatsFromGame()
-
-			#print(statList)
 
 			for player in self.playerList:
 				if statList:
@@ -236,53 +231,6 @@ class GameData():
 			if (5 <= int(self.slots) <= 6) and (int(self.numberOfComputers) == 0):
 				self.matchType = MatchType.THREES
 
-			try:
-
-				channelName = self.parameters.data['channel']
-				numberOfHumans = str(int(self.numberOfHumans))
-				numberOfComputers = str(int(self.numberOfComputers))
-				numberOfPlayers = str(int(self.numberOfPlayers))
-				slots = str(int(self.slots))
-				randomStart = str(int(self.randomStart))
-				highResources = str(int(self.highResources))
-				VPCount = str(int(self.VPCount))
-				automatch = str(int(self.automatch))
-				mapFullName = str(self.mapFullName)
-				modName = str(self.modName)
-
-				offset = time.timezone if (time.localtime().tm_isdst == 0) else time.altzone
-				offset = offset / 60 / 60 * -1
-				hours = offset
-				hours_added = datetime.timedelta(hours = hours)
-				UTC_corrected_start_time = self.gameStartedDate + hours_added
-
-				gameStarted = str(UTC_corrected_start_time)
-				message = "!start,{},{},{},{},{},{},{},{},{},{},{},{}".format(channelName,gameStarted,numberOfHumans,numberOfComputers,numberOfPlayers,slots,randomStart,highResources,VPCount,automatch,mapFullName,modName)
-				for count , item in enumerate(self.playerList):
-					steamNumber = ""
-					if item.stats:
-						steamNumber = item.stats.steamNumber
-					else:
-						steamNumber = item.name
-
-					faction = ""
-					if item.faction:
-						faction = item.faction.name
-					team = "0"
-					if count >= (len(self.playerList)/2):
-						team = "1"
-
-					message += ",{},{},{}".format(str(steamNumber), str(faction), str(team))
-				
-				self.gameDescriptionString = message
-				#self.placeBetsString = "!OppStartBets,{}".format(channelName)
-
-			except Exception as e:
-				logging.error("Problem Creating Game Description")
-				logging.exception("Exception : ")
-				logging.error(str(e))
-
-			#print(self)
 			return True
 
 		except Exception as e:
@@ -291,6 +239,81 @@ class GameData():
 			logging.error(str(e))
 			self.gameInProgress = False
 			return False
+
+	def GetGameDescriptionString(self):
+		try:
+			offset = time.timezone if (time.localtime().tm_isdst == 0) else time.altzone
+			offset = offset / 60 / 60 * -1
+			hours = offset
+			hours_added = datetime.timedelta(hours = hours)
+			UTC_corrected_start_time = self.gameStartedDate + hours_added
+
+			gameStarted = str(UTC_corrected_start_time)
+			channelName = self.parameters.data['channel']
+
+			# Get the map full name from ucs file this takes time and so should only be called when output is intended.
+			self.GetMapNameFullFromUCSFile()
+			try:
+				numberOfHumans = str(int(self.numberOfHumans))
+				numberOfComputers = str(int(self.numberOfComputers))
+				numberOfPlayers = str(int(self.numberOfPlayers))
+				slots = str(int(self.slots))
+				randomStart = str(int(self.randomStart))
+				highResources = str(int(self.highResources))
+				VPCount = str(int(self.VPCount))
+				automatch = str(int(self.automatch))
+				mapNameFull = str(self.mapNameFull)
+				modName = str(self.modName)
+
+			except Exception as e:
+				logging.error("Problem Creating Game Description")
+				logging.exception("Exception : ")
+				logging.error(str(e))			
+
+			message = f"!start,{channelName},{gameStarted},{numberOfHumans},{numberOfComputers},{numberOfPlayers},{slots},{randomStart},{highResources},{VPCount},{automatch},{mapNameFull},{modName}"
+			for count , item in enumerate(self.playerList):
+				steamNumber = ""
+				if item.stats:
+					steamNumber = item.stats.steamNumber
+				else:
+					steamNumber = item.name
+
+				faction = ""
+				if item.faction:
+					faction = item.faction.name
+				team = "0"
+				if count >= (len(self.playerList)/2):
+					team = "1"
+
+				message += ",{},{},{}".format(str(steamNumber), str(faction), str(team))
+
+			self.gameDescriptionString = message
+			return self.gameDescriptionString
+		except Exception as e:
+			logging.error("Problem in GetGameDescriptionString")
+			logging.exception("Exception : ")
+			logging.error(str(e))			
+
+	def GetMapDescriptionFromUCSFile(self):
+		# mapDescriptionFull will be None until resolved this takes time because file reading so moved to separate function call
+		# get mapDescriptionFull from ucs file if they exist there
+		try:
+			self.mapDescriptionFull = UCS(parameters=self.parameters).compareUCS(self.mapDescription)	
+
+		except Exception as e:
+			logging.error("Problem in GetMapDescription")
+			logging.exception("Exception : ")
+			logging.error(str(e))
+
+	def GetMapNameFullFromUCSFile(self):
+		# mapNameFull and mapDescriptionFull will be None until resolved this takes time because file reading so moved to separate function call
+		# get mapNameFull from ucs file if they exist there
+		try:
+			self.mapNameFull = UCS(parameters=self.parameters).compareUCS(self.mapName)	
+		except Exception as e:
+			logging.error("Problem in GetMapNameFull")
+			logging.exception("Exception : ")
+			logging.error(str(e))
 
 	def GetPtrAddr(self, base, offsets):
 		try:
@@ -308,7 +331,7 @@ class GameData():
 			pass
 	
 
-	def getCOHMemoryAddress(self):
+	def GetCOHMemoryAddress(self):
 		
 		try:
 			self.pm = Pymem("RelicCOH.exe")
@@ -325,7 +348,6 @@ class GameData():
 			
 	
 	# rewrite function below to remove memory search.
-
 	def getStatsFromGame(self):
 		try:
 

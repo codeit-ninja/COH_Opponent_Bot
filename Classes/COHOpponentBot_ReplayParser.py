@@ -213,9 +213,14 @@ class ReplayParser:
 		self.parseChunk(0)
 		self.parseChunk(0)
 
-		#get mapname and mapdescription from ucs file if they exist there
+		self.mapNameFull = None 
+		self.mapDescriptionFull = None 
+
+	def ResolveMapNameFullAndMapDescriptionFromUCS(self):
+		# mapNameFull and mapDescriptionFull will be None until resolved this takes time because file reading so moved to separate function call
+		#get mapNameFull and mapDescriptionFull from ucs file if they exist there
 		self.mapNameFull = UCS(parameters=self.parameters).compareUCS(self.mapName)
-		self.mapDescriptionFull = UCS(parameters=self.parameters).compareUCS(self.mapDescription)
+		self.mapDescriptionFull = UCS(parameters=self.parameters).compareUCS(self.mapDescription)		
 
 
 	def parseChunk(self, level):

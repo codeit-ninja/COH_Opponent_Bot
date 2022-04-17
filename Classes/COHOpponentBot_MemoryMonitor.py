@@ -69,12 +69,10 @@ class MemoryMonitor(threading.Thread):
 
 	def GameStarted(self):
 		try:
-			#self.getGameData()
 			self.gameData.outputOpponentData()
 			self.PostSteamNumber()
 			self.PostData()
 			self.StartBets()
-
 
 		except Exception as e:
 			logging.info("Problem in GameStarted")
@@ -91,8 +89,9 @@ class MemoryMonitor(threading.Thread):
 			logging.error(str(e))
 
 	def PostData(self):
+		# Sending to cohopponentbot channel about game, this requires parsing mapName First
 		try:
-			message = self.gameData.gameDescriptionString
+			message = self.gameData.GetGameDescriptionString()
 			self.ircClient.SendMessageToOpponentBotChannelIRC(message)
 
 		except Exception as e:

@@ -102,14 +102,16 @@ class IRC_Channel(threading.Thread):
 	def gameInfo(self):
 		self.gameData = GameData(self.ircClient, parameters=self.parameters)
 		if self.gameData.getDataFromGame():
-			self.ircClient.SendPrivateMessageToIRC(f"Map : {self.gameData.mapFullName}, High Resources : {self.gameData.highResources}, Automatch : {self.gameData.automatch}, Slots : {self.gameData.slots}, Players : {self.gameData.numberOfPlayers}.")
+			self.ircClient.SendPrivateMessageToIRC(f"Map : {self.gameData.mapNameFull}, High Resources : {self.gameData.highResources}, Automatch : {self.gameData.automatch}, Slots : {self.gameData.slots}, Players : {self.gameData.numberOfPlayers}.")
+
 	def story(self):
 		self.gameData = GameData(self.ircClient, parameters=self.parameters)
 		logging.info(str(self.gameData))
 		if self.gameData.getDataFromGame():
 			logging.info(str(self.gameData))
+			# Requires parsing the map description from the UCS file this takes time so must be done first
+			self.gameData.GetMapDescriptionFromUCSFile()
 			self.ircClient.SendPrivateMessageToIRC("{}.".format(self.gameData.mapDescriptionFull))
-
 
 	def testOutput(self):
 		if not self.gameData:
