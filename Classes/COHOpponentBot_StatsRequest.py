@@ -9,9 +9,8 @@ from Classes.COHOpponentBot_PlayerStat import PlayerStat
 
 class StatsRequest:
 	def __init__(self, parameters = None):
-		if parameters:
-			self.parameters = parameters
-		else:
+		self.parameters = parameters
+		if not parameters:
 			self.parameters = Parameters()
 		
 		# Declare instance variables for storing data returned from server (nested List/Dictionary)

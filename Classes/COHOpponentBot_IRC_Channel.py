@@ -19,10 +19,9 @@ class IRC_Channel(threading.Thread):
 		self.queue = queue
 		self.channel = channel
 
-		if parameters:
-			self.parameters = parameters
-		else:
-			self.parameters = Parameters()	
+		self.parameters = parameters
+		if not parameters:
+			self.parameters = Parameters()
 
 		self.gameData = GameData(self.ircClient, parameters=self.parameters)
 		

@@ -34,9 +34,8 @@ class GameData():
 
 	def __init__(self, ircClient = None, parameters = None):
 
-		if parameters:
-			self.parameters = parameters
-		else:
+		self.parameters = parameters
+		if not parameters:
 			self.parameters = Parameters()	
 
 		self.playerList = []
@@ -371,6 +370,7 @@ class GameData():
 								if "/steam/" in steamNumber:
 									#print(steamNumber[7:24])
 									int(steamNumber[7:24]) # throws exception if steam number is not a number
+									logging.info(f"Got steamNumber from memory {str(steamNumber[7:24])}")
 									steamNumberList.append(str(steamNumber[7:24]))
 									break
 							except Exception as e:
@@ -427,9 +427,6 @@ class GameData():
 				if (str(item.faction) == str(Faction.WM)) or (str(item.faction)== str(Faction.PE)):
 					if item.name != "":
 						axisTeam.append(item)
-
-			#logging.info("players in allies team : " +str(len(alliesTeam)))
-			#logging.info("players in axis team : " + str(len(axisTeam)))
 
 			# output each player to file
 			if (self.parameters.data.get('useOverlayPreFormat')):

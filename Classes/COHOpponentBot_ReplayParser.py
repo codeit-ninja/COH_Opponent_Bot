@@ -12,11 +12,9 @@ class ReplayParser:
 
 	def __init__(self, filePath = None, parameters = None) -> None:
 
-
-		if parameters:
-			self.parameters = parameters
-		else:
-			self.parameters = Parameters()	
+		self.parameters = parameters
+		if not parameters:
+			self.parameters = Parameters()
 
 		self.filePath = filePath
 

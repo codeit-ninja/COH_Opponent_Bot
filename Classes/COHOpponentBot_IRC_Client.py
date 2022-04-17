@@ -30,10 +30,9 @@ class IRC_Client(threading.Thread):
 
 		self.displayConsoleOut = consoleDisplayBool
 
-		if parameters:
-			self.parameters = parameters
-		else:
-			self.parameters = Parameters()	
+		self.parameters = parameters
+		if not parameters:
+			self.parameters = Parameters()
 
 		self.adminUserName = self.parameters.privatedata.get('adminUserName')	# This username will be able to use admin commands, exit the program and bypass some limits.
 

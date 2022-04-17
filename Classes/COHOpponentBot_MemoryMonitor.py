@@ -15,9 +15,8 @@ class MemoryMonitor(threading.Thread):
 			logging.info("Memory Monitor Started!")
 			self.running = True
 
-			if parameters:
-				self.parameters = parameters
-			else:
+			self.parameters = parameters
+			if not parameters:
 				self.parameters = Parameters()
 
 			self.pm = None
@@ -152,7 +151,7 @@ class MemoryMonitor(threading.Thread):
 			logging.error(str(e))
 			logging.exception("Exception : ")
 	
-	def close(self):
+	def Close(self):
 		logging.info("Memory Monitor Closing!")
 		self.running = False
 		# break out of loops if waiting
@@ -163,7 +162,7 @@ class MemoryMonitor(threading.Thread):
 			self.winLostTimer.cancel()
 			#self.GetWinLose()
 
-	def find_between(self, s, first, last ):
+	def Find_between(self, s, first, last ):
 		try:
 			start = s.index( first ) + len( first )
 			end = s.index( last, start )
