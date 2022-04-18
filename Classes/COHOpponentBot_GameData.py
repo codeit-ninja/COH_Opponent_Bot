@@ -38,6 +38,15 @@ class GameData():
 		if not parameters:
 			self.parameters = Parameters()	
 
+		# Local reference to the IRC client
+		self.ircClient = ircClient
+
+		# Pymem handle 
+		self.pm = None
+		self.baseAddress = None
+		self.cohProcessID = None
+
+		# Replay Data Default Values
 		self.playerList = []
 		self.numberOfHumans = 0
 		self.numberOfComputers = 0
@@ -45,22 +54,13 @@ class GameData():
 		self.normalCPUCount = 0
 		self.hardCPUCount = 0
 		self.expertCPUCount = 0
-
 		self.numberOfPlayers = 0
 		self.slots = 0
-
 		self.matchType = MatchType.BASIC
-		self.ircClient = ircClient
-
 		self.cohRunning = False
 		self.gameInProgress = False
-
 		self.gameStartedDate = None
-
-		self.cohProcessID = None
-
 		self.ircStringOutputList = [] # This holds a list of IRC string outputs.
-
 		self.randomStart = None
 		self.highResources = None
 		self.VPCount = None
@@ -70,14 +70,42 @@ class GameData():
 		self.modName = None
 		self.mapDescription = None
 		self.mapDescriptionFull = ""
-
 		self.gameDescriptionString = ""
 
-		self.pm = None
-		self.baseAddress = None
+		self.ircStringOutputList = [] # This holds a list of IRC string outputs.
+
+	def ClearData(self):
+		self.playerList = []
+		self.numberOfHumans = 0
+		self.numberOfComputers = 0
+		self.easyCPUCount = 0
+		self.normalCPUCount = 0
+		self.hardCPUCount = 0
+		self.expertCPUCount = 0
+		self.numberOfPlayers = 0
+		self.slots = 0
+		self.matchType = MatchType.BASIC
+		self.cohRunning = False
+		self.gameInProgress = False
+		self.gameStartedDate = None
+		self.cohProcessID = None
+		self.randomStart = None
+		self.highResources = None
+		self.VPCount = None
+		self.automatch = None
+		self.mapName = None
+		self.mapNameFull = ""
+		self.modName = None
+		self.mapDescription = None
+		self.mapDescriptionFull = ""
+		self.gameDescriptionString = ""
+
+		self.ircStringOutputList = [] # This holds a list of IRC string outputs.
 
 	def GetDataFromGame(self):
 		try:
+			# First Clear all data that can be aquired from the game
+			self.ClearData() 
 			
 			# Check if company of heroes is running if not return false
 			if not self.GetCOHMemoryAddress():

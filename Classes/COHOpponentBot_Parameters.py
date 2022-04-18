@@ -60,7 +60,7 @@ class Parameters:
 
 		self.data['logErrorsToFile'] = True
 
-		self.data['filePollInterval'] = 20
+		self.data['filePollInterval'] = 10
 
 		self.data['showSteamProfile'] = False
 
@@ -151,7 +151,7 @@ class Parameters:
 			logging.error(str(e))
 			logging.exception("Exception : ")
 
-		# Set the locatoin of cohPath from all steam folder installations
+		# Set the location of cohPath from all steam folder installations
 
 		if (not self.data.get('cohPath')) or (not self.data.get('cohUCSPath')):
 			#connecting to key in registry

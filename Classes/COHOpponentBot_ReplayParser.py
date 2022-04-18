@@ -403,7 +403,7 @@ class ReplayParser:
 		output += "mapFileName : {}\n".format(self.mapFileName)
 		output += "mapWidth : {}\n".format(self.mapWidth)
 		output += "mapHeight : {}\n".format(self.mapHeight)
-		output += "playerList : {}\n".format(len(self.playerList))
+		output += "playerList Size : {}\n".format(len(self.playerList))
 		output += "playerList : {}\n".format(self.playerList)
 		return output
 
