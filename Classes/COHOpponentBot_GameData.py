@@ -308,7 +308,10 @@ class GameData():
 		
 		try:
 			self.pm = Pymem("RelicCOH.exe")
-			logging.info(f"getCOHMemoryAddress self.pm : {str(self.pm)}")
+			self.cohProcessID = self.pm.process_id
+			logging.info(f"self.pm : {str(self.pm)}")
+			logging.info(f"cohProcessID : {str(self.cohProcessID)}")
+			# The baseAddres is used for pointers memory access
 			self.baseAddress = pymem.process.module_from_name(self.pm.process_handle , "RelicCOH.exe").lpBaseOfDll
 			logging.info(f"getCOHMemoryAddress self.baseAddress : {str(self.baseAddress)}")
 			self.cohRunning = True
@@ -325,10 +328,10 @@ class GameData():
 				with Process.open_process(self.pm.process_id) as p:
 					searchString = bytearray("COH__REC".encode('ascii'))
 					buff = bytes(searchString)
-					print(f"buff{buff}")
+					#print(f"buff{buff}")
 					if buff:
 						replayMemoryAddress = p.search_all_memory(buff)
-						print(replayMemoryAddress)
+						#print(replayMemoryAddress)
 						for address in replayMemoryAddress:
 							#There should be only one COH__REC in memory if the game is running
 							try:
@@ -788,7 +791,7 @@ class GameData():
 		output += "COH running : {}\n".format(str(self.cohRunning)) 
 		output += "Game In Progress : {}\n".format(str(self.gameInProgress)) 
 		output += "gameStartedDate : {}\n".format(str(self.gameStartedDate)) 
-		output += "cohMemoryAddress : {}\n".format(str(self.cohProcessID)) 
+		output += "cohProcessID : {}\n".format(str(self.cohProcessID)) 
 		output += "baseAddress : {}\n".format(str(self.baseAddress)) 
 		output += "gameDescriptionString : {}\n".format(str(self.gameDescriptionString)) 
 

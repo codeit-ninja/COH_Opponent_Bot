@@ -60,7 +60,7 @@ class Parameters:
 
 		self.data['logErrorsToFile'] = True
 
-		self.data['filePollInterval'] = 10
+		self.data['filePollInterval'] = 20
 
 		self.data['showSteamProfile'] = False
 
