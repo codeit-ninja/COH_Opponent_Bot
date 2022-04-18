@@ -57,7 +57,7 @@ class GameData():
 
 		self.gameStartedDate = None
 
-		self.cohMemoryAddress = None
+		self.cohProcessID = None
 
 		self.ircStringOutputList = [] # This holds a list of IRC string outputs.
 
@@ -76,30 +76,6 @@ class GameData():
 		self.pm = None
 		self.baseAddress = None
 
-	def GetGameInProgress(self):
-		try:
-			# try to get COH__REC string from static pointer of replay in memory to tell if game in progress
-			cohrecReplayAddress = 0x00902030
-			cohrecOffsets = [0x28,0x160,0x4,0x84,0x24,0x110,0x0]
-			logging.info(f"baseAddress : {str(self.baseAddress)}")
-			memoryAddress = self.GetPtrAddr(int(self.baseAddress) + int(cohrecReplayAddress), cohrecOffsets)
-			logging.info(f"got memory address from pointer : {str(memoryAddress)}")
-			if memoryAddress:
-				replayHeaderStringIdentifer = self.pm.read_bytes(memoryAddress + 4, 8)
-				if replayHeaderStringIdentifer == "COH__REC".encode():
-					logging.info("Contains COH__REC")
-					self.gameInProgress = True
-					return True
-			logging.info("Could Not find COH__REC")
-			self.gameInProgress = False
-			return False
-		except Exception as e:
-			logging.info("Could Not find COH__REC")
-			self.gameInProgress = False
-			logging.exception("Exception : ")
-			return False
-
-
 	def GetDataFromGame(self):
 		try:
 			
@@ -108,22 +84,23 @@ class GameData():
 				return False
 
 			# Check if a game is currently in progress if not return false.
-			if not self.GetGameInProgress():
+			replayData = self.GetCOHREC()
+			if not replayData:
 				return False
 
-			mpPointerAddress = 0x00901EA8
-			mpOffsets=[0xC,0xC,0x18,0x10,0x24,0x18,0x264]
+			#mpPointerAddress = 0x00901EA8
+			#mpOffsets=[0xC,0xC,0x18,0x10,0x24,0x18,0x264]
 
 			# not used but for reference
-			muniPointerAddress = 0x00901EA8
-			muniOffsets=[0xC,0xC,0x18,0x10,0x24,0x18,0x26C]
+			#muniPointerAddress = 0x00901EA8
+			#muniOffsets=[0xC,0xC,0x18,0x10,0x24,0x18,0x26C]
 
 			# not used but for reference
-			fuelPointerAddress = 0x00901EA8
-			fuelOffsets = [0xC,0xC,0x18,0x10,0x24,0x18,0x268]
+			#fuelPointerAddress = 0x00901EA8
+			#fuelOffsets = [0xC,0xC,0x18,0x10,0x24,0x18,0x268]
 
-			cohrecReplayAddress = 0x00902030
-			cohrecOffsets = [0x28,0x160,0x4,0x84,0x24,0x110,0x0]
+			#cohrecReplayAddress = 0x00902030
+			#cohrecOffsets = [0x28,0x160,0x4,0x84,0x24,0x110,0x0]
 
 			#print(f"baseAddress{self.baseAddress}")
 			#print(f"baseAddress{mpPointerAddress}")
@@ -135,8 +112,8 @@ class GameData():
 			#mp = self.pm.read_float(self.GetPtrAddr(int(self.baseAddress) + int(mpPointerAddress), mpOffsets))
 
 			# access replay data in game memory
-			replayData = self.pm.read_bytes(self.GetPtrAddr(self.baseAddress + cohrecReplayAddress, cohrecOffsets), 4000)
-
+			#replayData = self.pm.read_bytes(self.GetPtrAddr(self.baseAddress + cohrecReplayAddress, cohrecOffsets), 4000)
+			
 			# if the above executes without throwing an error then game is in progress.
 			self.gameInProgress = True
 
@@ -327,7 +304,6 @@ class GameData():
 			#' Error routinely thrown when Pointer not found
 			pass
 	
-
 	def GetCOHMemoryAddress(self):
 		
 		try:
@@ -342,45 +318,70 @@ class GameData():
 			self.cohRunning = False
 			logging.info(f"self.cohRunning {self.cohRunning}")
 			return False
+
+	def GetCOHREC(self):
+		try:
+			if self.pm:
+				with Process.open_process(self.pm.process_id) as p:
+					searchString = bytearray("COH__REC".encode('ascii'))
+					buff = bytes(searchString)
+					print(f"buff{buff}")
+					if buff:
+						replayMemoryAddress = p.search_all_memory(buff)
+						print(replayMemoryAddress)
+						for address in replayMemoryAddress:
+							#There should be only one COH__REC in memory if the game is running
+							try:
+								data_dump = self.pm.read_bytes(address-4, 4000)	
+								data_dump = bytearray(data_dump)
+								self.gameInProgress = True
+								return data_dump
+							except Exception as e:
+								pass
+				self.gameInProgress = False
+				return None
+
+		except Exception as e:
+			logging.error("Problem in GetCOHREC")
+			logging.exception("Exception :")
+
 			
 	
 	# rewrite function below to remove memory search.
 	def getStatsFromGame(self):
 		try:
-
-			self.cohMemoryAddress = Process.get_pid_by_name('RelicCOH.exe')
-
-			with Process.open_process(self.cohMemoryAddress) as p:
-				steamNumberList = []
-				steamNumberList.append(self.parameters.data['steamNumber']) # add default value incase it isn't found
-				for player in self.playerList:
-					name = bytearray(str(player.name).encode('utf-16le'))
-					buff = bytes(name)
-					if buff:
-						#print(player.name)
-						#print(len(player.name))
-						#print(name)
-						#print(buff)
-						replayMemoryAddress = p.search_all_memory(buff)
-						for address in replayMemoryAddress:
-							try:
-								data_dump = p.read_memory(address-56, (ctypes.c_byte * 48)())	
-								data_dump = bytearray(data_dump)
-								steamNumber = data_dump.decode('utf-16le').strip()
-								if "/steam/" in steamNumber:
-									#print(steamNumber[7:24])
-									int(steamNumber[7:24]) # throws exception if steam number is not a number
-									logging.info(f"Got steamNumber from memory {str(steamNumber[7:24])}")
-									steamNumberList.append(str(steamNumber[7:24]))
-									break
-							except Exception as e:
-								pass
-				statList = []
-				for item in steamNumberList:
-					statRquest = StatsRequest(parameters= self.parameters)
-					stat = statRquest.returnStats(item)
-					statList.append(stat)
-				return statList
+			if self.pm:
+				with Process.open_process(self.pm.process_id) as p:
+					steamNumberList = []
+					steamNumberList.append(self.parameters.data['steamNumber']) # add default value incase it isn't found
+					for player in self.playerList:
+						name = bytearray(str(player.name).encode('utf-16le'))
+						buff = bytes(name)
+						if buff:
+							#print(player.name)
+							#print(len(player.name))
+							#print(name)
+							#print(buff)
+							replayMemoryAddress = p.search_all_memory(buff)
+							for address in replayMemoryAddress:
+								try:
+									data_dump = p.read_memory(address-56, (ctypes.c_byte * 48)())	
+									data_dump = bytearray(data_dump)
+									steamNumber = data_dump.decode('utf-16le').strip()
+									if "/steam/" in steamNumber:
+										#print(steamNumber[7:24])
+										int(steamNumber[7:24]) # throws exception if steam number is not a number
+										logging.info(f"Got steamNumber from memory {str(steamNumber[7:24])}")
+										steamNumberList.append(str(steamNumber[7:24]))
+										break
+								except Exception as e:
+									pass
+					statList = []
+					for item in steamNumberList:
+						statRquest = StatsRequest(parameters= self.parameters)
+						stat = statRquest.returnStats(item)
+						statList.append(stat)
+					return statList
 		except Exception as e:
 			logging.error(str(e))
 			logging.exception("Exception : ")
@@ -787,7 +788,7 @@ class GameData():
 		output += "COH running : {}\n".format(str(self.cohRunning)) 
 		output += "Game In Progress : {}\n".format(str(self.gameInProgress)) 
 		output += "gameStartedDate : {}\n".format(str(self.gameStartedDate)) 
-		output += "cohMemoryAddress : {}\n".format(str(self.cohMemoryAddress)) 
+		output += "cohMemoryAddress : {}\n".format(str(self.cohProcessID)) 
 		output += "baseAddress : {}\n".format(str(self.baseAddress)) 
 		output += "gameDescriptionString : {}\n".format(str(self.gameDescriptionString)) 
 
