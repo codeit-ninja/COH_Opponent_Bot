@@ -354,12 +354,12 @@ class GameData():
 							success = replayParser.processData()
 							if success:
 								self.gameInProgress = True
-								return replayParser
-							else:
-								self.gameInProgress = False						
+								return replayParser			
 					except:
 						logging.exception("Exception : ")
 						logging.error("Not reading memory at this location properly")
+			self.gameInProgress = False
+
 		except Exception as e:
 			logging.error("Problem in GetCOHREC")
 			logging.exception("Exception :")

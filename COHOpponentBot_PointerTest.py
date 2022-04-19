@@ -104,6 +104,12 @@ loops = 0
 
 event = threading.Event()
 
+timeTakenToSearchStart = datetime.datetime.now()
+gameData.Get_replayParser_BySearch()
+timeTakenToSearchEnd = datetime.datetime.now()
+logging.info(f"Time taken to get replay data by Search : {str(timeTakenToSearchEnd-timeTakenToSearchStart)}")
+
+
 
 while gameData.GetCOHMemoryAddress():
     
@@ -112,7 +118,10 @@ while gameData.GetCOHMemoryAddress():
     logging.info(f"Loop : {loops}")
     for count, item in enumerate(myListOfCOHRECPointers):
         logging.info(f"{count} {item}")
+        startGetPointer = datetime.datetime.now()
         actualCOHRECMemoryAddress = gameData.GetPtrAddr(gameData.baseAddress + item[0], item[1])
+        endGetPointer = datetime.datetime.now()
+        logging.info(f"Time to GetPtrAddr : {str(endGetPointer - startGetPointer)}")
         logging.info(f"actualCOHRECMemoryAddress {str(actualCOHRECMemoryAddress)}")
         if actualCOHRECMemoryAddress:
             try:
@@ -136,7 +145,7 @@ while gameData.GetCOHMemoryAddress():
             except:
                 logging.error("Not reading memory at this location properly")
                 logging.exception("Exception : ")
-        event.wait(10)
+    event.wait(10)
 
 finished = datetime.datetime.now()
 
