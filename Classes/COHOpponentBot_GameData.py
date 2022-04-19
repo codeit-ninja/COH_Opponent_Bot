@@ -147,7 +147,10 @@ class GameData():
 
 			cohreplayparser = ReplayParser(parameters=self.parameters)
 			cohreplayparser.data = bytearray(replayData)
-			cohreplayparser.processData()
+			success = cohreplayparser.processData()
+			# If partial data present the replay parser can fail, in these circumstances return and try again. Do not set game in progress to False.
+			if not success:
+				return False
 
 			self.gameStartedDate = cohreplayparser.localDate
 			self.randomStart = cohreplayparser.randomStart
@@ -239,7 +242,6 @@ class GameData():
 			logging.error("Problem in Paradice")
 			logging.exception("Exception : ")
 			logging.error(str(e))
-			self.gameInProgress = False
 			return False
 
 	def GetGameDescriptionString(self):

@@ -1,3 +1,4 @@
+from concurrent.futures.process import _threads_wakeups
 import logging
 from Classes.COHOpponentBot_Parameters import Parameters
 import re
@@ -39,6 +40,8 @@ class ReplayParser:
 		self.mapHeight = None
 		self.playerList = []
 
+		self.success = None
+
 		self.data = None
 		self.dataIndex = 0
 
@@ -56,6 +59,7 @@ class ReplayParser:
 		except Exception as e:
 			logging.error("Failed to read 4 bytes")
 			logging.exception("Stack Trace: ")
+			self.success = False
 
 	def read_Bytes(self, numberOfBytes):
 		"""reads a number of bytes from the data array"""
@@ -67,6 +71,7 @@ class ReplayParser:
 		except Exception as e:
 			logging.error("Failed to Read bytes")
 			logging.exception("Stack Trace: ")
+			self.success = False
 
 
 	def read_LengthString(self):
@@ -79,6 +84,7 @@ class ReplayParser:
 		except Exception as e:
 			logging.error("Failed to read a string of specified length")
 			logging.exception("Stack Trace: ")
+			self.success = False
 
 	def read_2ByteString(self, stringLength=0 ) -> str:
 		"""Reads a 2byte encoded little-endian string of specified length."""
@@ -90,7 +96,8 @@ class ReplayParser:
 				return theString
 		except Exception as e:
 			logging.error("Failed to read a string of specified length")
-			logging.exception("Stack Trace: ")            
+			logging.exception("Stack Trace: ")    
+			self.success = False        
 
 	def read_LengthASCIIString(self) -> str:
 		"""Reads ASCII string, the length defined by the first four bytes."""
@@ -102,6 +109,7 @@ class ReplayParser:
 		except Exception as e:
 			logging.error("Failed to read a string of specified length")
 			logging.exception("Stack Trace: ")  
+			self.success = False
 
 	def read_ASCIIString(self, stringLength=0) -> str:
 		"""Reads a byte array of spcified length and attempts to convert it into a string."""
@@ -114,6 +122,7 @@ class ReplayParser:
 		except Exception as e:
 			logging.error("Failed to read a string of specified length")
 			logging.exception("Stack Trace: ")  
+			self.success = False
 
 	def read_NULLTerminated_2ByteString(self) -> str:
 		"""Reads a Utf-16 little endian character string until the first two byte NULL value."""
@@ -126,6 +135,7 @@ class ReplayParser:
 		except Exception as e:
 			logging.error("Failed to read a string of specified length")
 			logging.exception("Stack Trace: ")  
+			self.success = False
 
 	def read_NULLTerminated_ASCIIString(self) -> str:
 		"""Reads a byte array until the first NULL and converts to a string."""
@@ -137,7 +147,8 @@ class ReplayParser:
 				return characters  
 		except Exception as e:
 			logging.error("Failed to read a string of specified length")
-			logging.exception("Stack Trace: ")  
+			logging.exception("Stack Trace: ")
+			self.success = False
 
 	def seek(self, numberOfBytes, relative = 0):
 		"""Moves the file index a number of bytes forward or backward"""
@@ -166,6 +177,8 @@ class ReplayParser:
 		self.processData()
 
 	def processData(self):
+		# Set return flag
+		self.success = True
 
 		#Process the file Header
 		self.fileVersion = self.read_UnsignedLong4Bytes()
@@ -210,6 +223,11 @@ class ReplayParser:
 
 		self.parseChunk(0)
 		self.parseChunk(0)
+
+		if self.success:
+			return True
+		else:
+			return False
 
 	def ResolveMapNameFullAndMapDescriptionFromUCS(self):
 		# mapNameFull and mapDescriptionFull will be None until resolved this takes time because file reading so moved to separate function call

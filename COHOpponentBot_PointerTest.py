@@ -91,8 +91,8 @@ while gameData.GetCOHMemoryAddress():
         logging.info(f"actualCOHRECMemoryAddress {str(actualCOHRECMemoryAddress)}")
         if actualCOHRECMemoryAddress:
             try:
-                header = gameData.pm.read_bytes(actualCOHRECMemoryAddress + 4, 8)
-                if header == bytes("COH__REC".encode('ascii')):
+                header = gameData.pm.read_bytes(actualCOHRECMemoryAddress, 8)
+                if header[4:12] == bytes("COH__REC".encode('ascii')):
                     logging.info("Pointing to COH__REC")
             except:
                 logging.error("Not reading memory at this location properly")
