@@ -43,7 +43,7 @@ class FactionResult():
                     self.winLossRatio = "Unbeaten"
         except Exception as e:
             logging.error("In factionResult Creating winLossRatio")
-            logging.error(str(e))	
+            logging.error(str(e))
             logging.exception("Exception : ")
 
     def __str__(self):
