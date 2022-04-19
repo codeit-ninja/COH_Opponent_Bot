@@ -1,24 +1,14 @@
 import ctypes
 import datetime
 import html
-from importlib.util import module_from_spec
 import logging
-#from multiprocessing import Process
-from mem_edit import Process
 import os
 import re
 import time
-
-import ctypes
-import ctypes.util
-import functools
-import logging
-import platform
-import struct
-import sys
-
-from pymem import *
+import pymem
 import pymem.process
+
+from mem_edit import Process
 
 from Classes.COHOpponentBot_Faction import Faction
 from Classes.COHOpponentBot_MatchType import MatchType
@@ -32,830 +22,890 @@ from Classes.COHOpponentBot_UCS import UCS
 
 class GameData():
 
-	def __init__(self, ircClient = None, parameters = None):
-		"""Instanciates a new object of type GameData"""
+    def __init__(self, ircClient=None, parameters=None):
+        """Instanciates a new object of type GameData"""
 
-		self.parameters = parameters
-		if not parameters:
-			self.parameters = Parameters()	
+        self.parameters = parameters
+        if not parameters:
+            self.parameters = Parameters()
 
-		# Local reference to the IRC client
-		self.ircClient = ircClient
+        # Local reference to the IRC client
+        self.ircClient = ircClient
 
-		# Pymem handle 
-		self.pm = None
-		self.baseAddress = None
-		self.cohProcessID = None
+        # Pymem handle
+        self.pm = None
+        self.baseAddress = None
+        self.cohProcessID = None
 
-		# Replay Data Default Values
-		self.playerList = []
-		self.numberOfHumans = 0
-		self.numberOfComputers = 0
-		self.easyCPUCount = 0
-		self.normalCPUCount = 0
-		self.hardCPUCount = 0
-		self.expertCPUCount = 0
-		self.numberOfPlayers = 0
-		self.slots = 0
-		self.matchType = MatchType.BASIC
-		self.cohRunning = False
-		self.gameInProgress = False
-		self.gameStartedDate = None
-		self.ircStringOutputList = [] # This holds a list of IRC string outputs.
-		self.randomStart = None
-		self.highResources = None
-		self.VPCount = None
-		self.automatch = None
-		self.mapName = None
-		self.mapNameFull = ""
-		self.modName = None
-		self.mapDescription = None
-		self.mapDescriptionFull = ""
-		self.gameDescriptionString = ""
+        # Replay Data Default Values
+        self.playerList = []
+        self.numberOfHumans = 0
+        self.numberOfComputers = 0
+        self.easyCPUCount = 0
+        self.normalCPUCount = 0
+        self.hardCPUCount = 0
+        self.expertCPUCount = 0
+        self.numberOfPlayers = 0
+        self.slots = 0
+        self.matchType = MatchType.BASIC
+        self.cohRunning = False
+        self.gameInProgress = False
+        self.gameStartedDate = None
 
-		self.ircStringOutputList = [] # This holds a list of IRC string outputs.
+        self.randomStart = None
+        self.highResources = None
+        self.VPCount = None
+        self.automatch = None
+        self.mapName = None
+        self.mapNameFull = ""
+        self.modName = None
+        self.mapDescription = None
+        self.mapDescriptionFull = ""
+        self.gameDescriptionString = ""
 
-	def ClearData(self):
-		"""Clears all the variable information in the GameData instance."""
-		self.playerList = []
-		self.numberOfHumans = 0
-		self.numberOfComputers = 0
-		self.easyCPUCount = 0
-		self.normalCPUCount = 0
-		self.hardCPUCount = 0
-		self.expertCPUCount = 0
-		self.numberOfPlayers = 0
-		self.slots = 0
-		self.matchType = MatchType.BASIC
-		self.cohRunning = False
-		self.gameInProgress = False
-		self.gameStartedDate = None
-		self.cohProcessID = None
-		self.randomStart = None
-		self.highResources = None
-		self.VPCount = None
-		self.automatch = None
-		self.mapName = None
-		self.mapNameFull = ""
-		self.modName = None
-		self.mapDescription = None
-		self.mapDescriptionFull = ""
-		self.gameDescriptionString = ""
+        # This holds a list of IRC string outputs.
+        self.ircStringOutputList = []
 
-		self.ircStringOutputList = [] # This holds a list of IRC string outputs.
+    def ClearData(self):
+        """Clears all the variable information in the GameData instance."""
 
-	def GetDataFromGame(self):
-		"""Attempts to get all the COH game information from the replay in memory."""
-		try:
-			# First Clear all data that can be aquired from the game
-			self.ClearData() 
-			
-			# Check if company of heroes is running if not return false
-			if not self.GetCOHMemoryAddress():
-				return False
+        self.playerList = []
+        self.numberOfHumans = 0
+        self.numberOfComputers = 0
+        self.easyCPUCount = 0
+        self.normalCPUCount = 0
+        self.hardCPUCount = 0
+        self.expertCPUCount = 0
+        self.numberOfPlayers = 0
+        self.slots = 0
+        self.matchType = MatchType.BASIC
+        self.cohRunning = False
+        self.gameInProgress = False
+        self.gameStartedDate = None
+        self.cohProcessID = None
+        self.randomStart = None
+        self.highResources = None
+        self.VPCount = None
+        self.automatch = None
+        self.mapName = None
+        self.mapNameFull = ""
+        self.modName = None
+        self.mapDescription = None
+        self.mapDescriptionFull = ""
+        self.gameDescriptionString = ""
 
-			# Check if a game is currently in progress if not return false.
-			replayParser = self.Get_replayParser_BySearch()
-			if not replayParser:
-				return False
+        # This holds a list of IRC string outputs.
+        self.ircStringOutputList = []
 
-			self.gameStartedDate = replayParser.localDate
-			self.randomStart = replayParser.randomStart
+    def GetDataFromGame(self):
+        """Attempts to get all the COH information from memory."""
 
-			self.highResources = replayParser.highResources
-			self.VPCount = replayParser.VPCount
-			if replayParser.matchType.lower() == "automatch":
-				self.automatch = True
-			else:
-				self.automatch = False
+        # First Clear all data that can be aquired from the game
+        self.ClearData()
 
-			self.mapName = replayParser.mapName
-			self.mapDescription = replayParser.mapDescription
-			self.modName = replayParser.modName
+        # Check if company of heroes is running if not return false
+        if not self.GetCOHMemoryAddress():
+            return False
 
-			for item in replayParser.playerList:
-				username = item['name']
-				factionString = item['faction']
-				player = Player(name=username,factionString=factionString)
-				self.playerList.append(player)
+        # Check if a game is currently in progress if not return false.
+        replayParser = self.Get_replayParser_BySearch()
+        if not replayParser:
+            return False
 
-			statList = self.getStatsFromGame()
+        self.gameStartedDate = replayParser.localDate
+        self.randomStart = replayParser.randomStart
 
-			for player in self.playerList:
-				if statList:
-					for stat in statList:
-						try:
-							#logging.info("userName from alias : {}".format(str(stat.alias).encode('utf-16le')))
-							#logging.info("userName from game : {}".format(str(player.name).encode('utf-16le')))
-							if str(stat.alias).encode('utf-16le') == str(player.name).encode('utf-16le'):
-								player.stats = stat						
-						except Exception as e:
-							logging.error(str(e))
-							logging.exception("Stack : ")
+        self.highResources = replayParser.highResources
+        self.VPCount = replayParser.VPCount
+        if replayParser.matchType.lower() == "automatch":
+            self.automatch = True
+        else:
+            self.automatch = False
 
-							#Assign Streamer name from steam alias and streamer steam Number 
-							try:
-								if self.parameters.data.get('steamNumber') == player.stats.steamNumber:
-									self.parameters.data['steamAlias'] = player.stats.alias
-									self.parameters.save()
-							except Exception as e:
-								logging.error(str(e))
-								logging.exception("Stack : ")			
+        self.mapName = replayParser.mapName
+        self.mapDescription = replayParser.mapDescription
+        self.modName = replayParser.modName
 
-			self.numberOfHumans = sum(item.stats is not None for item in self.playerList)
+        for item in replayParser.playerList:
+            username = item['name']
+            factionString = item['faction']
+            player = Player(name=username, factionString=factionString)
+            self.playerList.append(player)
 
-			cpuCounter = 0
-			easyCounter = 0
-			normalCounter = 0
-			hardCounter = 0
-			expertCounter = 0
+        statList = self.getStatsFromGame()
 
-			for item in self.playerList:
-				if (item.stats is None):
-					if ("CPU" in item.name): 
-						cpuCounter += 1
-					if ("Easy" in item.name):
-						easyCounter += 1
-					if ("Normal" in item.name):
-						normalCounter += 1
-					if ("Hard" in item.name):
-						hardCounter += 1
-					if ("Expert" in item.name):
-						expertCounter += 1
-				
-			self.numberOfComputers = cpuCounter
-			self.numberOfPlayers = cpuCounter + self.numberOfHumans
-			self.easyCPUCount = easyCounter
-			self.normalCPUCount = normalCounter
-			self.hardCPUCount = hardCounter
-			self.expertCPUCount = expertCounter
+        for player in self.playerList:
+            if statList:
+                for stat in statList:
+                    try:
+                        alias = str(stat.alias).encode('utf-16le')
+                        name = str(player.name).encode('utf-16le')
+                        if alias == name:
+                            player.stats = stat
+                    except Exception as e:
+                        logging.error(str(e))
+                        logging.exception("Stack : ")
 
-			self.slots = len(replayParser.playerList)
+                    steamNumber = self.parameters.data.get('steamNumber')
+                    ps = player.stats
+                    if ps:
+                        if steamNumber == ps.steamNumber:
+                            self.parameters.data['steamAlias'] = ps.alias
+                            self.parameters.save()
 
-			#set the current MatchType
-			self.matchType = MatchType.BASIC
-			if (int(self.numberOfComputers) > 0):
-				self.matchType = MatchType.BASIC
-			if (0 <= int(self.slots) <= 2) and (int(self.numberOfComputers) == 0):
-				self.matchType = MatchType.ONES
-			if (3 <= int(self.slots) <= 4) and (int(self.numberOfComputers) == 0):
-				self.matchType = MatchType.TWOS
-			if (5 <= int(self.slots) <= 6) and (int(self.numberOfComputers) == 0):
-				self.matchType = MatchType.THREES
+        humans = sum(item.stats is not None for item in self.playerList)
+        self.numberOfHumans = humans
 
-			return True
+        cpuCounter = 0
+        easyCounter = 0
+        normalCounter = 0
+        hardCounter = 0
+        expertCounter = 0
 
-		except Exception as e:
-			logging.error("Problem in Paradice")
-			logging.exception("Exception : ")
-			logging.error(str(e))
-			return False
+        for item in self.playerList:
+            if (item.stats is None):
+                if ("CPU" in item.name):
+                    cpuCounter += 1
+                if ("Easy" in item.name):
+                    easyCounter += 1
+                if ("Normal" in item.name):
+                    normalCounter += 1
+                if ("Hard" in item.name):
+                    hardCounter += 1
+                if ("Expert" in item.name):
+                    expertCounter += 1
 
-	def GetGameDescriptionString(self):
-		try:
-			offset = time.timezone if (time.localtime().tm_isdst == 0) else time.altzone
-			offset = offset / 60 / 60 * -1
-			hours = offset
-			hours_added = datetime.timedelta(hours = hours)
-			UTC_corrected_start_time = self.gameStartedDate + hours_added
+        self.numberOfComputers = cpuCounter
+        self.numberOfPlayers = cpuCounter + self.numberOfHumans
+        self.easyCPUCount = easyCounter
+        self.normalCPUCount = normalCounter
+        self.hardCPUCount = hardCounter
+        self.expertCPUCount = expertCounter
 
-			gameStarted = str(UTC_corrected_start_time)
-			channelName = self.parameters.data['channel']
+        self.slots = len(replayParser.playerList)
 
-			# Get the map full name from ucs file this takes time and so should only be called when output is intended.
-			self.GetMapNameFullFromUCSFile()
-			try:
-				numberOfHumans = str(int(self.numberOfHumans))
-				numberOfComputers = str(int(self.numberOfComputers))
-				numberOfPlayers = str(int(self.numberOfPlayers))
-				slots = str(int(self.slots))
-				randomStart = str(int(self.randomStart))
-				highResources = str(int(self.highResources))
-				VPCount = str(int(self.VPCount))
-				automatch = str(int(self.automatch))
-				mapNameFull = str(self.mapNameFull)
-				modName = str(self.modName)
+        # Set the current MatchType
 
-			except Exception as e:
-				logging.error("Problem Creating Game Description")
-				logging.exception("Exception : ")
-				logging.error(str(e))			
+        self.matchType = MatchType.BASIC
+        if (int(self.numberOfComputers) > 0):
+            self.matchType = MatchType.BASIC
+        if (0 <= int(self.slots) <= 2):
+            if (int(self.numberOfComputers) == 0):
+                self.matchType = MatchType.ONES
+        if (3 <= int(self.slots) <= 4):
+            if (int(self.numberOfComputers) == 0):
+                self.matchType = MatchType.TWOS
+        if (5 <= int(self.slots) <= 6):
+            if (int(self.numberOfComputers) == 0):
+                self.matchType = MatchType.THREES
 
-			message = f"!start,{channelName},{gameStarted},{numberOfHumans},{numberOfComputers},{numberOfPlayers},{slots},{randomStart},{highResources},{VPCount},{automatch},{mapNameFull},{modName}"
-			for count , item in enumerate(self.playerList):
-				steamNumber = ""
-				if item.stats:
-					steamNumber = item.stats.steamNumber
-				else:
-					steamNumber = item.name
+        return True
 
-				faction = ""
-				if item.faction:
-					faction = item.faction.name
-				team = "0"
-				if count >= (len(self.playerList)/2):
-					team = "1"
+    def GetGameDescriptionString(self) -> str:
+        """Produces a single-line game description string."""
 
-				message += ",{},{},{}".format(str(steamNumber), str(faction), str(team))
+        offset = time.timezone
+        if (time.localtime().tm_isdst == 0):
+            offset = time.timezone
+        else:
+            time.altzone
 
-			self.gameDescriptionString = message
-			return self.gameDescriptionString
-		except Exception as e:
-			logging.error("Problem in GetGameDescriptionString")
-			logging.exception("Exception : ")
-			logging.error(str(e))			
+        offset = offset / 60 / 60 * -1
+        hours = offset
+        hours_added = datetime.timedelta(hours=hours)
+        UTC_corrected_start_time = self.gameStartedDate + hours_added
 
-	def GetMapDescriptionFromUCSFile(self):
-		# mapDescriptionFull will be None until resolved this takes time because file reading so moved to separate function call
-		# get mapDescriptionFull from ucs file if they exist there
-		try:
-			self.mapDescriptionFull = UCS(parameters=self.parameters).compareUCS(self.mapDescription)	
+        gameStarted = str(UTC_corrected_start_time)
+        channelName = self.parameters.data.get('channel')
 
-		except Exception as e:
-			logging.error("Problem in GetMapDescription")
-			logging.exception("Exception : ")
-			logging.error(str(e))
+        # Get the map full name from ucs file this takes time and so
+        # should only be called when output is intended.
 
-	def GetMapNameFullFromUCSFile(self):
-		# mapNameFull and mapDescriptionFull will be None until resolved this takes time because file reading so moved to separate function call
-		# get mapNameFull from ucs file if they exist there
-		try:
-			self.mapNameFull = UCS(parameters=self.parameters).compareUCS(self.mapName)	
-		except Exception as e:
-			logging.error("Problem in GetMapNameFull")
-			logging.exception("Exception : ")
-			logging.error(str(e))
+        self.GetMapNameFullFromUCSFile()
 
-	def GetPtrAddr(self, base : int, offsets : list) -> int | None:
-		"""Gets memory address from a pointer address (base) and applies offsets.
+        try:
+            numberOfHumans = str(int(self.numberOfHumans))
+            numberOfComputers = str(int(self.numberOfComputers))
+            numberOfPlayers = str(int(self.numberOfPlayers))
+            slots = str(int(self.slots))
+            randomStart = str(int(self.randomStart))
+            highResources = str(int(self.highResources))
+            VPCount = str(int(self.VPCount))
+            automatch = str(int(self.automatch))
+            mapNameFull = str(self.mapNameFull)
+            modName = str(self.modName)
 
-		Parameters:
-		:param base:  The base memory address
-		:type base: int
-           
-        :param offsets: The list of offsets	
-		:type offsets: list
+        except Exception as e:
+            logging.error("Problem Creating Game Description")
+            logging.exception("Exception : ")
+            logging.error(str(e))
+
+        message = (
+            f"!start,{channelName},{gameStarted},{numberOfHumans},"
+            f"{numberOfComputers},{numberOfPlayers},{slots},{randomStart},"
+            f"{highResources},{VPCount},{automatch},{mapNameFull},{modName}"
+            )
+
+        for count, item in enumerate(self.playerList):
+            steamNumber = ""
+            if item.stats:
+                steamNumber = item.stats.steamNumber
+            else:
+                steamNumber = item.name
+
+            faction = ""
+            if item.faction:
+                faction = item.faction.name
+            team = "0"
+            if count >= (len(self.playerList)/2):
+                team = "1"
+
+            message += f",{str(steamNumber)},{str(faction)},{str(team)}"
+
+        self.gameDescriptionString = message
+        return self.gameDescriptionString
+
+    def GetMapDescriptionFromUCSFile(self):
+        """mapDescriptionFull will be None until resolved.
+
+        This takes time because file reading. gets mapDescriptionFull
+        from ucs file if they exist there.
+        """
+
+        try:
+            ucs = UCS(parameters=self.parameters)
+            self.mapDescriptionFull = ucs.compareUCS(self.mapDescription)
+
+        except Exception as e:
+            logging.error("Problem in GetMapDescription")
+            logging.exception("Exception : ")
+            logging.error(str(e))
+
+    def GetMapNameFullFromUCSFile(self):
+        """mapNameFull will be None until resolved.
+
+        This takes time because file reading
+        get mapNameFull from ucs file if they exist there.
+        """
+
+        try:
+            ucs = UCS(parameters=self.parameters)
+            self.mapNameFull = ucs.compareUCS(self.mapName)
+        except Exception as e:
+            logging.error("Problem in GetMapNameFull")
+            logging.exception("Exception : ")
+            logging.error(str(e))
+
+    def GetPtrAddr(self, base: int, offsets: list) -> int | None:
+        """Gets memory address from a pointer address (base) and applies offsets.
+
+        Parameters
+        ----------
+        base: int
+            The base memory address.
+
+        offsets: list
+            The list of offsets.
+
+        Returns
+        -------
+        int
+            The memory address.
+        """
+
+        try:
+            if self.pm:
+                addr = self.pm.read_int(base)
+                for i in offsets:
+                    if i != offsets[-1]:
+                        addr = self.pm.read_int(addr + i)
+                return addr + offsets[-1]
+        except Exception as e:
+            if e:
+                return None
+
+    def GetCOHMemoryAddress(self) -> bool:
+        """Gets the active process for RelicCOH.exe
+
+        Returns
+        -------
+        bool
+            True if COH is running.
+        """
+
+        self.pm = pymem.Pymem("RelicCOH.exe")
+        if self.pm:
+            self.cohProcessID = self.pm.process_id
+            logging.info(f"self.pm : {str(self.pm)}")
+            logging.info(f"cohProcessID : {str(self.cohProcessID)}")
+            ph = self.pm.process_handle
+            mi = pymem.process.module_from_name(ph, "RelicCOH.exe")
+            if mi:
+                self.baseAddress = mi.lpBaseOfDll
+                info = (
+                    "getCOHMemoryAddress self.baseAddress :"
+                    f"{str(self.baseAddress)}"
+                )
+                logging.info(info)
+                self.cohRunning = True
+                logging.info(f"self.cohRunning {self.cohRunning}")
+                return True
+        else:
+            self.cohRunning = False
+            logging.info(f"self.cohRunning {self.cohRunning}")
+            return False
+
+    def Get_replayParser_ByPointer(self) -> ReplayParser:
+        """Gets an instance of the replayParser containing COH game info."""
+
+        myListOfCOHRECPointers = []
+        # 1
+        cohrecReplayAddress = 0x00902030
+        cohrecOffsets = [0x28, 0x160, 0x4, 0x84, 0x2C, 0x110, 0x0]
+        myListOfCOHRECPointers.append([cohrecReplayAddress, cohrecOffsets])
+
+        # 2
+        cohrecReplayAddress = 0x00902030
+        cohrecOffsets = [0x28, 0x160, 0x4, 0x84, 0x24, 0x110, 0x0]
+        myListOfCOHRECPointers.append([cohrecReplayAddress, cohrecOffsets])
+
+        # 3
+        cohrecReplayAddress = 0x00902030
+        cohrecOffsets = [0x4, 0x160, 0x4, 0x118, 0x110, 0x0]
+        myListOfCOHRECPointers.append([cohrecReplayAddress, cohrecOffsets])
+
+        # 4
+        cohrecReplayAddress = 0x00902030
+        cohrecOffsets = [0x4, 0x160, 0x4, 0x110, 0x110, 0x0]
+        myListOfCOHRECPointers.append([cohrecReplayAddress, cohrecOffsets])
+
+        for count, item in enumerate(myListOfCOHRECPointers):
+            logging.info(f"{count} {item}")
+            ad = self.GetPtrAddr(self.baseAddress + item[0], item[1])
+            actualCOHRECMemoryAddress = ad
+            info = (
+                f"actualCOHRECMemoryAddress :"
+                f"{str(actualCOHRECMemoryAddress)}"
+                )
+            logging.info(info)
+            if actualCOHRECMemoryAddress:
+                try:
+                    rd = self.pm.read_bytes(actualCOHRECMemoryAddress, 4000)
+                except Exception as e:
+                    logging.error(e)
+                if rd:
+                    if rd[4:12] == bytes("COH__REC".encode('ascii')):
+                        logging.info("Pointing to COH__REC")
+                        replayByteData = bytearray(rd)
+                        replayParser = ReplayParser(parameters=self.parameters)
+                        replayParser.data = bytearray(replayByteData)
+                        success = replayParser.processData()
+                        if success:
+                            self.gameInProgress = True
+                            return replayParser
+
+        self.gameInProgress = False
+
+    def Get_replayParser_BySearch(self):
+        """Gets an instance of the replayParser containing COH game info."""
+
+        if self.pm:
+            with Process.open_process(self.pm.process_id) as p:
+                try:
+                    searchString = bytearray("COH__REC".encode('ascii'))
+                    buff = bytes(searchString)
+                except Exception as e:
+                    logging.error(e)
+
+                if buff:
+                    replayMemoryAddress = p.search_all_memory(buff)
+
+                    if replayMemoryAddress:
+                        for address in replayMemoryAddress:
+                            # There should be only one COH__REC in memory
+                            # if the game is running
+                            try:
+                                rd = self.pm.read_bytes(address-4, 4000)
+                                rd = bytearray(rd)
+                                rp = ReplayParser(parameters=self.parameters)
+                                rp.data = bytearray(rd)
+                                success = rp.processData()
+                                if success:
+                                    self.gameInProgress = True
+                                    return rp
+                            except Exception as e:
+                                if e:
+                                    pass
+                    else:
+                        self.gameInProgress = False
+
+    def getStatsFromGame(self):
+        """Provides stats from playerList names from game memory."""
+
+        if self.pm:
+            with Process.open_process(self.pm.process_id) as p:
+                steamNumberList = []
+                steamNumberList.append(self.parameters.data.get('steamNumber'))
+                # add default value incase it isn't found.
+                for player in self.playerList:
+                    name = bytearray(str(player.name).encode('utf-16le'))
+                    buff = bytes(name)
+                    if buff:
+                        replayMemoryAddress = p.search_all_memory(buff)
+                        for address in replayMemoryAddress:
+                            try:
+                                ad = address-56
+                                dd = p.read_memory(ad, (ctypes.c_byte * 48)())
+                                dd = bytearray(dd)
+                                steamNumber = dd.decode('utf-16le').strip()
+                                if "/steam/" in steamNumber:
+                                    int(steamNumber[7:24])
+                                    # throws exception if steamNumber
+                                    # is not a number
+                                    info = (
+                                        f"Got steamNumber from memory "
+                                        f"{str(steamNumber[7:24])}"
+                                    )
+                                    logging.info(info)
+                                    sNumber = str(steamNumber[7:24])
+                                    steamNumberList.append(sNumber)
+                                    break
+                            except Exception as e:
+                                if e:
+                                    pass
+                    statList = []
+                    for item in steamNumberList:
+                        statRquest = StatsRequest(parameters=self.parameters)
+                        stat = statRquest.returnStats(item)
+                        statList.append(stat)
+                    return statList
+
+    def TestOutput(self):
+        """Produces text output according to Preformat."""
+        if not self.parameters:
+            self.parameters = Parameters()
+
+        steamNumber = self.parameters.data.get('steamNumber')
+        statsRequest = StatsRequest(parameters=self.parameters)
+        streamerStats = statsRequest.returnStats(str(steamNumber))
+        streamerPlayer = Player(name=self.parameters.data.get('channel'))
+        streamerPlayer.stats = streamerStats
+        if streamerPlayer.stats:
+            output = (
+                "Streamer Full Stat list formatted according"
+                " to Custom Chat Output Preformat:"
+            )
+            self.ircClient.SendToOutputField(output)
+            preformat = self.parameters.data.get('customStringPreFormat')
+            self.ircClient.SendToOutputField(preformat)
+
+            for match in MatchType:
+                for faction in Faction:
+                    for value in streamerPlayer.stats.leaderboardData:
+                        ld = streamerPlayer.stats.leaderboardData[value]
+                        playerFaction = str(ld.faction)
+                        if (playerFaction == str(faction)):
+                            playerMatchtype = str(ld.matchType)
+                            if (playerMatchtype == str(match)):
+                                self.matchType = match
+                                streamerPlayer.faction = faction
+                                self.__produceOutput(streamerPlayer)
+
+        else:
+            output = (
+                "I could not get stats from the stat server using steam# "
+                f"{steamNumber} it might be down or the steam# might "
+                "be invalid."
+            )
+            self.ircClient.SendToOutputField(output)
+
+    def __produceOutput(self, streamerPlayer):
+        sFD = self.populateStringFormattingDictionary(streamerPlayer)
+        cPFOS = self.parameters.data.get('customStringPreFormat')
+        theString = self.formatPreFormattedString(cPFOS, sFD)
+        outputList = list(self.split_by_n(theString, 500))
+        for item in outputList:
+            self.ircClient.SendToOutputField(item)
+
+    def outputOpponentData(self):
+
+        logging.info("In output opponent data")
+        logging.info(str(self))
+
+        # Prepare outputs
+        axisTeam = []
+        alliesTeam = []
+
+        if self.playerList:
+            for item in self.playerList:
+                if (str(item.faction) == str(Faction.US)) or (str(item.faction)== str(Faction.CW)):
+                    if item.name != "":
+                        alliesTeam.append(item)
+                if (str(item.faction) == str(Faction.WM)) or (str(item.faction)== str(Faction.PE)):
+                    if item.name != "":
+                        axisTeam.append(item)
+
+            # output each player to file
+            if (self.parameters.data.get('useOverlayPreFormat')):
+                self.saveOverlayHTML(axisTeam, alliesTeam)
+
+            # output to chat if customoutput ticked
+            if (self.parameters.data.get('useCustomPreFormat')):	
+                if (int(self.numberOfComputers) > 0):
+                    self.ircStringOutputList.append("Game with " + str(self.numberOfComputers) + " computer AI, ("+str(self.easyCPUCount)+") Easy, ("+str(self.normalCPUCount)+") Normal, ("+str(self.hardCPUCount)+") Hard, ("+str(self.expertCPUCount)+") Expert.")	
+                for item in self.playerList:
+                    #check if item has stats if not it is a computer
+                    if item.stats:
+                        if(item.stats.steamNumber == self.parameters.data.get('steamNumber')):
+                            if (self.parameters.data.get('showOwn')):
+                                self.ircStringOutputList = self.ircStringOutputList + self.createCustomOutput(item)
+                        else:
+                            self.ircStringOutputList = self.ircStringOutputList + self.createCustomOutput(item)					
+                for item in self.ircStringOutputList:
+                    self.ircClient.SendPrivateMessageToIRC(str(item)) # outputs the information to IRC
+
+
+    def createCustomOutput(self, player):
+        stringFormattingDictionary = self.populateStringFormattingDictionary(player)
+        customPreFormattedOutputString = self.parameters.data.get('customStringPreFormat')
+        theString = self.formatPreFormattedString(customPreFormattedOutputString, stringFormattingDictionary)
+        outputList = list(self.split_by_n(theString, 500))
+        # removed separate message for steamProfile
+        #if (self.parameters.data.get('showSteamProfile')):
+        #	outputList.append("Steam profile " + str(player.stats.steamProfileAddress))
+        return outputList
+
+    def populateStringFormattingDictionary(self, player, overlay = False):
+        prefixDiv = ""
+        postfixDivClose = ""
+        if overlay:
+            prefixDiv = '<div class = "textVariables">'
+            postfixDivClose = '</div>'
+        stringFormattingDictionary = dict(self.parameters.stringFormattingDictionary)
+        #loads default values from parameters into stringFormattingDictionary (Key: Value:None)
+        nameDiv = ""
+        factionDiv = ""
+        matchDiv = ""
+        countryDiv = ""
+        totalWinsDiv = ""
+        totalLossesDiv = ""
+        totalWinLossRatioDiv = ""
+        winsDiv = ""
+        lossesDiv = ""
+        disputesDiv = ""
+        streakDiv = ""
+        dropsDiv = ""
+        rankDiv = ""
+        levelDiv = ""
+        wlRatioDiv = ""
+        steamprofile = ""
+        cohstatslink = ""
+
+        if overlay:
+            nameDiv = '<div class = "name">'
+            factionDiv = '<div class = "faction">'
+            matchDiv = '<div class = "matchtype">'
+            countryDiv = '<div class = "country">'
+            totalWinsDiv = '<div class = "totalwins">'
+            totalLossesDiv = '<div class = "totallosses">'
+            totalWinLossRatioDiv = '<div class = "totalwlratio">'
+            winsDiv = '<div class = "wins">'
+            lossesDiv = '<div class = "losses">'
+            disputesDiv = '<div class = "disputes">'
+            streakDiv = '<div class = "streak">'
+            dropsDiv = '<div class = "drops">'
+            rankDiv = '<div class = "rank">'
+            levelDiv = '<div class = "level">'
+            wlRatioDiv = '<div class = "wlratio">'
+            steamprofile = '<div class = "steamprofile">'
+            cohstatslink = '<div class = "cohstatslink">'
+
+        playerName = self.sanatizeUserName(player.name)
+        if not playerName:
+            playerName = ""
+        stringFormattingDictionary['$NAME$'] =  prefixDiv + nameDiv + str(playerName) + postfixDivClose + postfixDivClose
         
-		:returns: a memory address
-		:rtype: : int , None
-		"""
+        if overlay:
+            stringFormattingDictionary['$NAME$'] =  prefixDiv + nameDiv + str(html.escape(playerName)) + postfixDivClose + postfixDivClose
+        
+        if type(player.faction) is Faction:
+            stringFormattingDictionary['$FACTION$'] =  prefixDiv + factionDiv + str(player.faction.name) + postfixDivClose + postfixDivClose
 
-		try:
-			if self.pm:
-				addr = self.pm.read_int(base)
-				for i in offsets:
-					if i != offsets[-1]:
-						addr = self.pm.read_int(addr + i)
-				return addr + offsets[-1]
-		except Exception as e:
-			#logging.info("Problem in GetPtrAddr")
-			#logging.info(str(e))
-			#logging.exception("Stack : ")
-			#' Error routinely thrown when Pointer not found
-			pass
-	
-	def GetCOHMemoryAddress(self):
-		
-		try:
-			self.pm = Pymem("RelicCOH.exe")
-			self.cohProcessID = self.pm.process_id
-			logging.info(f"self.pm : {str(self.pm)}")
-			logging.info(f"cohProcessID : {str(self.cohProcessID)}")
-			# The baseAddres is used for pointers memory access
-			self.baseAddress = pymem.process.module_from_name(self.pm.process_handle , "RelicCOH.exe").lpBaseOfDll
-			logging.info(f"getCOHMemoryAddress self.baseAddress : {str(self.baseAddress)}")
-			self.cohRunning = True
-			logging.info(f"self.cohRunning {self.cohRunning}")
-			return True
-		except Exception as e:
-			self.cohRunning = False
-			logging.info(f"self.cohRunning {self.cohRunning}")
-			return False
+        if (self.matchType == MatchType.BASIC):
+            stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + matchDiv + "Basic" + postfixDivClose + postfixDivClose
+        if (self.matchType == MatchType.ONES):
+            stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + matchDiv + "1v1" + postfixDivClose + postfixDivClose
+        if (self.matchType == MatchType.TWOS):
+            stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + matchDiv + "2v2" + postfixDivClose + postfixDivClose
+        if (self.matchType == MatchType.THREES):
+            stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + matchDiv + "3v3" + postfixDivClose + postfixDivClose
 
-	def Get_replayParser_ByPointer(self):
-		try:
-			myListOfCOHRECPointers = []
-			#1
-			cohrecReplayAddress = 0x00902030
-			cohrecOffsets = [0x28,0x160,0x4,0x84,0x2C,0x110,0x0]
-			myListOfCOHRECPointers.append([cohrecReplayAddress,cohrecOffsets])
-
-			#2
-			cohrecReplayAddress = 0x00902030
-			cohrecOffsets = [0x28,0x160,0x4,0x84,0x24,0x110,0x0]
-			myListOfCOHRECPointers.append([cohrecReplayAddress,cohrecOffsets])
-
-			#3
-			cohrecReplayAddress = 0x00902030
-			cohrecOffsets = [0x4,0x160,0x4,0x118,0x110,0x0]
-			myListOfCOHRECPointers.append([cohrecReplayAddress,cohrecOffsets])
-
-			#4
-			cohrecReplayAddress = 0x00902030
-			cohrecOffsets = [0x4,0x160,0x4,0x110,0x110,0x0]
-			myListOfCOHRECPointers.append([cohrecReplayAddress,cohrecOffsets])
-
-			for count, item in enumerate(myListOfCOHRECPointers):
-				logging.info(f"{count} {item}")
-				actualCOHRECMemoryAddress = self.GetPtrAddr(self.baseAddress + item[0], item[1])
-				logging.info(f"actualCOHRECMemoryAddress {str(actualCOHRECMemoryAddress)}")
-				if actualCOHRECMemoryAddress:
-					try:
-						replayByteData = self.pm.read_bytes(actualCOHRECMemoryAddress, 4000)
-						if replayByteData[4:12] == bytes("COH__REC".encode('ascii')):
-							logging.info("Pointing to COH__REC")
-							replayByteData = bytearray(replayByteData)
-							replayParser = ReplayParser(parameters=self.parameters)
-							replayParser.data = bytearray(replayByteData)
-							success = replayParser.processData()
-							if success:
-								self.gameInProgress = True
-								return replayParser			
-					except:
-						logging.exception("Exception : ")
-						logging.error("Not reading memory at this location properly")
-			self.gameInProgress = False
-
-		except Exception as e:
-			logging.error("Problem in GetCOHREC")
-			logging.exception("Exception :")
+        # if a computer it will have no stats
+        if player.stats:
+            stringFormattingDictionary['$COUNTRY$'] =  prefixDiv + countryDiv + str(player.stats.country) + postfixDivClose + postfixDivClose
+            stringFormattingDictionary['$TOTALWINS$'] =  prefixDiv + totalWinsDiv + str(player.stats.totalWins) + postfixDivClose + postfixDivClose
+            stringFormattingDictionary['$TOTALLOSSES$'] =  prefixDiv + totalLossesDiv + str(player.stats.totalLosses) + postfixDivClose + postfixDivClose
+            stringFormattingDictionary['$TOTALWLRATIO$'] =  prefixDiv + totalWinLossRatioDiv + str(player.stats.totalWLRatio) + postfixDivClose + postfixDivClose
+            stringFormattingDictionary['$STEAMPROFILE$'] =  prefixDiv + steamprofile + str(player.stats.steamProfileAddress) + postfixDivClose + postfixDivClose
+            stringFormattingDictionary['$COHSTATSLINK$'] =  prefixDiv + cohstatslink + str(player.stats.cohstatsLink) + postfixDivClose + postfixDivClose
 
 
-	def Get_replayParser_BySearch(self):
-		try:
-			if self.pm:
-				with Process.open_process(self.pm.process_id) as p:
-					searchString = bytearray("COH__REC".encode('ascii'))
-					buff = bytes(searchString)
-					#print(f"buff{buff}")
-					if buff:
-						replayMemoryAddress = p.search_all_memory(buff)
-						#print(replayMemoryAddress)
-						if replayMemoryAddress:
-							for address in replayMemoryAddress:
-								#There should be only one COH__REC in memory if the game is running
-								try:
-									replayData = self.pm.read_bytes(address-4, 4000)	
-									replayData = bytearray(replayData)
-									replayParser = ReplayParser(parameters=self.parameters)
-									replayParser.data = bytearray(replayData)
-									success = replayParser.processData()
-									if success:
-										self.gameInProgress = True
-										return replayParser
-								except Exception as e:
-									pass
-						else:
-							self.gameInProgress = False
+            #set default null values for all parameters in dictionary
+            stringFormattingDictionary['$WINS$'] =  prefixDiv + winsDiv + "0" + postfixDivClose + postfixDivClose
+            stringFormattingDictionary['$LOSSES$'] =  prefixDiv + lossesDiv + "0" + postfixDivClose + postfixDivClose
+            stringFormattingDictionary['$DISPUTES$'] =  prefixDiv + disputesDiv + "0" + postfixDivClose + postfixDivClose
+            stringFormattingDictionary['$STREAK$'] =  prefixDiv + streakDiv + "0" + postfixDivClose + postfixDivClose
+            stringFormattingDictionary['$DROPS$'] =  prefixDiv + dropsDiv + "0" + postfixDivClose + postfixDivClose
+            stringFormattingDictionary['$RANK$'] =  prefixDiv + rankDiv + "-" + postfixDivClose + postfixDivClose
+            stringFormattingDictionary['$LEVEL$'] =  prefixDiv + levelDiv + "0" + postfixDivClose + postfixDivClose
+            stringFormattingDictionary['$WLRATIO$'] =  prefixDiv + wlRatioDiv + "-" + postfixDivClose	+ postfixDivClose	
 
-		except Exception as e:
-			logging.error("Problem in GetCOHREC")
-			logging.exception("Exception :")
+            for value in player.stats.leaderboardData:
+                if (str(player.stats.leaderboardData[value].matchType) == str(self.matchType)):
+                    if (str(player.stats.leaderboardData[value].faction) == str(player.faction)):
+                
+                        stringFormattingDictionary['$WINS$'] =  prefixDiv + winsDiv + str(player.stats.leaderboardData[value].wins) + postfixDivClose + postfixDivClose
+                        stringFormattingDictionary['$LOSSES$'] =  prefixDiv + lossesDiv + str(player.stats.leaderboardData[value].losses) + postfixDivClose + postfixDivClose
+                        stringFormattingDictionary['$DISPUTES$'] =  prefixDiv + disputesDiv + str(player.stats.leaderboardData[value].disputes) + postfixDivClose + postfixDivClose
+                        stringFormattingDictionary['$STREAK$'] =  prefixDiv + streakDiv + str(player.stats.leaderboardData[value].streak) + postfixDivClose + postfixDivClose
+                        stringFormattingDictionary['$DROPS$'] =  prefixDiv + dropsDiv + str(player.stats.leaderboardData[value].drops) + postfixDivClose + postfixDivClose
+                        stringFormattingDictionary['$RANK$'] =  prefixDiv + rankDiv + str(player.stats.leaderboardData[value].rank) + postfixDivClose + postfixDivClose
+                        stringFormattingDictionary['$LEVEL$'] =  prefixDiv + levelDiv + str(player.stats.leaderboardData[value].rankLevel) + postfixDivClose + postfixDivClose
+                        stringFormattingDictionary['$WLRATIO$'] =  prefixDiv + wlRatioDiv + str(player.stats.leaderboardData[value].winLossRatio) + postfixDivClose + postfixDivClose
+                     
 
-	
-	# rewrite function below to remove memory search.
-	def getStatsFromGame(self):
-		try:
-			if self.pm:
-				with Process.open_process(self.pm.process_id) as p:
-					steamNumberList = []
-					steamNumberList.append(self.parameters.data['steamNumber']) # add default value incase it isn't found
-					for player in self.playerList:
-						name = bytearray(str(player.name).encode('utf-16le'))
-						buff = bytes(name)
-						if buff:
-							#print(player.name)
-							#print(len(player.name))
-							#print(name)
-							#print(buff)
-							replayMemoryAddress = p.search_all_memory(buff)
-							for address in replayMemoryAddress:
-								try:
-									data_dump = p.read_memory(address-56, (ctypes.c_byte * 48)())	
-									data_dump = bytearray(data_dump)
-									steamNumber = data_dump.decode('utf-16le').strip()
-									if "/steam/" in steamNumber:
-										#print(steamNumber[7:24])
-										int(steamNumber[7:24]) # throws exception if steam number is not a number
-										logging.info(f"Got steamNumber from memory {str(steamNumber[7:24])}")
-										steamNumberList.append(str(steamNumber[7:24]))
-										break
-								except Exception as e:
-									pass
-					statList = []
-					for item in steamNumberList:
-						statRquest = StatsRequest(parameters= self.parameters)
-						stat = statRquest.returnStats(item)
-						statList.append(stat)
-					return statList
-		except Exception as e:
-			logging.error(str(e))
-			logging.exception("Exception : ")
+        return stringFormattingDictionary
 
-	def TestOutput(self):
-		steamNumber = self.parameters.data.get('steamNumber')
-		statsRequest = StatsRequest(parameters=self.parameters)
-		streamerStats = statsRequest.returnStats(str(steamNumber))
-		streamerPlayer = Player(name = self.parameters.data.get('channel'))
-		streamerPlayer.stats = streamerStats
-		if streamerPlayer.stats:
-			self.ircClient.SendToOutputField("Streamer Full Stat list formatted according to Custom Chat Output Preformat:")
-			self.ircClient.SendToOutputField(self.parameters.data.get('customStringPreFormat'))
+    def populateImageFormattingDictionary(self, player):
+        imageOverlayFormattingDictionary = self.parameters.imageOverlayFormattingDictionary
+        
+        #faction icons
+        if player.faction:
+            fileExists = False
+            factionIcon = ""
+            if type(player.faction) is Faction:
+                factionIcon = "OverlayImages\\Armies\\" + str(player.faction.name).lower() + ".png"
+                fileExists = os.path.isfile(factionIcon)
+            logging.info(factionIcon)
+            if fileExists:
+                imageOverlayFormattingDictionary['$FACTIONICON$'] = '<div class = "factionflagimg"><img src="{0}" ></div>'.format(factionIcon)
+                logging.info(imageOverlayFormattingDictionary.get('$FACTIONICON$'))
+            else:
+                imageOverlayFormattingDictionary['$FACTIONICON$'] = '<div class = "factionflagimg"><img src="data:," alt></div>'		
 
-			for match in MatchType:
-				for faction in Faction:
-					for value in streamerPlayer.stats.leaderboardData:
-						if (str(streamerPlayer.stats.leaderboardData[value].faction) == str(faction)) and (str(streamerPlayer.stats.leaderboardData[value].matchType) == str(match)):
-							self.matchType = match
-							streamerPlayer.faction = faction
-							stringFormattingDictionary = self.populateStringFormattingDictionary(streamerPlayer)
-							customPreFormattedOutputString = self.parameters.data.get('customStringPreFormat')
-							theString = self.formatPreFormattedString(customPreFormattedOutputString, stringFormattingDictionary)
-							outputList = list(self.split_by_n(theString, 500))
-							for item in outputList:
-								self.ircClient.SendToOutputField(item)
-		else:
-			self.ircClient.SendToOutputField("I could not get stats from the stat server using steam# {} it might be down or the steam# might be invalid.".format(steamNumber))
-
-	def outputOpponentData(self):
-
-		logging.info("In output opponent data")
-		logging.info(str(self))
-
-		# Prepare outputs
-		axisTeam = []
-		alliesTeam = []
-
-		if self.playerList:
-			for item in self.playerList:
-				if (str(item.faction) == str(Faction.US)) or (str(item.faction)== str(Faction.CW)):
-					if item.name != "":
-						alliesTeam.append(item)
-				if (str(item.faction) == str(Faction.WM)) or (str(item.faction)== str(Faction.PE)):
-					if item.name != "":
-						axisTeam.append(item)
-
-			# output each player to file
-			if (self.parameters.data.get('useOverlayPreFormat')):
-				self.saveOverlayHTML(axisTeam, alliesTeam)
-
-			# output to chat if customoutput ticked
-			if (self.parameters.data.get('useCustomPreFormat')):	
-				if (int(self.numberOfComputers) > 0):
-					self.ircStringOutputList.append("Game with " + str(self.numberOfComputers) + " computer AI, ("+str(self.easyCPUCount)+") Easy, ("+str(self.normalCPUCount)+") Normal, ("+str(self.hardCPUCount)+") Hard, ("+str(self.expertCPUCount)+") Expert.")	
-				for item in self.playerList:
-					#check if item has stats if not it is a computer
-					if item.stats:
-						if(item.stats.steamNumber == self.parameters.data.get('steamNumber')):
-							if (self.parameters.data.get('showOwn')):
-								self.ircStringOutputList = self.ircStringOutputList + self.createCustomOutput(item)
-						else:
-							self.ircStringOutputList = self.ircStringOutputList + self.createCustomOutput(item)					
-				for item in self.ircStringOutputList:
-					self.ircClient.SendPrivateMessageToIRC(str(item)) # outputs the information to IRC
+        # if a computer it will have no stats therefore no country flag or rank
+        # set default values for flags and faction rank	
 
 
-	def createCustomOutput(self, player):
-		stringFormattingDictionary = self.populateStringFormattingDictionary(player)
-		customPreFormattedOutputString = self.parameters.data.get('customStringPreFormat')
-		theString = self.formatPreFormattedString(customPreFormattedOutputString, stringFormattingDictionary)
-		outputList = list(self.split_by_n(theString, 500))
-		# removed separate message for steamProfile
-		#if (self.parameters.data.get('showSteamProfile')):
-		#	outputList.append("Steam profile " + str(player.stats.steamProfileAddress))
-		return outputList
+        imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="data:," alt></div>'
+        defaultFlagIcon = "OverlayImages\\Flagssmall\\unknown_flag.png"
+        fileExists = os.path.isfile(defaultFlagIcon)
+        if fileExists:
+            imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="{0}" ></div>'.format(defaultFlagIcon)
 
-	def populateStringFormattingDictionary(self, player, overlay = False):
-		prefixDiv = ""
-		postfixDivClose = ""
-		if overlay:
-			prefixDiv = '<div class = "textVariables">'
-			postfixDivClose = '</div>'
-		stringFormattingDictionary = dict(self.parameters.stringFormattingDictionary)
-		#loads default values from parameters into stringFormattingDictionary (Key: Value:None)
-		nameDiv = ""
-		factionDiv = ""
-		matchDiv = ""
-		countryDiv = ""
-		totalWinsDiv = ""
-		totalLossesDiv = ""
-		totalWinLossRatioDiv = ""
-		winsDiv = ""
-		lossesDiv = ""
-		disputesDiv = ""
-		streakDiv = ""
-		dropsDiv = ""
-		rankDiv = ""
-		levelDiv = ""
-		wlRatioDiv = ""
-		steamprofile = ""
-		cohstatslink = ""
+        if player.stats:
+            if player.stats.country:
+                countryIcon = "OverlayImages\\Flagssmall\\" + str(player.stats.country).lower() + ".png"
+                fileExists = os.path.isfile(countryIcon)
+                if fileExists:
+                    imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="{0}" ></div>'.format(countryIcon)
+                else:
+                    imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="data:," alt></div>'
 
-		if overlay:
-			nameDiv = '<div class = "name">'
-			factionDiv = '<div class = "faction">'
-			matchDiv = '<div class = "matchtype">'
-			countryDiv = '<div class = "country">'
-			totalWinsDiv = '<div class = "totalwins">'
-			totalLossesDiv = '<div class = "totallosses">'
-			totalWinLossRatioDiv = '<div class = "totalwlratio">'
-			winsDiv = '<div class = "wins">'
-			lossesDiv = '<div class = "losses">'
-			disputesDiv = '<div class = "disputes">'
-			streakDiv = '<div class = "streak">'
-			dropsDiv = '<div class = "drops">'
-			rankDiv = '<div class = "rank">'
-			levelDiv = '<div class = "level">'
-			wlRatioDiv = '<div class = "wlratio">'
-			steamprofile = '<div class = "steamprofile">'
-			cohstatslink = '<div class = "cohstatslink">'
+            #rank icons
+            for value in player.stats.leaderboardData:
+                if (str(player.stats.leaderboardData[value].matchType) == str(self.matchType)):
+                    if (str(player.stats.leaderboardData[value].faction) == str(player.faction)):
+                        iconPrefix = ""
+                        if str(player.faction) == str(Faction.PE):
+                            iconPrefix = "panzer_"
+                        if str(player.faction) == str(Faction.CW):
+                            iconPrefix = "brit_"
+                        if str(player.faction) == str(Faction.US):
+                            iconPrefix = "us_"
+                        if str(player.faction) == str(Faction.WM):
+                            iconPrefix = "heer_"												
+                        level = str(player.stats.leaderboardData[value].rankLevel).zfill(2)
+                        levelIcon = "OverlayImages\\Ranks\\" + iconPrefix + level + ".png"
+                        logging.info("levelIcon : " + str(levelIcon))
+                        fileExists = os.path.isfile(levelIcon)
+                        if fileExists:
+                            imageOverlayFormattingDictionary['$LEVELICON$'] =  '<div class = "rankimg"><img src="{0}" ></div>'.format(levelIcon)
+                            logging.info(imageOverlayFormattingDictionary.get('$LEVELICON$'))
+                        else:
+                            imageOverlayFormattingDictionary['$LEVELICON$'] = '<div class = "rankimg"><img src="data:," alt></div>'
+                            levelIcon = "OverlayImages\\Ranks\\no_rank_yet.png"
+                            if os.path.isfile(levelIcon):
+                                imageOverlayFormattingDictionary['$LEVELICON$'] =  '<div class = "rankimg"><img src="{0}" ></div>'.format(levelIcon)
 
-		playerName = self.sanatizeUserName(player.name)
-		if not playerName:
-			playerName = ""
-		stringFormattingDictionary['$NAME$'] =  prefixDiv + nameDiv + str(playerName) + postfixDivClose + postfixDivClose
-		
-		if overlay:
-			stringFormattingDictionary['$NAME$'] =  prefixDiv + nameDiv + str(html.escape(playerName)) + postfixDivClose + postfixDivClose
-		
-		if type(player.faction) is Faction:
-			stringFormattingDictionary['$FACTION$'] =  prefixDiv + factionDiv + str(player.faction.name) + postfixDivClose + postfixDivClose
+        return imageOverlayFormattingDictionary
 
-		if (self.matchType == MatchType.BASIC):
-			stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + matchDiv + "Basic" + postfixDivClose + postfixDivClose
-		if (self.matchType == MatchType.ONES):
-			stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + matchDiv + "1v1" + postfixDivClose + postfixDivClose
-		if (self.matchType == MatchType.TWOS):
-			stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + matchDiv + "2v2" + postfixDivClose + postfixDivClose
-		if (self.matchType == MatchType.THREES):
-			stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + matchDiv + "3v3" + postfixDivClose + postfixDivClose
+    def sanatizeUserName(self, userName):
+        try:
+            if userName:
+                userName = str(userName) # ensure type of string
+                userName = userName.lstrip("!")
+                # add 1 extra whitespace to username if it starts with . or / using rjust to prevent . and / twitch chat commands causing problems
+                if (bool(re.match("""^[/\.]""" , userName))):
+                    userName = str(userName.rjust(len(userName)+1))
+                # escape any single quotes
+                userName = userName.replace("'","\'")
+                # escape any double quotes
+                userName = userName.replace('"', '\"')
+            return userName
+        except Exception as e:
+            logging.info("In sanitizeUserName username less than 2 chars")
+            logging.exception("Exception : "+ str(e))
 
-		# if a computer it will have no stats
-		if player.stats:
-			stringFormattingDictionary['$COUNTRY$'] =  prefixDiv + countryDiv + str(player.stats.country) + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$TOTALWINS$'] =  prefixDiv + totalWinsDiv + str(player.stats.totalWins) + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$TOTALLOSSES$'] =  prefixDiv + totalLossesDiv + str(player.stats.totalLosses) + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$TOTALWLRATIO$'] =  prefixDiv + totalWinLossRatioDiv + str(player.stats.totalWLRatio) + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$STEAMPROFILE$'] =  prefixDiv + steamprofile + str(player.stats.steamProfileAddress) + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$COHSTATSLINK$'] =  prefixDiv + cohstatslink + str(player.stats.cohstatsLink) + postfixDivClose + postfixDivClose
+    def formatPreFormattedString(self, theString, stringFormattingDictionary, overlay = False):
 
+        if overlay:
+            prefixDiv = '<div class = "nonVariableText">'
+            postfixDiv = '</div>'
 
-			#set default null values for all parameters in dictionary
-			stringFormattingDictionary['$WINS$'] =  prefixDiv + winsDiv + "0" + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$LOSSES$'] =  prefixDiv + lossesDiv + "0" + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$DISPUTES$'] =  prefixDiv + disputesDiv + "0" + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$STREAK$'] =  prefixDiv + streakDiv + "0" + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$DROPS$'] =  prefixDiv + dropsDiv + "0" + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$RANK$'] =  prefixDiv + rankDiv + "-" + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$LEVEL$'] =  prefixDiv + levelDiv + "0" + postfixDivClose + postfixDivClose
-			stringFormattingDictionary['$WLRATIO$'] =  prefixDiv + wlRatioDiv + "-" + postfixDivClose	+ postfixDivClose	
+            #compile a pattern for all the keys
+            pattern = re.compile(r'(' + '|'.join(re.escape(key) for key in stringFormattingDictionary.keys()) + r')')
 
-			for value in player.stats.leaderboardData:
-				if (str(player.stats.leaderboardData[value].matchType) == str(self.matchType)):
-					if (str(player.stats.leaderboardData[value].faction) == str(player.faction)):
-				
-						stringFormattingDictionary['$WINS$'] =  prefixDiv + winsDiv + str(player.stats.leaderboardData[value].wins) + postfixDivClose + postfixDivClose
-						stringFormattingDictionary['$LOSSES$'] =  prefixDiv + lossesDiv + str(player.stats.leaderboardData[value].losses) + postfixDivClose + postfixDivClose
-						stringFormattingDictionary['$DISPUTES$'] =  prefixDiv + disputesDiv + str(player.stats.leaderboardData[value].disputes) + postfixDivClose + postfixDivClose
-						stringFormattingDictionary['$STREAK$'] =  prefixDiv + streakDiv + str(player.stats.leaderboardData[value].streak) + postfixDivClose + postfixDivClose
-						stringFormattingDictionary['$DROPS$'] =  prefixDiv + dropsDiv + str(player.stats.leaderboardData[value].drops) + postfixDivClose + postfixDivClose
-						stringFormattingDictionary['$RANK$'] =  prefixDiv + rankDiv + str(player.stats.leaderboardData[value].rank) + postfixDivClose + postfixDivClose
-						stringFormattingDictionary['$LEVEL$'] =  prefixDiv + levelDiv + str(player.stats.leaderboardData[value].rankLevel) + postfixDivClose + postfixDivClose
-						stringFormattingDictionary['$WLRATIO$'] =  prefixDiv + wlRatioDiv + str(player.stats.leaderboardData[value].winLossRatio) + postfixDivClose + postfixDivClose
-					 
+            logging.info("pattern " + str(pattern))
+            #split the string to include the dictionary keys
+            fullSplit = re.split(pattern, theString)
+            
+            logging.info("fullSplit " + str(fullSplit))
+            
+            #Then replace the Non key values with the postfix and prefix
+            for x in range(len(fullSplit)):
+                if not fullSplit[x] in stringFormattingDictionary.keys():
+                    fullSplit[x] = prefixDiv + fullSplit[x] + postfixDiv
 
-		return stringFormattingDictionary
-
-	def populateImageFormattingDictionary(self, player):
-		imageOverlayFormattingDictionary = self.parameters.imageOverlayFormattingDictionary
-		
-		#faction icons
-		if player.faction:
-			fileExists = False
-			factionIcon = ""
-			if type(player.faction) is Faction:
-				factionIcon = "OverlayImages\\Armies\\" + str(player.faction.name).lower() + ".png"
-				fileExists = os.path.isfile(factionIcon)
-			logging.info(factionIcon)
-			if fileExists:
-				imageOverlayFormattingDictionary['$FACTIONICON$'] = '<div class = "factionflagimg"><img src="{0}" ></div>'.format(factionIcon)
-				logging.info(imageOverlayFormattingDictionary.get('$FACTIONICON$'))
-			else:
-				imageOverlayFormattingDictionary['$FACTIONICON$'] = '<div class = "factionflagimg"><img src="data:," alt></div>'		
-
-		# if a computer it will have no stats therefore no country flag or rank
-		# set default values for flags and faction rank	
+            #This string can then be processed to replace the keys with their appropriate values
+            theString = "".join(fullSplit)
 
 
-		imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="data:," alt></div>'
-		defaultFlagIcon = "OverlayImages\\Flagssmall\\unknown_flag.png"
-		fileExists = os.path.isfile(defaultFlagIcon)
-		if fileExists:
-			imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="{0}" ></div>'.format(defaultFlagIcon)
+        # I'm dammed if I know how this regular expression works but it does.
+        pattern = re.compile(r'(?<!\w)(' + '|'.join(re.escape(key) for key in stringFormattingDictionary.keys()) + r')(?!\w)')
+        result = pattern.sub(lambda x: stringFormattingDictionary[x.group()], theString)
+        return result
 
-		if player.stats:
-			if player.stats.country:
-				countryIcon = "OverlayImages\\Flagssmall\\" + str(player.stats.country).lower() + ".png"
-				fileExists = os.path.isfile(countryIcon)
-				if fileExists:
-					imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="{0}" ></div>'.format(countryIcon)
-				else:
-					imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="data:," alt></div>'
+    def saveOverlayHTML(self, axisTeamList, alliesTeamList):
+        try:
+            team1 = ""
+            team2 = ""
+            team1List = []
+            team2List = []
 
-			#rank icons
-			for value in player.stats.leaderboardData:
-				if (str(player.stats.leaderboardData[value].matchType) == str(self.matchType)):
-					if (str(player.stats.leaderboardData[value].faction) == str(player.faction)):
-						iconPrefix = ""
-						if str(player.faction) == str(Faction.PE):
-							iconPrefix = "panzer_"
-						if str(player.faction) == str(Faction.CW):
-							iconPrefix = "brit_"
-						if str(player.faction) == str(Faction.US):
-							iconPrefix = "us_"
-						if str(player.faction) == str(Faction.WM):
-							iconPrefix = "heer_"												
-						level = str(player.stats.leaderboardData[value].rankLevel).zfill(2)
-						levelIcon = "OverlayImages\\Ranks\\" + iconPrefix + level + ".png"
-						logging.info("levelIcon : " + str(levelIcon))
-						fileExists = os.path.isfile(levelIcon)
-						if fileExists:
-							imageOverlayFormattingDictionary['$LEVELICON$'] =  '<div class = "rankimg"><img src="{0}" ></div>'.format(levelIcon)
-							logging.info(imageOverlayFormattingDictionary.get('$LEVELICON$'))
-						else:
-							imageOverlayFormattingDictionary['$LEVELICON$'] = '<div class = "rankimg"><img src="data:," alt></div>'
-							levelIcon = "OverlayImages\\Ranks\\no_rank_yet.png"
-							if os.path.isfile(levelIcon):
-								imageOverlayFormattingDictionary['$LEVELICON$'] =  '<div class = "rankimg"><img src="{0}" ></div>'.format(levelIcon)
+            team1List.clear()
+            team2List.clear()
 
-		return imageOverlayFormattingDictionary
+            #by default player team is allies unless the player is steam number is present in the axisTeamList
+            team1List = alliesTeamList
+            team2List = axisTeamList
 
-	def sanatizeUserName(self, userName):
-		try:
-			if userName:
-				userName = str(userName) # ensure type of string
-				userName = userName.lstrip("!")
-				# add 1 extra whitespace to username if it starts with . or / using rjust to prevent . and / twitch chat commands causing problems
-				if (bool(re.match("""^[/\.]""" , userName))):
-					userName = str(userName.rjust(len(userName)+1))
-				# escape any single quotes
-				userName = userName.replace("'","\'")
-				# escape any double quotes
-				userName = userName.replace('"', '\"')
-			return userName
-		except Exception as e:
-			logging.info("In sanitizeUserName username less than 2 chars")
-			logging.exception("Exception : "+ str(e))
+            for item in axisTeamList:
+                if item.stats:
+                    if (str(self.parameters.data.get('steamNumber')) == str(item.stats.steamNumber)):
+                        #logging.info ("Player team is AXIS")
+                        team1List = axisTeamList
+                        team2List = alliesTeamList
 
-	def formatPreFormattedString(self, theString, stringFormattingDictionary, overlay = False):
+            useOverlayPreFormat = bool(self.parameters.data.get('useOverlayPreFormat'))
+            if (useOverlayPreFormat):
+                for item in team1List:
+                    preFormattedString = self.parameters.data.get('overlayStringPreFormatLeft')
+                    # first substitute all the text in the preformat
+                    stringFormattingDictionary = self.populateStringFormattingDictionary(item, overlay = True)
+                    #theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary, overlay = True)
+                    # second substitue all the html images if used
+                    stringFormattingDictionary.update(self.populateImageFormattingDictionary(item))
+                    theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary, overlay= True)
+                    team1 += str(theString) + str("<BR>") + "\n"
+                for item in team2List:
+                    preFormattedString = self.parameters.data.get('overlayStringPreFormatRight')
+                    # first substitute all the text in the preformat
+                    stringFormattingDictionary.clear()
+                    stringFormattingDictionary = self.populateStringFormattingDictionary(item, overlay = True)
+                    #theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary,overlay = True)
+                    # second substitue all the html images if used
+                    stringFormattingDictionary.update(self.populateImageFormattingDictionary(item))
+                    theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary, overlay= True)
+                    team2 += str(theString) + str("<BR>") + "\n"
+            else:
+            
+                for item in team1List:
+                    team1 += str(item.name) + str("<BR>") + "\n"
+                for item in team2List:
+                    team2 += str(item.name) + str("<BR>") + "\n"
+            
+            cssFilePath = self.parameters.data.get('overlayStyleCSSFilePath')
+            #check if css file exists and if not output the default template to folder
+            if not (os.path.isfile(cssFilePath)):
+                with open(cssFilePath , 'w' , encoding="utf-8") as outfile:
+                    outfile.write(OverlayTemplates().overlaycss)
 
-		if overlay:
-			prefixDiv = '<div class = "nonVariableText">'
-			postfixDiv = '</div>'
+            htmlOutput = OverlayTemplates().overlayhtml.format(cssFilePath, team1, team2)
+            # create output overlay from template
+            with open("overlay.html" , 'w', encoding="utf-8") as outfile:
+                outfile.write(htmlOutput)
+                #logging.info("Creating Overlay File\n")
 
-			#compile a pattern for all the keys
-			pattern = re.compile(r'(' + '|'.join(re.escape(key) for key in stringFormattingDictionary.keys()) + r')')
+        except Exception as e:
+            logging.error(str(e))
+            logging.exception("Exception : ")
 
-			logging.info("pattern " + str(pattern))
-			#split the string to include the dictionary keys
-			fullSplit = re.split(pattern, theString)
-			
-			logging.info("fullSplit " + str(fullSplit))
-			
-			#Then replace the Non key values with the postfix and prefix
-			for x in range(len(fullSplit)):
-				if not fullSplit[x] in stringFormattingDictionary.keys():
-					fullSplit[x] = prefixDiv + fullSplit[x] + postfixDiv
+    @staticmethod
+    def clearOverlayHTML():
+        try:
+            htmlOutput = OverlayTemplates().overlayhtml.format("","","")
+            # create output overlay from template
+            with open("overlay.html" , 'w') as outfile:
+                outfile.write(htmlOutput)
+        except Exception as e:
+            logging.error(str(e))
+            logging.exception("Exception : ")
 
-			#This string can then be processed to replace the keys with their appropriate values
-			theString = "".join(fullSplit)
+    def split_by_n(self, seq, n):
+        '''A generator to divide a sequence into chunks of n units.'''
+        while seq:
+            yield seq[:n]
+            seq = seq[n:]
 
+    def find_between(self, s, first, last ):
+        try:
+            start = s.index( first ) + len( first )
+            end = s.index( last, start )
+            return s[start:end]
+        except ValueError:
+            return ""
 
-		# I'm dammed if I know how this regular expression works but it does.
-		pattern = re.compile(r'(?<!\w)(' + '|'.join(re.escape(key) for key in stringFormattingDictionary.keys()) + r')(?!\w)')
-		result = pattern.sub(lambda x: stringFormattingDictionary[x.group()], theString)
-		return result
+    def __str__(self):
+        output = "GameData : \n"
+        output += "Time Last Game Started : {}\n".format(str(self.gameStartedDate))
+        output += "player List : {}\n".format(str(self.playerList)) 
+        output += "numberOfPlayers : {}\n".format(str(self.numberOfPlayers))
+        output += "Number Of Computers : {}\n".format(str(self.numberOfComputers)) 
+        output += "Easy CPU : {}\n".format(str(self.easyCPUCount)) 
+        output += "Normal CPU : {}\n".format(str(self.normalCPUCount)) 
+        output += "Hard CPU : {}\n".format(str(self.hardCPUCount)) 
+        output += "Expert CPU : {}\n".format(str(self.expertCPUCount))
+        output += "Number Of Humans : {}\n".format(str(self.numberOfHumans))
+        output += "Match Type : {}\n".format(str(self.matchType.name))
+        output += "slots : {}\n".format(str(self.slots))
+        output += "mapName : {}\n".format(str(self.mapName))
+        output += "mapNameFull : {}\n".format(str(self.mapNameFull))
+        output += "mapDescription : {}\n".format(str(self.mapDescription))
+        output += "mapDescriptionFull : {}\n".format(str(self.mapDescriptionFull))
+        output += "randomStart : {}\n".format(str(self.randomStart)) 
+        output += "highResources : {}\n".format(str(self.highResources)) 
+        output += "VPCount : {}\n".format(str(self.VPCount))
+        output += "automatch : {}\n".format(str(self.automatch))
+        output += "modName : {}\n".format(str(self.modName))
+        output += "COH running : {}\n".format(str(self.cohRunning)) 
+        output += "Game In Progress : {}\n".format(str(self.gameInProgress)) 
+        output += "gameStartedDate : {}\n".format(str(self.gameStartedDate)) 
+        output += "cohProcessID : {}\n".format(str(self.cohProcessID)) 
+        output += "baseAddress : {}\n".format(str(self.baseAddress)) 
+        output += "gameDescriptionString : {}\n".format(str(self.gameDescriptionString)) 
 
-	def saveOverlayHTML(self, axisTeamList, alliesTeamList):
-		try:
-			team1 = ""
-			team2 = ""
-			team1List = []
-			team2List = []
+        return output
 
-			team1List.clear()
-			team2List.clear()
-
-			#by default player team is allies unless the player is steam number is present in the axisTeamList
-			team1List = alliesTeamList
-			team2List = axisTeamList
-
-			for item in axisTeamList:
-				if item.stats:
-					if (str(self.parameters.data.get('steamNumber')) == str(item.stats.steamNumber)):
-						#logging.info ("Player team is AXIS")
-						team1List = axisTeamList
-						team2List = alliesTeamList
-
-			useOverlayPreFormat = bool(self.parameters.data.get('useOverlayPreFormat'))
-			if (useOverlayPreFormat):
-				for item in team1List:
-					preFormattedString = self.parameters.data.get('overlayStringPreFormatLeft')
-					# first substitute all the text in the preformat
-					stringFormattingDictionary = self.populateStringFormattingDictionary(item, overlay = True)
-					#theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary, overlay = True)
-					# second substitue all the html images if used
-					stringFormattingDictionary.update(self.populateImageFormattingDictionary(item))
-					theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary, overlay= True)
-					team1 += str(theString) + str("<BR>") + "\n"
-				for item in team2List:
-					preFormattedString = self.parameters.data.get('overlayStringPreFormatRight')
-					# first substitute all the text in the preformat
-					stringFormattingDictionary.clear()
-					stringFormattingDictionary = self.populateStringFormattingDictionary(item, overlay = True)
-					#theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary,overlay = True)
-					# second substitue all the html images if used
-					stringFormattingDictionary.update(self.populateImageFormattingDictionary(item))
-					theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary, overlay= True)
-					team2 += str(theString) + str("<BR>") + "\n"
-			else:
-			
-				for item in team1List:
-					team1 += str(item.name) + str("<BR>") + "\n"
-				for item in team2List:
-					team2 += str(item.name) + str("<BR>") + "\n"
-			
-			cssFilePath = self.parameters.data.get('overlayStyleCSSFilePath')
-			#check if css file exists and if not output the default template to folder
-			if not (os.path.isfile(cssFilePath)):
-				with open(cssFilePath , 'w' , encoding="utf-8") as outfile:
-					outfile.write(OverlayTemplates().overlaycss)
-
-			htmlOutput = OverlayTemplates().overlayhtml.format(cssFilePath, team1, team2)
-			# create output overlay from template
-			with open("overlay.html" , 'w', encoding="utf-8") as outfile:
-				outfile.write(htmlOutput)
-				#logging.info("Creating Overlay File\n")
-
-		except Exception as e:
-			logging.error(str(e))
-			logging.exception("Exception : ")
-
-	@staticmethod
-	def clearOverlayHTML():
-		try:
-			htmlOutput = OverlayTemplates().overlayhtml.format("","","")
-			# create output overlay from template
-			with open("overlay.html" , 'w') as outfile:
-				outfile.write(htmlOutput)
-		except Exception as e:
-			logging.error(str(e))
-			logging.exception("Exception : ")
-
-	def split_by_n(self, seq, n):
-		'''A generator to divide a sequence into chunks of n units.'''
-		while seq:
-			yield seq[:n]
-			seq = seq[n:]
-
-	def find_between(self, s, first, last ):
-		try:
-			start = s.index( first ) + len( first )
-			end = s.index( last, start )
-			return s[start:end]
-		except ValueError:
-			return ""
-
-	def __str__(self):
-		output = "GameData : \n"
-		output += "Time Last Game Started : {}\n".format(str(self.gameStartedDate))
-		output += "player List : {}\n".format(str(self.playerList)) 
-		output += "numberOfPlayers : {}\n".format(str(self.numberOfPlayers))
-		output += "Number Of Computers : {}\n".format(str(self.numberOfComputers)) 
-		output += "Easy CPU : {}\n".format(str(self.easyCPUCount)) 
-		output += "Normal CPU : {}\n".format(str(self.normalCPUCount)) 
-		output += "Hard CPU : {}\n".format(str(self.hardCPUCount)) 
-		output += "Expert CPU : {}\n".format(str(self.expertCPUCount))
-		output += "Number Of Humans : {}\n".format(str(self.numberOfHumans))
-		output += "Match Type : {}\n".format(str(self.matchType.name))
-		output += "slots : {}\n".format(str(self.slots))
-		output += "mapName : {}\n".format(str(self.mapName))
-		output += "mapNameFull : {}\n".format(str(self.mapNameFull))
-		output += "mapDescription : {}\n".format(str(self.mapDescription))
-		output += "mapDescriptionFull : {}\n".format(str(self.mapDescriptionFull))
-		output += "randomStart : {}\n".format(str(self.randomStart)) 
-		output += "highResources : {}\n".format(str(self.highResources)) 
-		output += "VPCount : {}\n".format(str(self.VPCount))
-		output += "automatch : {}\n".format(str(self.automatch))
-		output += "modName : {}\n".format(str(self.modName))
-		output += "COH running : {}\n".format(str(self.cohRunning)) 
-		output += "Game In Progress : {}\n".format(str(self.gameInProgress)) 
-		output += "gameStartedDate : {}\n".format(str(self.gameStartedDate)) 
-		output += "cohProcessID : {}\n".format(str(self.cohProcessID)) 
-		output += "baseAddress : {}\n".format(str(self.baseAddress)) 
-		output += "gameDescriptionString : {}\n".format(str(self.gameDescriptionString)) 
-
-		return output
-
-	def __repr__(self):
-		return str(self)
+    def __repr__(self):
+        return str(self)

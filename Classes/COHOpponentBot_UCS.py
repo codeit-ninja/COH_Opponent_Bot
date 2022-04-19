@@ -5,27 +5,27 @@ from Classes.COHOpponentBot_Parameters import Parameters
 
 
 class UCS:
-	def __init__(self, ucsPath = None, parameters = None) -> None:
-		
-		self.parameters = parameters
-		if not parameters:
-			self.parameters = Parameters()
+    def __init__(self, ucsPath=None, parameters=None) -> None:
 
-		self.ucsPath = ucsPath
-		if not ucsPath:
-			self.ucsPath = self.parameters.data.get('cohUCSPath')
-		
+        self.parameters = parameters
+        if not parameters:
+            self.parameters = Parameters()
 
-	def compareUCS(self, compareString):
-		try:
-			if compareString:
-				if (os.path.isfile(self.ucsPath)):
-					with open(self.ucsPath, 'r',  encoding='utf16') as f:	
-						for line in f:
-							if len(line.split('\t')) > 1:
-								firstString = str(line.split('\t')[0])
-								if str(compareString[1:].strip()) == str(firstString):
-									return " ".join(line.split()[1:])
-		except Exception as e:
-			logging.error(str(e))
-			logging.exception("Exception : ")
+        self.ucsPath = ucsPath
+        if not ucsPath:
+            self.ucsPath = self.parameters.data.get('cohUCSPath')
+
+    def compareUCS(self, compareString) -> str:
+        try:
+            if compareString:
+                if (os.path.isfile(self.ucsPath)):
+                    with open(self.ucsPath, 'r',  encoding='utf16') as f:
+                        for line in f:
+                            if len(line.split('\t')) > 1:
+                                firstString = str(line.split('\t')[0])
+                                cs = str(compareString[1:].strip())
+                                if cs == str(firstString):
+                                    return " ".join(line.split()[1:])
+        except Exception as e:
+            logging.error(str(e))
+            logging.exception("Exception : ")
