@@ -19,7 +19,7 @@ class Player:
             self.faction = Faction.CW
         if self.factionString == "axis_panzer_elite":
             self.faction = Faction.PE
-    
+
     def __str__(self):
         output = "name : {}\n".format(str(self.name))
         output += "factionString : {}\n".format(str(self.factionString))

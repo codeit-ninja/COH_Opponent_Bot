@@ -7,7 +7,12 @@ from Classes.COHOpponentBot_GUI import GUI
 # Default error logging log file location:
 for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
-logging.basicConfig(format='%(asctime)s (%(threadName)-10s) [%(levelname)s] %(message)s', filename= 'COH_Opponent_Bot.log',filemode = "w", level=logging.INFO)
+
+logging.basicConfig(
+    format='%(asctime)s (%(threadName)-10s) [%(levelname)s] %(message)s',
+    filename='COH_Opponent_Bot.log',
+    filemode="w",
+    level=logging.INFO)
 
 GameData.clearOverlayHTML()
 

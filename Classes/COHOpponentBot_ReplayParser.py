@@ -8,9 +8,10 @@ from Classes.COHOpponentBot_UCS import UCS
 
 
 class ReplayParser:
-    """Parses a company of heroes 1 replay.
+    """Parses a Company of Heroes 1 replay.
 
-    Extract as much useful information from it as possible.
+    Extract as much useful information from its
+    header as possible.
     """
 
     def __init__(self, filePath=None, parameters=None) -> None:
@@ -52,11 +53,16 @@ class ReplayParser:
 
     def read_UnsignedLong4Bytes(self) -> int:
         """Reads 4 bytes as an unsigned long int."""
+
         try:
             if self.data:
-                fourBytes = bytearray(self.data[self.dataIndex:self.dataIndex+4])
+                fourBytes = bytearray(
+                    self.data[self.dataIndex:self.dataIndex+4])
                 self.dataIndex += 4
-                theInt = int.from_bytes(fourBytes, byteorder='little', signed=False)
+                theInt = int.from_bytes(
+                    fourBytes,
+                    byteorder='little',
+                    signed=False)
                 return theInt
         except Exception as e:
             logging.error(str(e))
@@ -66,9 +72,11 @@ class ReplayParser:
 
     def read_Bytes(self, numberOfBytes):
         """reads a number of bytes from the data array"""
+
         try:
             if self.data:
-                output = bytearray(self.data[self.dataIndex:self.dataIndex+numberOfBytes])
+                output = bytearray(
+                    self.data[self.dataIndex:self.dataIndex+numberOfBytes])
                 self.dataIndex += numberOfBytes
                 return output
         except Exception as e:
@@ -77,13 +85,17 @@ class ReplayParser:
             logging.exception("Stack Trace: ")
             self.success = False
 
-
     def read_LengthString(self):
-        """Reads the first 4 bytes containing the string length and then the rest of the string."""
+        """Reads an indexed String.
+
+        Reads the first 4 bytes containing the string length
+        and then the rest of the string.
+        """
+
         try:
             if self.data:
                 stringLength = self.read_UnsignedLong4Bytes()
-                theString = self.read_2ByteString(stringLength =stringLength)
+                theString = self.read_2ByteString(stringLength=stringLength)
                 return theString
         except Exception as e:
             logging.error(str(e))
@@ -91,20 +103,21 @@ class ReplayParser:
             logging.exception("Stack Trace: ")
             self.success = False
 
-
-    def read_2ByteString(self, stringLength=0 ) -> str:
+    def read_2ByteString(self, stringLength=0) -> str:
         """Reads a 2byte encoded little-endian string of specified length."""
+
         try:
             if self.data:
-                theBytes = bytearray(self.data[self.dataIndex:self.dataIndex+(stringLength*2)])
+                theBytes = bytearray(
+                    self.data[self.dataIndex:self.dataIndex+(stringLength*2)])
                 self.dataIndex += stringLength*2
                 theString = theBytes.decode('utf-16le')
                 return theString
         except Exception as e:
             logging.error(str(e))
             logging.error("Failed to read a string of specified length")
-            logging.exception("Stack Trace: ")    
-            self.success = False        
+            logging.exception("Stack Trace: ")
+            self.success = False
 
     def read_LengthASCIIString(self) -> str:
         """Reads ASCII string, the length defined by the first four bytes."""
@@ -116,45 +129,62 @@ class ReplayParser:
         except Exception as e:
             logging.error(str(e))
             logging.error("Failed to read a string of specified length")
-            logging.exception("Stack Trace: ")  
+            logging.exception("Stack Trace: ")
             self.success = False
 
     def read_ASCIIString(self, stringLength=0) -> str:
-        """Reads a byte array of spcified length and attempts to convert it into a string."""
+        """Reads and ASCII string of specfied length.
+
+        Reads a byte array of spcified length
+        and attempts to convert it into a string.
+        """
+
         try:
             if self.data:
-                theBytes = bytearray(self.data[self.dataIndex:self.dataIndex+stringLength])
+                theBytes = bytearray(
+                    self.data[self.dataIndex:self.dataIndex+stringLength])
                 self.dataIndex += stringLength
                 theString = theBytes.decode('ascii')
                 return theString
         except Exception as e:
             logging.error(str(e))
             logging.error("Failed to read a string of specified length")
-            logging.exception("Stack Trace: ")  
+            logging.exception("Stack Trace: ")
             self.success = False
 
     def read_NULLTerminated_2ByteString(self) -> str:
-        """Reads a Utf-16 little endian character string until the first two byte NULL value."""
+        """Reads a Utf-16 little endian character string.
+
+        Reads until the first two byte NULL value.
+        """
+
         try:
             if self.data:
                 characters = ""
-                for character in iter(partial(self.read_Bytes, 2) , bytearray(b"\x00\x00")):
+                for character in iter(
+                        partial(self.read_Bytes, 2),
+                        bytearray(b"\x00\x00")
+                ):
                     characters += bytearray(character).decode('utf-16le')
-                return characters    
+                return characters
         except Exception as e:
             logging.error(str(e))
             logging.error("Failed to read a string of specified length")
-            logging.exception("Stack Trace: ")  
+            logging.exception("Stack Trace: ")
             self.success = False
 
     def read_NULLTerminated_ASCIIString(self) -> str:
         """Reads a byte array until the first NULL and converts to a string."""
+
         try:
             if self.data:
                 characters = ""
-                for character in iter(partial(self.read_Bytes, 1) , bytearray(b"\x00")):
+                for character in iter(
+                    partial(self.read_Bytes, 1),
+                    bytearray(b"\x00")
+                ):
                     characters += bytearray(character).decode('ascii')
-                return characters  
+                return characters
         except Exception as e:
             logging.error(str(e))
             logging.error("Failed to read a string of specified length")
@@ -163,6 +193,7 @@ class ReplayParser:
 
     def seek(self, numberOfBytes, relative=0):
         """Moves the file index a number of bytes forward or backward"""
+
         try:
             numberOfBytes = int(numberOfBytes)
             relative = int(relative)
@@ -180,7 +211,7 @@ class ReplayParser:
             logging.error("Failed move file Index")
             logging.exception("Stack Trace: ")
 
-    def load(self, filePath = ""):
+    def load(self, filePath=""):
         with open(filePath, "rb") as fileHandle:
             self.data = fileHandle.read()
         self.processData()
@@ -189,46 +220,48 @@ class ReplayParser:
         # Set return flag
         self.success = True
 
-        #Process the file Header
-        self.fileVersion = self.read_UnsignedLong4Bytes()
+        # Process the file Header
+        self.fileVersion = self.read_UnsignedLong4Bytes()  # int (8)
 
-        cohrec = self.read_ASCIIString(stringLength= 8)
+        self.read_ASCIIString(stringLength=8)  # COH__REC
 
         self.localDateString = self.read_NULLTerminated_2ByteString()
 
         # Parse localDateString as a datetime object
         self.localDate = self.decodeDate(self.localDateString)
 
-        self.seek(76,0)
+        self.seek(76, 0)
 
         firstRelicChunkyAddress = self.dataIndex
 
-        relicChunky = self.read_ASCIIString(stringLength=12)
+        self.read_ASCIIString(stringLength=12)  # relicChunky
 
-        unknown = self.read_UnsignedLong4Bytes()
+        self.read_UnsignedLong4Bytes()  # unknown
 
-        self.chunkyVersion = self.read_UnsignedLong4Bytes() # 3
+        self.chunkyVersion = self.read_UnsignedLong4Bytes()  # 3
 
-        unknown = self.read_UnsignedLong4Bytes()
+        self.read_UnsignedLong4Bytes()  # unknown
 
         self.chunkyHeaderLength = self.read_UnsignedLong4Bytes()
-        
-        self.seek(-28,1) # sets file pointer back to start of relic chunky
-        self.seek(self.chunkyHeaderLength, 1) # seeks to begining of FOLDPOST
+
+        self.seek(-28, 1)  # sets file pointer back to start of relic chunky
+        self.seek(self.chunkyHeaderLength, 1)  # seeks to begining of FOLDPOST
 
         self.seek(firstRelicChunkyAddress, 0)
-        self.seek(96,1) # move pointer to the position of the second relic chunky
+        self.seek(96, 1)
+        # move pointer to the position of the second relic chunky
+
         secondRelicChunkyAddress = self.dataIndex
 
-        relicChunky = self.read_ASCIIString(stringLength=12)
+        self.read_ASCIIString(stringLength=12)  # relicChunky
 
-        unknown = self.read_UnsignedLong4Bytes()
-        chunkyVersion = self.read_UnsignedLong4Bytes() # 3
-        unknown = self.read_UnsignedLong4Bytes()
+        self.read_UnsignedLong4Bytes()  # unknown
+        self.read_UnsignedLong4Bytes()  # chunkyVersion 3
+        self.read_UnsignedLong4Bytes()  # unknown
         chunkLength = self.read_UnsignedLong4Bytes()
-        
+
         self.seek(secondRelicChunkyAddress, 0)
-        self.seek(chunkLength, 1) # seek to position of first viable chunk
+        self.seek(chunkLength, 1)  # seek to position of first viable chunk
 
         self.parseChunk(0)
         self.parseChunk(0)
@@ -255,11 +288,10 @@ class ReplayParser:
 
         chunkNameLength = self.read_UnsignedLong4Bytes()
 
-        self.seek(8,1)
+        self.seek(8, 1)
 
-        chunkName = ""
         if chunkNameLength > 0:
-            chunkName = self.read_ASCIIString(stringLength=chunkNameLength)
+            self.read_ASCIIString(stringLength=chunkNameLength)  # chunkName
 
         chunkStart = self.dataIndex
 
@@ -267,49 +299,50 @@ class ReplayParser:
         if chunkType:
             if (chunkType.startswith("FOLD")):
 
-                while (self.dataIndex < (chunkStart + chunkLength )):
+                while (self.dataIndex < (chunkStart + chunkLength)):
                     self.parseChunk(level=level+1)
 
         if (chunkType == "DATASDSC") and (int(chunkVersion) == 2004):
 
-            unknown = self.read_UnsignedLong4Bytes()
+            self.read_UnsignedLong4Bytes()  # unknown
             self.unknownDate = self.read_LengthString()
-            unknown = self.read_UnsignedLong4Bytes()
-            unknown = self.read_UnsignedLong4Bytes()
-            unknown = self.read_UnsignedLong4Bytes()
-            self.modName = self.read_LengthASCIIString() 
+            self.read_UnsignedLong4Bytes()  # unknown
+            self.read_UnsignedLong4Bytes()  # unknown
+            self.read_UnsignedLong4Bytes()  # unknown
+            self.modName = self.read_LengthASCIIString()
             self.mapFileName = self.read_LengthASCIIString()
-            unknown = self.read_UnsignedLong4Bytes()
-            unknown = self.read_UnsignedLong4Bytes()
-            unknown = self.read_UnsignedLong4Bytes()
-            unknown = self.read_UnsignedLong4Bytes()
-            unknown = self.read_UnsignedLong4Bytes()
+            self.read_UnsignedLong4Bytes()  # unknown
+            self.read_UnsignedLong4Bytes()  # unknown
+            self.read_UnsignedLong4Bytes()  # unknown
+            self.read_UnsignedLong4Bytes()  # unknown
+            self.read_UnsignedLong4Bytes()  # unknown
             self.mapName = self.read_LengthString()
-            
-            value = self.read_UnsignedLong4Bytes() 
-            if value != 0: # test to see if data is replicated or not
-                unknown = self.read_2ByteString(value)
+
+            value = self.read_UnsignedLong4Bytes()
+            if value != 0:  # test to see if data is replicated or not
+                self.read_2ByteString(value)  # unknown
             self.mapDescription = self.read_LengthString()
-            unknown = self.read_UnsignedLong4Bytes()
+            self.read_UnsignedLong4Bytes()  # unknown
             self.mapWidth = self.read_UnsignedLong4Bytes()
             self.mapHeight = self.read_UnsignedLong4Bytes()
-            unknown = self.read_UnsignedLong4Bytes()
-            unknown = self.read_UnsignedLong4Bytes()
-            unknown = self.read_UnsignedLong4Bytes() 
+            self.read_UnsignedLong4Bytes()  # unknown
+            self.read_UnsignedLong4Bytes()  # unknown
+            self.read_UnsignedLong4Bytes()  # unknown
 
         if(chunkType == "DATABASE") and (int(chunkVersion == 11)):
 
             self.seek(16, 1)
 
             self.randomStart = True
-            self.randomStart = not (self.read_UnsignedLong4Bytes() == 0) # 0 is fixed 1 is random
-            
-            COLS = self.read_UnsignedLong4Bytes()
-            
+            self.randomStart = not (self.read_UnsignedLong4Bytes() == 0)
+            #  0 is fixed 1 is random
+
+            self.read_UnsignedLong4Bytes()  # COLS
+
             self.highResources = (self.read_UnsignedLong4Bytes() == 1)
 
-            TSSR = self.read_UnsignedLong4Bytes()
-            
+            self.read_UnsignedLong4Bytes()  # TSSR
+
             self.VPCount = 250 * (1 << (int)(self.read_UnsignedLong4Bytes()))
 
             self.seek(5, 1)
@@ -318,17 +351,17 @@ class ReplayParser:
 
             self.seek(8, 1)
 
-            self.VPGame = (self.read_UnsignedLong4Bytes() ==  0x603872a3)
+            self.VPGame = (self.read_UnsignedLong4Bytes() == 0x603872a3)
 
-            self.seek(23 , 1)
-
-            self.read_LengthASCIIString()
-
-            self.seek(4,1)
+            self.seek(23, 1)
 
             self.read_LengthASCIIString()
 
-            self.seek(8,1)
+            self.seek(4, 1)
+
+            self.read_LengthASCIIString()
+
+            self.seek(8, 1)
 
             if (self.read_UnsignedLong4Bytes() == 2):
                 self.read_LengthASCIIString()
@@ -345,36 +378,45 @@ class ReplayParser:
             self.read_UnsignedLong4Bytes()
             self.read_UnsignedLong4Bytes()
 
-            self.playerList.append({'name':userName,'faction':faction})
-
+            self.playerList.append({'name': userName, 'faction': faction})
 
         self.seek(chunkStart + chunkLength, 0)
 
-
     def decodeDate(self, timeString) -> datetime:
+        """Processes the date string.
+
+        The date is in a different format depending on the game locale
+        (US, EURO and ASIAN dates strings follow a different string format)
         """
-        Processes the date string that is in a different format depending on the game locale (US, EURO and ASIAN dates strings follow a different string format)
-        """
-        #24hr: DD-MM-YYYY HH:mm
+
+        # 24hr: DD-MM-YYYY HH:mm
         reEuro = re.compile(r"(\d\d).(\d\d).(\d\d\d\d)\s(\d\d).(\d\d)")
-        match =  re.match(reEuro, timeString)
+        match = re.match(reEuro, timeString)
         if match:
-            #print("Euro String")
-            #print(match.groups())
+            # print("Euro String")
+            # print(match.groups())
             try:
                 day = int(match.group(1))
                 month = int(match.group(2))
                 year = int(match.group(3))
                 hour = int(match.group(4))
                 minute = int(match.group(5))
-                return datetime.datetime(year = year, month=month, day = day, hour = hour, minute = minute)
+                return datetime.datetime(
+                    year=year,
+                    month=month,
+                    day=day,
+                    hour=hour,
+                    minute=minute
+                )
             except Exception as e:
                 logging.error(str(e))
                 logging.exception("Exception : ")
 
-        #12hr: MM/DD/YYYY hh:mm XM *numbers are not 0-padded
-        reUS = re.compile(r"(\d{1,2}).(\d{1,2}).(\d\d\d\d)\s(\d{1,2}).(\d{1,2}).*?(\w)M")
-        match = re.match(reUS, timeString) 
+        # 12hr: MM/DD/YYYY hh:mm XM *numbers are not 0-padded
+        reUS = re.compile(
+            r"(\d{1,2}).(\d{1,2}).(\d\d\d\d)\s(\d{1,2}).(\d{1,2}).*?(\w)M"
+            )
+        match = re.match(reUS, timeString)
         if match:
             print("US String")
             print(match.groups())
@@ -387,14 +429,25 @@ class ReplayParser:
                 meridiem = str(match.group(6))
                 if "p" in meridiem.lower():
                     hour = hour + 12
-                return datetime.datetime(year = year, month=month, day = day, hour = hour, minute = minute)
+                return datetime.datetime(
+                    year=year,
+                    month=month,
+                    day=day,
+                    hour=hour,
+                    minute=minute
+                )
             except Exception as e:
                 logging.error(str(e))
                 logging.exception("Exception : ")
-        
-        #YYYY/MM/DD HH:MM
+
+        # YYYY/MM/DD HH:MM
         reAsian = re.compile(r"(\d\d\d\d).(\d\d).(\d\d)\s(\d\d).(\d\d)")
-        match = re.match(reAsian, (" ".join(  (str(timeString).encode("ascii", "ignore").decode()).split() ) ) )
+        s = " ".join((str(timeString).encode("ascii", "ignore").decode()))
+        s = s.split()
+        match = re.match(
+            reAsian,
+            s
+        )
         if match:
             print("Asian String")
             print(match.groups())
@@ -404,7 +457,13 @@ class ReplayParser:
                 year = int(match.group(1))
                 hour = int(match.group(4))
                 minute = int(match.group(5))
-                return datetime.datetime(year = year, month=month, day = day, hour = hour, minute = minute)
+                return datetime.datetime(
+                    year=year,
+                    month=month,
+                    day=day,
+                    hour=hour,
+                    minute=minute
+                )
             except Exception as e:
                 logging.error(str(e))
                 logging.exception("Exception : ")
@@ -433,4 +492,3 @@ class ReplayParser:
         output += "playerList Size : {}\n".format(len(self.playerList))
         output += "playerList : {}\n".format(self.playerList)
         return output
-
