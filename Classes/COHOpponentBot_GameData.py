@@ -33,6 +33,7 @@ from Classes.COHOpponentBot_UCS import UCS
 class GameData():
 
 	def __init__(self, ircClient = None, parameters = None):
+		"""Instanciates a new object of type GameData"""
 
 		self.parameters = parameters
 		if not parameters:
@@ -75,6 +76,7 @@ class GameData():
 		self.ircStringOutputList = [] # This holds a list of IRC string outputs.
 
 	def ClearData(self):
+		"""Clears all the variable information in the GameData instance."""
 		self.playerList = []
 		self.numberOfHumans = 0
 		self.numberOfComputers = 0
@@ -103,6 +105,7 @@ class GameData():
 		self.ircStringOutputList = [] # This holds a list of IRC string outputs.
 
 	def GetDataFromGame(self):
+		"""Attempts to get all the COH game information from the replay in memory."""
 		try:
 			# First Clear all data that can be aquired from the game
 			self.ClearData() 
@@ -283,7 +286,20 @@ class GameData():
 			logging.exception("Exception : ")
 			logging.error(str(e))
 
-	def GetPtrAddr(self, base, offsets):
+	def GetPtrAddr(self, base : int, offsets : list) -> int | None:
+		"""Gets memory address from a pointer address (base) and applies offsets.
+
+		Parameters:
+		:param base:  The base memory address
+		:type base: int
+           
+        :param offsets: The list of offsets	
+		:type offsets: list
+        
+		:returns: a memory address
+		:rtype: : int , None
+		"""
+
 		try:
 			if self.pm:
 				addr = self.pm.read_int(base)

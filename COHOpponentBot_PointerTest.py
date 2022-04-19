@@ -154,6 +154,3 @@ difference = (finished - started)
 
 logging.info(f"Excution took {str(difference)}")
 
-
-
-

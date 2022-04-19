@@ -86,6 +86,7 @@ class ReplayParser:
 			logging.exception("Stack Trace: ")
 			self.success = False
 
+
 	def read_2ByteString(self, stringLength=0 ) -> str:
 		"""Reads a 2byte encoded little-endian string of specified length."""
 		try:
