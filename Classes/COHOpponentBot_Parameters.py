@@ -55,21 +55,13 @@ class Parameters:
 		self.data['botOAuthKey'] = ""
 
 		self.data['whisperTo'] = "xcoinbetbot"
-
 		self.data['showOwn'] = False
-
 		self.data['logErrorsToFile'] = True
-
 		self.data['filePollInterval'] = 10
-
 		self.data['showSteamProfile'] = False
-
 		self.data['automaticTrigger'] = True
-
 		self.data['writeIWonLostInChat'] = True
-
 		self.data['writePlaceYourBetsInChat'] = False
-
 		self.data['clearOverlayAfterGameOver'] = True
 
 		self.data['logPath'] = ""
@@ -127,6 +119,7 @@ class Parameters:
 
 		# the following is windows specific code using ctypes.win will not compile on linux
 		# sets logpath from my documents folder location
+		# sets steamNumber
 		try:
 			buf= ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
 			ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
@@ -152,7 +145,9 @@ class Parameters:
 			logging.exception("Exception : ")
 
 		# Set the location of cohPath from all steam folder installations
-
+		# Set cohPath
+		# Set cohUCSPath
+		# Set steamFolder
 		if (not self.data.get('cohPath')) or (not self.data.get('cohUCSPath')):
 			#connecting to key in registry
 			try:
@@ -211,13 +206,13 @@ class Parameters:
 			logging.error(str(e))
 			logging.exception("Exception : ")
 
-		try:
-			self.data['temprecReplayPath'] = self.data.get('logPath').replace("warnings.log" , "playback\\temp.rec")
-		except Exception as e:
-			logging.error(str(e))
-			logging.exception("Exception : ")
-		
-		
+
+		logPath = self.data.get('logPath')
+		if logPath and isinstance(logPath, str):
+			self.data['temprecReplayPath'] = logPath.replace("warnings.log" , "playback\\temp.rec")
+
+		# Set channel 
+		# Set steamAlias
 		#attempt to get userName from steamNumber
 		try:
 			statString = "/steam/" + str(self.data['steamNumber'])

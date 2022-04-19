@@ -112,61 +112,25 @@ class GameData():
 				return False
 
 			# Check if a game is currently in progress if not return false.
-			replayData = self.GetCOHREC()
-			if not replayData:
+			replayParser = self.Get_replayParser_BySearch()
+			if not replayParser:
 				return False
 
-			#mpPointerAddress = 0x00901EA8
-			#mpOffsets=[0xC,0xC,0x18,0x10,0x24,0x18,0x264]
+			self.gameStartedDate = replayParser.localDate
+			self.randomStart = replayParser.randomStart
 
-			# not used but for reference
-			#muniPointerAddress = 0x00901EA8
-			#muniOffsets=[0xC,0xC,0x18,0x10,0x24,0x18,0x26C]
-
-			# not used but for reference
-			#fuelPointerAddress = 0x00901EA8
-			#fuelOffsets = [0xC,0xC,0x18,0x10,0x24,0x18,0x268]
-
-			#cohrecReplayAddress = 0x00902030
-			#cohrecOffsets = [0x28,0x160,0x4,0x84,0x24,0x110,0x0]
-
-			#print(f"baseAddress{self.baseAddress}")
-			#print(f"baseAddress{mpPointerAddress}")
-
-			#print(f"baseAddress{str(int(self.baseAddress))}")
-			#print(f"baseAddress{str(int(mpPointerAddress))}")
-
-			# check game is running by accessing player mp
-			#mp = self.pm.read_float(self.GetPtrAddr(int(self.baseAddress) + int(mpPointerAddress), mpOffsets))
-
-			# access replay data in game memory
-			#replayData = self.pm.read_bytes(self.GetPtrAddr(self.baseAddress + cohrecReplayAddress, cohrecOffsets), 4000)
-			
-			# if the above executes without throwing an error then game is in progress.
-			self.gameInProgress = True
-
-			cohreplayparser = ReplayParser(parameters=self.parameters)
-			cohreplayparser.data = bytearray(replayData)
-			success = cohreplayparser.processData()
-			# If partial data present the replay parser can fail, in these circumstances return and try again. Do not set game in progress to False.
-			if not success:
-				return False
-
-			self.gameStartedDate = cohreplayparser.localDate
-			self.randomStart = cohreplayparser.randomStart
-
-			self.highResources = cohreplayparser.highResources
-			self.VPCount = cohreplayparser.VPCount
-			if cohreplayparser.matchType.lower() == "automatch":
+			self.highResources = replayParser.highResources
+			self.VPCount = replayParser.VPCount
+			if replayParser.matchType.lower() == "automatch":
 				self.automatch = True
 			else:
 				self.automatch = False
 
-			self.mapName = cohreplayparser.mapName
-			self.mapDescription = cohreplayparser.mapDescription
-			self.modName = cohreplayparser.modName
+			self.mapName = replayParser.mapName
+			self.mapDescription = replayParser.mapDescription
+			self.modName = replayParser.modName
 
-			for item in cohreplayparser.playerList:
+			for item in replayParser.playerList:
 				username = item['name']
 				factionString = item['faction']
 				player = Player(name=username,factionString=factionString)
@@ -223,7 +187,7 @@ class GameData():
 			self.hardCPUCount = hardCounter
 			self.expertCPUCount = expertCounter
 
-			self.slots = len(cohreplayparser.playerList)
+			self.slots = len(replayParser.playerList)
 
 			#set the current MatchType
 			self.matchType = MatchType.BASIC
@@ -352,7 +316,55 @@ class GameData():
 			logging.info(f"self.cohRunning {self.cohRunning}")
 			return False
 
-	def GetCOHREC(self):
+	def Get_replayParser_ByPointer(self):
+		try:
+			myListOfCOHRECPointers = []
+			#1
+			cohrecReplayAddress = 0x00902030
+			cohrecOffsets = [0x28,0x160,0x4,0x84,0x2C,0x110,0x0]
+			myListOfCOHRECPointers.append([cohrecReplayAddress,cohrecOffsets])
+
+			#2
+			cohrecReplayAddress = 0x00902030
+			cohrecOffsets = [0x28,0x160,0x4,0x84,0x24,0x110,0x0]
+			myListOfCOHRECPointers.append([cohrecReplayAddress,cohrecOffsets])
+
+			#3
+			cohrecReplayAddress = 0x00902030
+			cohrecOffsets = [0x4,0x160,0x4,0x118,0x110,0x0]
+			myListOfCOHRECPointers.append([cohrecReplayAddress,cohrecOffsets])
+
+			#4
+			cohrecReplayAddress = 0x00902030
+			cohrecOffsets = [0x4,0x160,0x4,0x110,0x110,0x0]
+			myListOfCOHRECPointers.append([cohrecReplayAddress,cohrecOffsets])
+
+			for count, item in enumerate(myListOfCOHRECPointers):
+				logging.info(f"{count} {item}")
+				actualCOHRECMemoryAddress = self.GetPtrAddr(self.baseAddress + item[0], item[1])
+				logging.info(f"actualCOHRECMemoryAddress {str(actualCOHRECMemoryAddress)}")
+				if actualCOHRECMemoryAddress:
+					try:
+						replayByteData = self.pm.read_bytes(actualCOHRECMemoryAddress, 4000)
+						if replayByteData[4:12] == bytes("COH__REC".encode('ascii')):
+							logging.info("Pointing to COH__REC")
+							replayByteData = bytearray(replayByteData)
+							replayParser = ReplayParser(parameters=self.parameters)
+							replayParser.data = bytearray(replayByteData)
+							success = replayParser.processData()
+							if success:
+								self.gameInProgress = True
+								return replayParser
+							else:
+								self.gameInProgress = False						
+					except:
+						logging.error("Not reading memory at this location properly")
+		except Exception as e:
+			logging.error("Problem in GetCOHREC")
+			logging.exception("Exception :")
+
+
+	def Get_replayParser_BySearch(self):
 		try:
 			if self.pm:
 				with Process.open_process(self.pm.process_id) as p:
@@ -362,23 +374,27 @@ class GameData():
 					if buff:
 						replayMemoryAddress = p.search_all_memory(buff)
 						#print(replayMemoryAddress)
-						for address in replayMemoryAddress:
-							#There should be only one COH__REC in memory if the game is running
-							try:
-								data_dump = self.pm.read_bytes(address-4, 4000)	
-								data_dump = bytearray(data_dump)
-								self.gameInProgress = True
-								return data_dump
-							except Exception as e:
-								pass
-				self.gameInProgress = False
-				return None
+						if replayMemoryAddress:
+							for address in replayMemoryAddress:
+								#There should be only one COH__REC in memory if the game is running
+								try:
+									replayData = self.pm.read_bytes(address-4, 4000)	
+									replayData = bytearray(replayData)
+									replayParser = ReplayParser(parameters=self.parameters)
+									replayParser.data = bytearray(replayData)
+									success = replayParser.processData()
+									if success:
+										self.gameInProgress = True
+										return replayParser
+								except Exception as e:
+									pass
+						else:
+							self.gameInProgress = False
 
 		except Exception as e:
 			logging.error("Problem in GetCOHREC")
 			logging.exception("Exception :")
 
-			
 	
 	# rewrite function below to remove memory search.
 	def getStatsFromGame(self):

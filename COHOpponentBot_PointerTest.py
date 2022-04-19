@@ -1,3 +1,4 @@
+import datetime
 import logging
 import threading
 
@@ -9,9 +10,27 @@ for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
 logging.basicConfig(format='%(asctime)s (%(threadName)-10s) [%(levelname)s] %(message)s', filename= 'PointerFinder.log',filemode = "w", level=logging.INFO)
 
+started = datetime.datetime.now()
+
+
+# not used but for reference
+#mpPointerAddress = 0x00901EA8
+#mpOffsets=[0xC,0xC,0x18,0x10,0x24,0x18,0x264]
+
+# not used but for reference
+#muniPointerAddress = 0x00901EA8
+#muniOffsets=[0xC,0xC,0x18,0x10,0x24,0x18,0x26C]
+
+# not used but for reference
+#fuelPointerAddress = 0x00901EA8
+#fuelOffsets = [0xC,0xC,0x18,0x10,0x24,0x18,0x268]
+
+# check game is running by accessing player mp
+#mp = self.pm.read_float(self.GetPtrAddr(int(self.baseAddress) + int(mpPointerAddress), mpOffsets))
+
 # Pointer list:
 
-myListOfPointers = []
+myListOfCOHRECPointers = []
 
 #1
 #cohrecReplayAddress = 0x008F80E0
@@ -36,22 +55,22 @@ myListOfPointers = []
 #5
 cohrecReplayAddress = 0x00902030
 cohrecOffsets = [0x28,0x160,0x4,0x84,0x2C,0x110,0x0]
-myListOfPointers.append([cohrecReplayAddress,cohrecOffsets])
+myListOfCOHRECPointers.append([cohrecReplayAddress,cohrecOffsets])
 
 #6
 cohrecReplayAddress = 0x00902030
 cohrecOffsets = [0x28,0x160,0x4,0x84,0x24,0x110,0x0]
-myListOfPointers.append([cohrecReplayAddress,cohrecOffsets])
+myListOfCOHRECPointers.append([cohrecReplayAddress,cohrecOffsets])
 
 #7
 cohrecReplayAddress = 0x00902030
 cohrecOffsets = [0x4,0x160,0x4,0x118,0x110,0x0]
-myListOfPointers.append([cohrecReplayAddress,cohrecOffsets])
+myListOfCOHRECPointers.append([cohrecReplayAddress,cohrecOffsets])
 
 #8
 cohrecReplayAddress = 0x00902030
 cohrecOffsets = [0x4,0x160,0x4,0x110,0x110,0x0]
-myListOfPointers.append([cohrecReplayAddress,cohrecOffsets])
+myListOfCOHRECPointers.append([cohrecReplayAddress,cohrecOffsets])
 
 #9
 #cohrecReplayAddress = 0x0090416C
@@ -82,25 +101,29 @@ loops = 0
 
 event = threading.Event()
 
+
 while gameData.GetCOHMemoryAddress():
     loops += 1
     logging.info(f"Loop : {loops}")
-    for count, item in enumerate(myListOfPointers):
+    for count, item in enumerate(myListOfCOHRECPointers):
         logging.info(f"{count} {item}")
         actualCOHRECMemoryAddress = gameData.GetPtrAddr(gameData.baseAddress + item[0], item[1])
         logging.info(f"actualCOHRECMemoryAddress {str(actualCOHRECMemoryAddress)}")
         if actualCOHRECMemoryAddress:
             try:
-                header = gameData.pm.read_bytes(actualCOHRECMemoryAddress, 8)
+                header = gameData.pm.read_bytes(actualCOHRECMemoryAddress, 4000)
                 if header[4:12] == bytes("COH__REC".encode('ascii')):
                     logging.info("Pointing to COH__REC")
             except:
                 logging.error("Not reading memory at this location properly")
-    event.wait(10)
+        event.wait(10)
+
+finished = datetime.datetime.now()
 
 
+difference = (finished - started)
 
-
+logging.info(f"Excution took {str(difference)}")
 
 
 
