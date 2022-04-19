@@ -358,6 +358,7 @@ class GameData():
 							else:
 								self.gameInProgress = False						
 					except:
+						logging.exception("Exception : ")
 						logging.error("Not reading memory at this location properly")
 		except Exception as e:
 			logging.error("Problem in GetCOHREC")

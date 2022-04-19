@@ -1,8 +1,11 @@
+from dataclasses import dataclass
 import datetime
 import logging
 import threading
 
 from Classes.COHOpponentBot_GameData import GameData
+from Classes.COHOpponentBot_Parameters import Parameters
+from Classes.COHOpponentBot_ReplayParser import ReplayParser
 
 
 
@@ -92,7 +95,7 @@ myListOfCOHRECPointers.append([cohrecReplayAddress,cohrecOffsets])
 #cohrecOffsets = [0x4,0x8,0x194,0x4,0x110,0x110,0x0]
 #myListOfPointers.append([cohrecReplayAddress,cohrecOffsets])
 
-
+parameters = Parameters()
 
 gameData = GameData()
 gameData.GetCOHMemoryAddress()
@@ -103,7 +106,9 @@ event = threading.Event()
 
 
 while gameData.GetCOHMemoryAddress():
+    
     loops += 1
+
     logging.info(f"Loop : {loops}")
     for count, item in enumerate(myListOfCOHRECPointers):
         logging.info(f"{count} {item}")
@@ -111,11 +116,26 @@ while gameData.GetCOHMemoryAddress():
         logging.info(f"actualCOHRECMemoryAddress {str(actualCOHRECMemoryAddress)}")
         if actualCOHRECMemoryAddress:
             try:
-                header = gameData.pm.read_bytes(actualCOHRECMemoryAddress, 4000)
-                if header[4:12] == bytes("COH__REC".encode('ascii')):
+                startTimeReadMemory = datetime.datetime.now()
+                replayByteData = gameData.pm.read_bytes(actualCOHRECMemoryAddress, 4000)
+                endTimeReadMemory = datetime.datetime.now()
+                logging.info(f"Time to read memory {str(endTimeReadMemory - startTimeReadMemory)}")
+                if replayByteData[4:12] == bytes("COH__REC".encode('ascii')):
                     logging.info("Pointing to COH__REC")
+                    startTimeProcessMemory = datetime.datetime.now()
+                    replayByteData = bytearray(replayByteData)
+                    replayParser = ReplayParser(parameters=parameters)
+                    replayParser.data = bytearray(replayByteData)
+                    success = replayParser.processData()
+                    endTimeProcessMemory = datetime.datetime.now()
+                    logging.info(f"Time to process replayByteDate : {str(endTimeProcessMemory - startTimeProcessMemory)}")
+                    if success:
+                        logging.info("Parsed successfully.")
+                    else:
+                        logging.info("Did not parse successfully.")
             except:
                 logging.error("Not reading memory at this location properly")
+                logging.exception("Exception : ")
         event.wait(10)
 
 finished = datetime.datetime.now()
