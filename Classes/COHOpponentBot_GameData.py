@@ -659,10 +659,7 @@ class GameData():
 		try:
 			if userName:
 				userName = str(userName) # ensure type of string
-				assert(len(userName) > 2) # ensure more than 2 characters
-				#remove ! from start of userName for example !opponent
-				if "!" == userName[0]:
-					userName = userName[1:]
+				userName = userName.lstrip("!")
 				# add 1 extra whitespace to username if it starts with . or / using rjust to prevent . and / twitch chat commands causing problems
 				if (bool(re.match("""^[/\.]""" , userName))):
 					userName = str(userName.rjust(len(userName)+1))
