@@ -14,14 +14,14 @@ logging.basicConfig(format='%(asctime)s (%(threadName)-10s) [%(levelname)s] %(me
 myListOfPointers = []
 
 #1
-cohrecReplayAddress = 0x008F80E0
-cohrecOffsets = [0x10,0x20,0x160,0x4,0x118,0x110,0x0]
-myListOfPointers.append([cohrecReplayAddress,cohrecOffsets])
+#cohrecReplayAddress = 0x008F80E0
+#cohrecOffsets = [0x10,0x20,0x160,0x4,0x118,0x110,0x0]
+#myListOfPointers.append([cohrecReplayAddress,cohrecOffsets])
 
 #2
-cohrecReplayAddress = 0x008F80E0
-cohrecOffsets = [0x10,0x20,0x160,0x4,0x110,0x110,0x0]
-myListOfPointers.append([cohrecReplayAddress,cohrecOffsets])
+#cohrecReplayAddress = 0x008F80E0
+#cohrecOffsets = [0x10,0x20,0x160,0x4,0x110,0x110,0x0]
+#myListOfPointers.append([cohrecReplayAddress,cohrecOffsets])
 
 #3
 #cohrecReplayAddress = 0x009017E8
@@ -54,24 +54,24 @@ cohrecOffsets = [0x4,0x160,0x4,0x110,0x110,0x0]
 myListOfPointers.append([cohrecReplayAddress,cohrecOffsets])
 
 #9
-cohrecReplayAddress = 0x0090416C
-cohrecOffsets = [0x4,0x4,0x194,0x4,0x118,0x110,0x0]
-myListOfPointers.append([cohrecReplayAddress,cohrecOffsets])
+#cohrecReplayAddress = 0x0090416C
+#cohrecOffsets = [0x4,0x4,0x194,0x4,0x118,0x110,0x0]
+#myListOfPointers.append([cohrecReplayAddress,cohrecOffsets])
 
 #10
-cohrecReplayAddress = 0x0090416C
-cohrecOffsets = [0x4,0x8,0x194,0x4,0x118,0x110,0x0]
-myListOfPointers.append([cohrecReplayAddress,cohrecOffsets])
+#cohrecReplayAddress = 0x0090416C
+#cohrecOffsets = [0x4,0x8,0x194,0x4,0x118,0x110,0x0]
+#myListOfPointers.append([cohrecReplayAddress,cohrecOffsets])
 
 #11
-cohrecReplayAddress = 0x0090416C
-cohrecOffsets = [0x4,0x4,0x194,0x4,0x110,0x110,0x0]
-myListOfPointers.append([cohrecReplayAddress,cohrecOffsets])
+#cohrecReplayAddress = 0x0090416C
+#cohrecOffsets = [0x4,0x4,0x194,0x4,0x110,0x110,0x0]
+#myListOfPointers.append([cohrecReplayAddress,cohrecOffsets])
 
 #12
-cohrecReplayAddress = 0x0090416C
-cohrecOffsets = [0x4,0x8,0x194,0x4,0x110,0x110,0x0]
-myListOfPointers.append([cohrecReplayAddress,cohrecOffsets])
+#cohrecReplayAddress = 0x0090416C
+#cohrecOffsets = [0x4,0x8,0x194,0x4,0x110,0x110,0x0]
+#myListOfPointers.append([cohrecReplayAddress,cohrecOffsets])
 
 
 
