@@ -109,7 +109,8 @@ class GameData():
             return False
 
         # Check if a game is currently in progress if not return false.
-        replayParser = self.Get_replayParser_BySearch()
+        # replayParser = self.Get_replayParser_BySearch()
+        replayParser = self.Get_replayParser_ByPointer()
         if not replayParser:
             return False
 
@@ -274,7 +275,7 @@ class GameData():
         """
 
         try:
-            ucs = UCS(parameters=self.settings)
+            ucs = UCS(settings=self.settings)
             self.mapDescriptionFull = ucs.compareUCS(self.mapDescription)
 
         except Exception as e:
@@ -290,7 +291,7 @@ class GameData():
         """
 
         try:
-            ucs = UCS(parameters=self.settings)
+            ucs = UCS(settings=self.settings)
             self.mapNameFull = ucs.compareUCS(self.mapName)
         except Exception as e:
             logging.error("Problem in GetMapNameFull")
@@ -359,6 +360,9 @@ class GameData():
     def Get_replayParser_ByPointer(self) -> ReplayParser:
         """Gets an instance of the replayParser containing COH game info."""
 
+        # There are four pointers to the replay that appear to be 'static'
+        # We can try them in sequence and return the data from the first
+        # one that works (Probably the first one)
         myListOfCOHRECPointers = []
         # 1
         cohrecReplayAddress = 0x00902030
