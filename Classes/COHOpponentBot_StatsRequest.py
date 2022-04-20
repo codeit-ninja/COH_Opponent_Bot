@@ -3,6 +3,7 @@ import logging
 import os
 import ssl
 import urllib
+
 from Classes.COHOpponentBot_Settings import Settings
 from Classes.COHOpponentBot_PlayerStat import PlayerStat
 
