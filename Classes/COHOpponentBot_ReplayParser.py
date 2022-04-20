@@ -2,23 +2,20 @@ import logging
 import re
 import datetime
 
-from Classes.COHOpponentBot_Parameters import Parameters
+from Classes.COHOpponentBot_Settings import Settings
 from functools import partial
 from Classes.COHOpponentBot_UCS import UCS
 
 
 class ReplayParser:
-    """Parses a Company of Heroes 1 replay.
-
-    Extract as much useful information from its
-    header as possible.
+    """Parses a Company of Heroes 1 replay header.
     """
 
     def __init__(self, filePath=None, parameters=None) -> None:
 
         self.parameters = parameters
         if not parameters:
-            self.parameters = Parameters()
+            self.parameters = Settings()
 
         self.filePath = filePath
 

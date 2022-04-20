@@ -5,12 +5,14 @@ import re
 from threading import Thread
 from tkinter import END
 
-from Classes.COHOpponentBot_Parameters import Parameters
+from Classes.COHOpponentBot_Settings import Settings
 from Classes.COHOpponentBot_GameData import GameData
 
 
 class IRC_Channel(threading.Thread):
-    def __init__(self, ircClient, irc, queue, channel, parameters=None):
+    """Iplements an IRC Channel Connection. Checks User Commands."""
+
+    def __init__(self, ircClient, irc, queue, channel, settings=None):
         Thread.__init__(self)
         self.ircClient = ircClient
         self.running = True
@@ -18,11 +20,11 @@ class IRC_Channel(threading.Thread):
         self.queue = queue
         self.channel = channel
 
-        self.parameters = parameters
-        if not parameters:
-            self.parameters = Parameters()
+        self.settings = settings
+        if not settings:
+            self.settings = Settings()
 
-        self.gameData = GameData(self.ircClient, parameters=self.parameters)
+        self.gameData = GameData(self.ircClient, settings=self.settings)
 
     def run(self):
         self.irc.send(('JOIN ' + self.channel + '\r\n').encode("utf8"))
@@ -84,7 +86,7 @@ class IRC_Channel(threading.Thread):
 
                 self.gameData = GameData(
                     ircClient=self.ircClient,
-                    parameters=self.parameters
+                    settings=self.settings
                 )
                 if self.gameData.GetDataFromGame():
                     self.gameData.outputOpponentData()
@@ -94,8 +96,8 @@ class IRC_Channel(threading.Thread):
                     )
 
             user = str(userName).lower()
-            admin = str(self.parameters.privatedata.get('adminUserName'))
-            channel = str(self.parameters.data.get('channel'))
+            admin = str(self.settings.privatedata.get('adminUserName'))
+            channel = str(self.settings.data.get('channel'))
             if (
                 message.lower() == "test"
                 and user == admin.lower()
@@ -130,7 +132,7 @@ class IRC_Channel(threading.Thread):
         try:
             self.gameData = GameData(
                 self.ircClient,
-                parameters=self.parameters
+                settings=self.settings
             )
             self.gameData.GetDataFromGame()
             self.gameData.GetMapDescriptionFromUCSFile()
@@ -145,7 +147,7 @@ class IRC_Channel(threading.Thread):
             logging.exception("Exception : ")
 
     def gameInfo(self):
-        self.gameData = GameData(self.ircClient, parameters=self.parameters)
+        self.gameData = GameData(self.ircClient, settings=self.settings)
         if self.gameData.GetDataFromGame():
             self.ircClient.SendPrivateMessageToIRC(
                 f"Map : {self.gameData.mapNameFull},"
@@ -156,7 +158,7 @@ class IRC_Channel(threading.Thread):
             )
 
     def story(self):
-        self.gameData = GameData(self.ircClient, parameters=self.parameters)
+        self.gameData = GameData(self.ircClient, settings=self.settings)
         logging.info(str(self.gameData))
         if self.gameData.GetDataFromGame():
             logging.info(str(self.gameData))
@@ -170,7 +172,7 @@ class IRC_Channel(threading.Thread):
         if not self.gameData:
             self.gameData = GameData(
                 self.ircClient,
-                parameters=self.parameters
+                settings=self.settings
             )
             self.gameData.GetDataFromGame()
         self.gameData.TestOutput()

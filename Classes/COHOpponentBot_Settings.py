@@ -11,7 +11,8 @@ import ctypes.wintypes
 # for finding the windows home directory will throw error on linux
 
 
-class Parameters:
+class Settings:
+    """Shared Settings Saved to and Loaded from file."""
 
     def __init__(self):
 

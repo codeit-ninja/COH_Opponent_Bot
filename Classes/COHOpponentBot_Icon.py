@@ -1,4 +1,5 @@
 class Icon:
+    """COH1 Opponent Bot Icon"""
     # The following literal string is the one way
     # I could encode the icon inside the file for pyinstaller
     # because it didn't like the external file

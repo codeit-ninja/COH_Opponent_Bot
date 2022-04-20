@@ -1,15 +1,17 @@
 import logging
 import os
 
-from Classes.COHOpponentBot_Parameters import Parameters
+from Classes.COHOpponentBot_Settings import Settings
 
 
 class UCS:
+    """Processes language UCS file strings and the in game symbolic aliases."""
+
     def __init__(self, ucsPath=None, parameters=None) -> None:
 
         self.parameters = parameters
         if not parameters:
-            self.parameters = Parameters()
+            self.parameters = Settings()
 
         self.ucsPath = ucsPath
         if not ucsPath:

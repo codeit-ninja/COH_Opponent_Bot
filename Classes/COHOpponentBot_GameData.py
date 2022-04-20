@@ -12,7 +12,7 @@ from mem_edit import Process
 
 from Classes.COHOpponentBot_Faction import Faction
 from Classes.COHOpponentBot_MatchType import MatchType
-from Classes.COHOpponentBot_Parameters import Parameters
+from Classes.COHOpponentBot_Settings import Settings
 from Classes.COHOpponentBot_Player import Player
 from Classes.COHOpponentBot_ReplayParser import ReplayParser
 from Classes.COHOpponentBot_StatsRequest import StatsRequest
@@ -21,13 +21,14 @@ from Classes.COHOpponentBot_UCS import UCS
 
 
 class GameData():
+    """Contains information about the current COH1 game and players. """
 
-    def __init__(self, ircClient=None, parameters=None):
+    def __init__(self, ircClient=None, settings=None):
         """Instanciates a new object of type GameData"""
 
-        self.parameters = parameters
-        if not parameters:
-            self.parameters = Parameters()
+        self.settings = settings
+        if not settings:
+            self.settings = Settings()
 
         # Local reference to the IRC client
         self.ircClient = ircClient
@@ -146,12 +147,12 @@ class GameData():
                         logging.error(str(e))
                         logging.exception("Stack : ")
 
-                    steamNumber = self.parameters.data.get('steamNumber')
+                    steamNumber = self.settings.data.get('steamNumber')
                     ps = player.stats
                     if ps:
                         if steamNumber == ps.steamNumber:
-                            self.parameters.data['steamAlias'] = ps.alias
-                            self.parameters.save()
+                            self.settings.data['steamAlias'] = ps.alias
+                            self.settings.save()
 
         humans = sum(item.stats is not None for item in self.playerList)
         self.numberOfHumans = humans
@@ -216,7 +217,7 @@ class GameData():
         UTC_corrected_start_time = self.gameStartedDate + hours_added
 
         gameStarted = str(UTC_corrected_start_time)
-        channelName = self.parameters.data.get('channel')
+        channelName = self.settings.data.get('channel')
 
         # Get the map full name from ucs file this takes time and so
         # should only be called when output is intended.
@@ -273,7 +274,7 @@ class GameData():
         """
 
         try:
-            ucs = UCS(parameters=self.parameters)
+            ucs = UCS(parameters=self.settings)
             self.mapDescriptionFull = ucs.compareUCS(self.mapDescription)
 
         except Exception as e:
@@ -289,7 +290,7 @@ class GameData():
         """
 
         try:
-            ucs = UCS(parameters=self.parameters)
+            ucs = UCS(parameters=self.settings)
             self.mapNameFull = ucs.compareUCS(self.mapName)
         except Exception as e:
             logging.error("Problem in GetMapNameFull")
@@ -397,7 +398,7 @@ class GameData():
                     if rd[4:12] == bytes("COH__REC".encode('ascii')):
                         logging.info("Pointing to COH__REC")
                         replayByteData = bytearray(rd)
-                        replayParser = ReplayParser(parameters=self.parameters)
+                        replayParser = ReplayParser(parameters=self.settings)
                         replayParser.data = bytearray(replayByteData)
                         success = replayParser.processData()
                         if success:
@@ -429,7 +430,7 @@ class GameData():
                             try:
                                 rd = self.pm.read_bytes(address-4, 4000)
                                 rd = bytearray(rd)
-                                rp = ReplayParser(parameters=self.parameters)
+                                rp = ReplayParser(parameters=self.settings)
                                 rp.data = bytearray(rd)
                                 success = rp.processData()
                                 if success:
@@ -447,7 +448,7 @@ class GameData():
         if self.pm:
             with Process.open_process(self.pm.process_id) as p:
                 steamNumberList = []
-                steamNumberList.append(self.parameters.data.get('steamNumber'))
+                steamNumberList.append(self.settings.data.get('steamNumber'))
                 # add default value incase it isn't found.
                 for player in self.playerList:
                     name = bytearray(str(player.name).encode('utf-16le'))
@@ -477,20 +478,20 @@ class GameData():
                                     pass
                     statList = []
                     for item in steamNumberList:
-                        statRquest = StatsRequest(parameters=self.parameters)
+                        statRquest = StatsRequest(parameters=self.settings)
                         stat = statRquest.returnStats(item)
                         statList.append(stat)
                     return statList
 
     def TestOutput(self):
         """Produces text output according to Preformat."""
-        if not self.parameters:
-            self.parameters = Parameters()
+        if not self.settings:
+            self.settings = Settings()
 
-        steamNumber = self.parameters.data.get('steamNumber')
-        statsRequest = StatsRequest(parameters=self.parameters)
+        steamNumber = self.settings.data.get('steamNumber')
+        statsRequest = StatsRequest(parameters=self.settings)
         streamerStats = statsRequest.returnStats(str(steamNumber))
-        streamerPlayer = Player(name=self.parameters.data.get('channel'))
+        streamerPlayer = Player(name=self.settings.data.get('channel'))
         streamerPlayer.stats = streamerStats
         if streamerPlayer.stats:
             output = (
@@ -498,7 +499,7 @@ class GameData():
                 " to Custom Chat Output Preformat:"
             )
             self.ircClient.SendToOutputField(output)
-            preformat = self.parameters.data.get('customStringPreFormat')
+            preformat = self.settings.data.get('customStringPreFormat')
             self.ircClient.SendToOutputField(preformat)
 
             for match in MatchType:
@@ -523,7 +524,7 @@ class GameData():
 
     def __produceOutput(self, streamerPlayer):
         sFD = self.populateStringFormattingDictionary(streamerPlayer)
-        cPFOS = self.parameters.data.get('customStringPreFormat')
+        cPFOS = self.settings.data.get('customStringPreFormat')
         theString = self.formatPreFormattedString(cPFOS, sFD)
         outputList = list(self.split_by_n(theString, 500))
         for item in outputList:
@@ -554,11 +555,11 @@ class GameData():
                         axisTeam.append(item)
 
             # output each player to file
-            if (self.parameters.data.get('useOverlayPreFormat')):
+            if (self.settings.data.get('useOverlayPreFormat')):
                 self.saveOverlayHTML(axisTeam, alliesTeam)
 
             # output to chat if customoutput ticked
-            if (self.parameters.data.get('useCustomPreFormat')):
+            if (self.settings.data.get('useCustomPreFormat')):
                 if (int(self.numberOfComputers) > 0):
                     self.ircStringOutputList.append(
                         "Game with " + str(self.numberOfComputers) +
@@ -571,9 +572,9 @@ class GameData():
                 for item in self.playerList:
                     # check if item has stats if not it is a computer
                     if item.stats:
-                        steamNumber = self.parameters.data.get('steamNumber')
+                        steamNumber = self.settings.data.get('steamNumber')
                         if(item.stats.steamNumber == steamNumber):
-                            if (self.parameters.data.get('showOwn')):
+                            if (self.settings.data.get('showOwn')):
                                 self.ircStringOutputList = (
                                     self.ircStringOutputList +
                                     self.createCustomOutput(item)
@@ -593,7 +594,7 @@ class GameData():
             self.populateStringFormattingDictionary(player)
         )
         customPreFormattedOutputString = (
-            self.parameters.data.get('customStringPreFormat')
+            self.settings.data.get('customStringPreFormat')
         )
         theString = (
             self.formatPreFormattedString(
@@ -611,7 +612,7 @@ class GameData():
             prefixDiv = '<div class = "textVariables">'
             postfixDivClose = '</div>'
         stringFormattingDictionary = dict(
-            self.parameters.stringFormattingDictionary)
+            self.settings.stringFormattingDictionary)
         # loads default values from parameters into
         # stringFormattingDictionary (Key: Value:None)
         nameDiv = ""
@@ -823,7 +824,7 @@ class GameData():
 
     def populateImageFormattingDictionary(self, player):
         imageOverlayFDict = (
-            self.parameters.imageOverlayFormattingDictionary)
+            self.settings.imageOverlayFormattingDictionary)
 
         # faction icons
         if player.faction:
@@ -1009,17 +1010,17 @@ class GameData():
 
             for item in axisTeamList:
                 if item.stats:
-                    steamNumber = str(self.parameters.data.get('steamNumber'))
+                    steamNumber = str(self.settings.data.get('steamNumber'))
                     if steamNumber == str(item.stats.steamNumber):
                         # logging.info ("Player team is AXIS")
                         team1List = axisTeamList
                         team2List = alliesTeamList
 
-            uopf = self.parameters.data.get('useOverlayPreFormat')
+            uopf = self.settings.data.get('useOverlayPreFormat')
             useOverlayPreFormat = bool(uopf)
             if (useOverlayPreFormat):
                 for item in team1List:
-                    pf = self.parameters.data.get('overlayStringPreFormatLeft')
+                    pf = self.settings.data.get('overlayStringPreFormatLeft')
                     preFormattedString = pf
                     # first substitute all the text in the preformat
                     sfDict = self.populateStringFormattingDictionary(
@@ -1035,7 +1036,7 @@ class GameData():
                     )
                     team1 += str(theString) + str("<BR>") + "\n"
                 for item in team2List:
-                    preFormattedString = self.parameters.data.get(
+                    preFormattedString = self.settings.data.get(
                         'overlayStringPreFormatRight'
                     )
                     # first substitute all the text in the preformat
@@ -1062,7 +1063,7 @@ class GameData():
                 for item in team2List:
                     team2 += str(item.name) + str("<BR>") + "\n"
 
-            cssFilePath = self.parameters.data.get('overlayStyleCSSFilePath')
+            cssFilePath = self.settings.data.get('overlayStyleCSSFilePath')
             # check if css file exists
             # and if not output the default template to folder
             if not (os.path.isfile(cssFilePath)):

@@ -4,6 +4,7 @@ import datetime
 
 
 class FactionResult():
+    """Contains Stat data for each COH1 game type and faction."""
 
     def __init__(
         self, faction=None, matchType='-1', name='-1', nameShort='-1',

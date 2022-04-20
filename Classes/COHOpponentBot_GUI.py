@@ -21,10 +21,11 @@ from Classes.COHOpponentBot_GameData import GameData
 from Classes.COHOpponentBot_MemoryMonitor import MemoryMonitor
 
 import Classes.COHOpponentBot_IRC_Client as COHOpponentBot_IRC_Client
-import Classes.COHOpponentBot_Parameters as COHOpponentBot_Parameters
+import Classes.COHOpponentBot_Settings as COHOpponentBot_Settings
 
 
 class GUI:
+    """Graphical User Interface for the COH Opponent Bot."""
 
     def __init__(self):
 
@@ -34,7 +35,7 @@ class GUI:
 
         self.ircClient = None  # reference to the opponentbot
 
-        self.parameters = COHOpponentBot_Parameters.Parameters()
+        self.settings = COHOpponentBot_Settings.Settings()
 
         self.master = tkinter.Tk()
 
@@ -45,23 +46,23 @@ class GUI:
 
         # Checkbox string construction option bools
 
-        v = int(bool(self.parameters.data.get('showOwn')))
+        v = int(bool(self.settings.data.get('showOwn')))
         self.showOwn = IntVar(value=v)
-        v = int(bool(self.parameters.data.get('automaticTrigger')))
+        v = int(bool(self.settings.data.get('automaticTrigger')))
         self.automaticTrigger = IntVar(value=v)
-        v = int(bool(self.parameters.data.get('writeIWonLostInChat')))
+        v = int(bool(self.settings.data.get('writeIWonLostInChat')))
         self.writeIWonLostInChat = IntVar(value=v)
-        v = int(bool(self.parameters.data.get('writePlaceYourBetsInChat')))
+        v = int(bool(self.settings.data.get('writePlaceYourBetsInChat')))
         self.writePlaceYourBetsInChat = IntVar(value=v)
-        v = int(bool(self.parameters.data.get('clearOverlayAfterGameOver')))
+        v = int(bool(self.settings.data.get('clearOverlayAfterGameOver')))
         self.clearOverlayAfterGameOver = IntVar(value=v)
-        v = int(bool(self.parameters.data.get('useOverlayPreFormat')))
+        v = int(bool(self.settings.data.get('useOverlayPreFormat')))
         self.useOverlayPreFormat = IntVar(value=v)
-        v = int(bool(self.parameters.data.get('mirrorLeftToRightOverlay')))
+        v = int(bool(self.settings.data.get('mirrorLeftToRightOverlay')))
         self.mirrorLeftToRightOverlay = IntVar(value=v)
-        v = int(bool(self.parameters.data.get('useCustomPreFormat')))
+        v = int(bool(self.settings.data.get('useCustomPreFormat')))
         self.useCustomPreFormat = IntVar(value=v)
-        v = int(bool(self.parameters.data.get('logErrorsToFile')))
+        v = int(bool(self.settings.data.get('logErrorsToFile')))
         self.logErrorsToFile = IntVar(value=v)
 
         self.customOverlayPreFormatStringLeft = StringVar()
@@ -108,26 +109,26 @@ class GUI:
         self.entryRelicCOHPath.grid(row=4, column=1)
 
         steamName = "Enter Your Steam Name Here"
-        if self.parameters.data.get('steamAlias'):
-            steamName = self.parameters.data.get('steamAlias')
+        if self.settings.data.get('steamAlias'):
+            steamName = self.settings.data.get('steamAlias')
         self.entrySteamName.insert(0, str(steamName))
 
-        logPath = self.parameters.data.get('logPath')
+        logPath = self.settings.data.get('logPath')
         if (logPath):
             self.entryWarningLogPath.insert(0, str(logPath))
 
-        cohPath = self.parameters.data.get('cohPath')
+        cohPath = self.settings.data.get('cohPath')
         if (cohPath):
             self.entryRelicCOHPath.insert(0, str(cohPath))
 
         steamNumber = "Enter Your Steam Number Here (17 digits)"
-        if self.parameters.data.get('steamNumber'):
-            steamNumber = self.parameters.data.get('steamNumber')
+        if self.settings.data.get('steamNumber'):
+            steamNumber = self.settings.data.get('steamNumber')
         self.entrySteam64IDNumber.insert(0, steamNumber)
 
         twitchName = "Enter Your Twitch Channel Name Here"
-        if self.parameters.data.get('channel'):
-            twitchName = self.parameters.data.get('channel')
+        if self.settings.data.get('channel'):
+            twitchName = self.settings.data.get('channel')
         self.entryTwitchChannel.insert(0, twitchName)
 
         self.entryTwitchChannel.config(state="disabled")
@@ -258,7 +259,7 @@ class GUI:
             # replaces both Won sign varients for korean language
             # and Yen symbol for Japanese language paths
             theFilename = re.sub(pattern, "/", self.master.filename)
-            self.parameters.save(theFilename)
+            self.settings.save(theFilename)
 
     def loadPreferences(self):
         files = [('Json', '*.json'), ('All Files', '*.*')]
@@ -276,11 +277,11 @@ class GUI:
             # replaces both Won sign varients for korean language
             # and Yen symbol for Japanese language paths
             theFilename = re.sub(pattern, "/", self.master.filename)
-            self.parameters.load(theFilename)
+            self.settings.load(theFilename)
             self.refreshParameters()
 
     def refreshParameters(self):
-        self.parameters = COHOpponentBot_Parameters.Parameters()
+        self.settings = COHOpponentBot_Settings.Settings()
 
     def showAboutDialogue(self):
         InformationString = (
@@ -368,9 +369,9 @@ class GUI:
                 validate="focusout",
                 validatecommand=self.saveCustomChatPreFormat)
             self.customChatOutputEntry.grid(sticky=W)
-            if self.parameters.data.get('customStringPreFormat'):
+            if self.settings.data.get('customStringPreFormat'):
                 self.customChatOutputPreFormatString.set(
-                    self.parameters.data.get('customStringPreFormat'))
+                    self.settings.data.get('customStringPreFormat'))
 
             self.frameCustomChatVariables = tkinter.LabelFrame(
                 self.frameCustomFormat,
@@ -385,7 +386,7 @@ class GUI:
             columnNumber = 0
             rowNumber = 0
 
-            sfd = self.parameters.stringFormattingDictionary
+            sfd = self.settings.stringFormattingDictionary
             for key, value in sfd.items():
 
                 myLabelFrame = tkinter.LabelFrame(
@@ -419,7 +420,7 @@ class GUI:
             # create all custom icon variables from dictionary keys
             columnNumber = 0
             rowNumber = 0
-            iofd = self.parameters.imageOverlayFormattingDictionary.items()
+            iofd = self.settings.imageOverlayFormattingDictionary.items()
             for key, value in iofd:
 
                 myLabelFrame = tkinter.LabelFrame(
@@ -456,9 +457,9 @@ class GUI:
                 validate="focusout",
                 validatecommand=self.saveCustomOverlayPreFormatLeft)
 
-            if self.parameters.data.get('overlayStringPreFormatLeft'):
+            if self.settings.data.get('overlayStringPreFormatLeft'):
                 self.customOverlayPreFormatStringLeft.set(
-                    self.parameters.data.get('overlayStringPreFormatLeft'))
+                    self.settings.data.get('overlayStringPreFormatLeft'))
 
             self.customOverlayEntryRight = tkinter.Entry(
                 self.frameCustomFormat,
@@ -467,9 +468,9 @@ class GUI:
                 validate="focusout",
                 validatecommand=self.saveCustomOverlayPreFormatRight)
 
-            if self.parameters.data.get('overlayStringPreFormatRight'):
+            if self.settings.data.get('overlayStringPreFormatRight'):
                 self.customOverlayPreFormatStringRight.set(
-                    self.parameters.data.get('overlayStringPreFormatRight'))
+                    self.settings.data.get('overlayStringPreFormatRight'))
 
             self.checkUseMirrorOverlay = tkinter.Checkbutton(
                 self.frameCustomFormat,
@@ -540,10 +541,10 @@ class GUI:
             )
             self.entryCSSFilePath.grid(row=0, column=1)
 
-            if(self.parameters.data.get('overlayStyleCSSFilePath')):
+            if(self.settings.data.get('overlayStyleCSSFilePath')):
                 self.entryCSSFilePath.insert(
                     0,
-                    str(self.parameters.data.get('overlayStyleCSSFilePath')))
+                    str(self.settings.data.get('overlayStyleCSSFilePath')))
 
             self.entryCSSFilePath.config(state=DISABLED)
 
@@ -572,15 +573,15 @@ class GUI:
             self.entryBotAccountName.grid(row=0, column=1)
             self.entryBotoAuthKey.grid(row=1, column=1)
 
-            if (self.parameters.data.get('botUserName')):
+            if (self.settings.data.get('botUserName')):
                 self.entryBotAccountName.insert(
                     0,
-                    str(self.parameters.data.get('botUserName')))
+                    str(self.settings.data.get('botUserName')))
 
-            if (self.parameters.data.get('botOAuthKey')):
+            if (self.settings.data.get('botOAuthKey')):
                 self.entryBotoAuthKey.insert(
                     0,
-                    str(self.parameters.data.get('botOAuthKey')))
+                    str(self.settings.data.get('botOAuthKey')))
 
             self.entryBotoAuthKey.config(show="*")
 
@@ -644,22 +645,22 @@ class GUI:
     def saveCustomChatPreFormat(self):
         if self.customChatOutputEntry:
             cco = self.customChatOutputPreFormatString.get()
-            self.parameters.data['customStringPreFormat'] = cco
-        self.parameters.save()
+            self.settings.data['customStringPreFormat'] = cco
+        self.settings.save()
         return True  # must return true to a validate entry method
 
     def saveCustomOverlayPreFormatLeft(self):
         if self.customOverlayEntryLeft:
             ospf = self.customOverlayPreFormatStringLeft.get()
-            self.parameters.data['overlayStringPreFormatLeft'] = ospf
-        self.parameters.save()
+            self.settings.data['overlayStringPreFormatLeft'] = ospf
+        self.settings.save()
         return True  # must return true to a validate entry method
 
     def saveCustomOverlayPreFormatRight(self):
         if self.customOverlayEntryRight:
             ospf = self.customOverlayPreFormatStringRight.get()
-            self.parameters.data['overlayStringPreFormatRight'] = ospf
-        self.parameters.save()
+            self.settings.data['overlayStringPreFormatRight'] = ospf
+        self.settings.save()
         return True  # must return true to a validate entry method
 
     def toggleUseOverlayPreFormat(self):
@@ -702,36 +703,36 @@ class GUI:
         self.saveToggles()
 
     def saveToggles(self):
-        self.parameters.data['showOwn'] = bool(self.showOwn.get())
+        self.settings.data['showOwn'] = bool(self.showOwn.get())
 
         automaticTrigger = bool(self.automaticTrigger.get())
-        self.parameters.data['automaticTrigger'] = automaticTrigger
+        self.settings.data['automaticTrigger'] = automaticTrigger
 
         wiwlc = bool(self.writeIWonLostInChat.get())
-        self.parameters.data['writeIWonLostInChat'] = wiwlc
+        self.settings.data['writeIWonLostInChat'] = wiwlc
 
         wpyb = bool(self.writePlaceYourBetsInChat.get())
-        self.parameters.data['writePlaceYourBetsInChat'] = wpyb
+        self.settings.data['writePlaceYourBetsInChat'] = wpyb
 
         coago = bool(self.clearOverlayAfterGameOver.get())
-        self.parameters.data['clearOverlayAfterGameOver'] = coago
+        self.settings.data['clearOverlayAfterGameOver'] = coago
 
         uop = bool(self.useOverlayPreFormat.get())
-        self.parameters.data['useOverlayPreFormat'] = uop
+        self.settings.data['useOverlayPreFormat'] = uop
 
         mrtl = bool(self.mirrorLeftToRightOverlay.get())
-        self.parameters.data['mirrorLeftToRightOverlay'] = mrtl
+        self.settings.data['mirrorLeftToRightOverlay'] = mrtl
 
         ucp = bool(self.useCustomPreFormat.get())
-        self.parameters.data['useCustomPreFormat'] = ucp
+        self.settings.data['useCustomPreFormat'] = ucp
 
         letf = bool(self.logErrorsToFile.get())
-        self.parameters.data['logErrorsToFile'] = letf
+        self.settings.data['logErrorsToFile'] = letf
 
-        self.parameters.save()
+        self.settings.save()
         try:
             if self.ircClient:
-                self.ircClient.parameters = self.parameters
+                self.ircClient.parameters = self.settings
         except Exception as e:
             logging.error(str(e))
             logging.exception('Exception : ')
@@ -798,8 +799,8 @@ class GUI:
                 self.entrySteam64IDNumber.config(state=DISABLED)
                 self.enableButtons()
                 steam64ID = self.entrySteam64IDNumber.get()
-                self.parameters.data['steamNumber'] = steam64ID
-                self.parameters.save()
+                self.settings.data['steamNumber'] = steam64ID
+                self.settings.save()
             else:
                 messagebox.showerror(
                     "Invaid Steam Number", "Please enter your steam number\n"
@@ -816,8 +817,8 @@ class GUI:
             if(self.special_match(self.entryTwitchChannel.get())):
                 self.entryTwitchChannel.config(state=DISABLED)
                 self.enableButtons()
-                self.parameters.data['channel'] = self.entryTwitchChannel.get()
-                self.parameters.save()
+                self.settings.data['channel'] = self.entryTwitchChannel.get()
+                self.settings.save()
             else:
                 messagebox.showerror(
                     "Invalid Twitch channel",
@@ -835,8 +836,8 @@ class GUI:
         if(theState == NORMAL):
             self.entrySteamName.config(state=DISABLED)
             self.enableButtons()
-            self.parameters.data['steamAlias'] = self.entrySteamName.get()
-            self.parameters.save()
+            self.settings.data['steamAlias'] = self.entrySteamName.get()
+            self.settings.save()
 
     def editBotName(self):
         theState = self.entryBotAccountName.cget('state')
@@ -850,8 +851,8 @@ class GUI:
                 self.entryBotAccountName.config(state="disabled")
                 self.enableButtons()
                 botacc = self.entryBotAccountName.get()
-                self.parameters.data['botUserName'] = botacc
-                self.parameters.save()
+                self.settings.data['botUserName'] = botacc
+                self.settings.save()
             else:
                 messagebox.showerror(
                     "Invalid Twitch channel",
@@ -871,8 +872,8 @@ class GUI:
                 self.entryBotoAuthKey.config(state="disabled")
                 self.enableButtons()
                 oAuth = self.entryBotoAuthKey.get()
-                self.parameters.data['botOAuthKey'] = oAuth
-                self.parameters.save()
+                self.settings.data['botOAuthKey'] = oAuth
+                self.settings.save()
             else:
                 messagebox.showerror(
                     "Invaid OAuth Key",
@@ -926,14 +927,14 @@ class GUI:
             # replaces both Won sign varients for korean language
             # and Yen symbol for Japanese language paths
             theFilename = re.sub(pattern, "/", self.master.filename)
-            self.parameters.data['logPath'] = theFilename.replace("/", '\\')
+            self.settings.data['logPath'] = theFilename.replace("/", '\\')
             self.entryWarningLogPath.config(state=NORMAL)
             self.entryWarningLogPath.delete(0, tkinter.END)
-            logpath = self.parameters.data.get('logPath')
+            logpath = self.settings.data.get('logPath')
             if logpath:
                 self.entryWarningLogPath.insert(0, str(logpath))
             self.entryWarningLogPath.config(state=DISABLED)
-            self.parameters.save()
+            self.settings.save()
         self.enableButtons()
 
     def locateCOH(self):
@@ -947,21 +948,21 @@ class GUI:
         if(self.master.filename != ""):
             # set cohPath
             if (os.path.isfile(self.master.filename)):
-                self.parameters.data['cohPath'] = self.master.filename
+                self.settings.data['cohPath'] = self.master.filename
             # set ucsPath
             d = os.path.dirname(self.master.filename)
             ucsPath = d + (
                 "\\CoH\\Engine\\Locale\\English"
                 "\\RelicCOH.English.ucs")
             if (os.path.isfile(ucsPath)):
-                self.parameters.data['cohUCSPath'] = ucsPath
+                self.settings.data['cohUCSPath'] = ucsPath
             self.entryRelicCOHPath.config(state=NORMAL)
             self.entryRelicCOHPath.delete(0, tkinter.END)
-            cohpath = self.parameters.data.get('cohPath')
+            cohpath = self.settings.data.get('cohPath')
             if cohpath:
                 self.entryRelicCOHPath.insert(0, str(cohpath))
             self.entryRelicCOHPath.config(state=DISABLED)
-            self.parameters.save()
+            self.settings.save()
         self.enableButtons()
 
     def browseCSSFilePathButton(self):
@@ -981,21 +982,21 @@ class GUI:
             # and Yen symbol for Japanese language paths
             theFilename = re.sub(pattern, "/", self.master.filename)
             theFilename = theFilename.replace("/", '\\')
-            self.parameters.data['overlayStyleCSSFilePath'] = theFilename
+            self.settings.data['overlayStyleCSSFilePath'] = theFilename
             self.entryCSSFilePath.config(state=NORMAL)
             self.entryCSSFilePath.delete(0, tkinter.END)
-            cssPath = self.parameters.data.get('overlayStyleCSSFilePath')
+            cssPath = self.settings.data.get('overlayStyleCSSFilePath')
             if cssPath:
                 self.entryCSSFilePath.insert(0, str(cssPath))
             self.entryCSSFilePath.config(state=DISABLED)
-            self.parameters.save()
+            self.settings.save()
         self.enableButtons()
 
     def connectIRC(self, thread):
         if (
-            self.checkSteamNumber(self.parameters.data.get('steamNumber'))
-            and self.special_match(self.parameters.data.get('channel'))
-            and os.path.isfile(self.parameters.data.get('logPath'))
+            self.checkSteamNumber(self.settings.data.get('steamNumber'))
+            and self.special_match(self.settings.data.get('channel'))
+            and os.path.isfile(self.settings.data.get('logPath'))
         ):
             # connect if there is no thread running
             # disconnect if thread is running
@@ -1023,9 +1024,9 @@ class GUI:
                 self.ircClient = COHOpponentBot_IRC_Client.IRC_Client(
                     self.txt,
                     bool(self.consoleDisplayBool.get()),
-                    parameters=self.parameters)
+                    parameters=self.settings)
                 self.ircClient.start()
-                if (bool(self.parameters.data.get('automaticTrigger'))):
+                if (bool(self.settings.data.get('automaticTrigger'))):
                     self.startMonitors()
                 self.connectButton.config(state=NORMAL)
         else:
@@ -1040,9 +1041,9 @@ class GUI:
         # Create Monitor Threads and start them.
         if self.ircClient:
             self.automaticMemoryMonitor = MemoryMonitor(
-                pollInterval=self.parameters.data.get('filePollInterval'),
+                pollInterval=self.settings.data.get('filePollInterval'),
                 ircClient=self.ircClient,
-                parameters=self.parameters)
+                parameters=self.settings)
             self.automaticMemoryMonitor.start()
 
     def closeMonitors(self):

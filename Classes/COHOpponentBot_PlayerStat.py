@@ -5,6 +5,7 @@ from Classes.COHOpponentBot_MatchType import MatchType
 
 
 class PlayerStat:
+    """Human player stats."""
 
     def __init__(self, statdata, steamNumber):
 

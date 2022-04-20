@@ -9,7 +9,7 @@ from tkinter import END
 from queue import Queue
 
 # import all secret parameters from parameters file
-from Classes.COHOpponentBot_Parameters import Parameters
+from Classes.COHOpponentBot_Settings import Settings
 from Classes.COHOpponentBot_IRC_Channel import IRC_Channel
 
 # Here are the message lines held until sent
@@ -18,8 +18,9 @@ toSend = False
 
 
 class IRC_Client(threading.Thread):
+    """IRC Chat Client Maintains Socket and Message Send Buffer."""
 
-    def __init__(self, output, consoleDisplayBool, parameters=None):
+    def __init__(self, output, consoleDisplayBool, settings=None):
 
         threading.Thread.__init__(self)
 
@@ -27,34 +28,34 @@ class IRC_Client(threading.Thread):
 
         self.displayConsoleOut = consoleDisplayBool
 
-        self.parameters = parameters
-        if not parameters:
-            self.parameters = Parameters()
+        self.settings = settings
+        if not settings:
+            self.settings = Settings()
 
-        self.adminUserName = self.parameters.privatedata.get('adminUserName')
+        self.adminUserName = self.settings.privatedata.get('adminUserName')
         # This username will be able to use admin commands
         # exit the program and bypass some limits.
 
         # use botusername or get default if not set
-        if (self.parameters.data.get('botUserName') == ""):
-            self.nick = self.parameters.privatedata.get('IRCnick')
+        if (self.settings.data.get('botUserName') == ""):
+            self.nick = self.settings.privatedata.get('IRCnick')
             # This value is the username used to connect to IRC
             # eg: "xcomreborn".
         else:
-            self.nick = self.parameters.data.get('botUserName')
+            self.nick = self.settings.data.get('botUserName')
 
-        self.channel = "#" + self.parameters.data.get('channel').lower()
+        self.channel = "#" + self.settings.data.get('channel').lower()
         # The channel name for your channel eg: "#xcomreborn".
 
         # use botoauthkey or get default if not set
-        if (self.parameters.data.get('botOAuthKey') == ""):
-            self.password = self.parameters.privatedata.get('IRCpassword')
+        if (self.settings.data.get('botOAuthKey') == ""):
+            self.password = self.settings.privatedata.get('IRCpassword')
         else:
-            self.password = self.parameters.data.get('botOAuthKey')
+            self.password = self.settings.data.get('botOAuthKey')
 
-        self.server = self.parameters.privatedata.get('IRCserver')
-        self.port = self.parameters.privatedata.get('IRCport')
-        rsp = self.parameters.privatedata.get('relicServerProxy')
+        self.server = self.settings.privatedata.get('IRCserver')
+        self.port = self.settings.privatedata.get('IRCport')
+        rsp = self.settings.privatedata.get('relicServerProxy')
         self.relicServerProxy = rsp
 
         # create IRC socket
@@ -108,7 +109,7 @@ class IRC_Client(threading.Thread):
             self.irc,
             self.queue,
             self.channel,
-            parameters=self.parameters
+            settings=self.settings
         )
         self.channelThread.start()
 

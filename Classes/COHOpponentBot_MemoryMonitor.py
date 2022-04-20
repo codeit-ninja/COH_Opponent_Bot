@@ -1,27 +1,28 @@
 import logging
 import threading
 
-from Classes.COHOpponentBot_Parameters import Parameters
+from Classes.COHOpponentBot_Settings import Settings
 from Classes.COHOpponentBot_GameData import GameData
 from Classes.COHOpponentBot_IRC_Client import IRC_Client
 from Classes.COHOpponentBot_StatsRequest import StatsRequest
 
 
 class MemoryMonitor(threading.Thread):
+    """Checks when COH1 game has started/ended."""
 
     def __init__(
         self, pollInterval=10,
         ircClient: IRC_Client = None,
-        parameters=None
+        settings=None
                 ):
         threading.Thread.__init__(self)
         try:
             logging.info("Memory Monitor Started!")
             self.running = True
 
-            self.parameters = parameters
-            if not parameters:
-                self.parameters = Parameters()
+            self.settings = settings
+            if not settings:
+                self.settings = Settings()
 
             self.pm = None
             self.baseAddress = None
@@ -65,7 +66,7 @@ class MemoryMonitor(threading.Thread):
         try:
             self.gameData = GameData(
                 ircClient=self.ircClient,
-                parameters=self.parameters)
+                settings=self.settings)
             self.gameData.GetDataFromGame()
         except Exception as e:
             logging.error("In getGameData")
@@ -86,8 +87,8 @@ class MemoryMonitor(threading.Thread):
 
     def PostSteamNumber(self):
         try:
-            channel = str(self.parameters.data.get('channel'))
-            steamNumber = str(self.parameters.data.get('steamNumber'))
+            channel = str(self.settings.data.get('channel'))
+            steamNumber = str(self.settings.data.get('steamNumber'))
             message = f"!setsteam,{channel},{steamNumber}"
             self.ircClient.SendMessageToOpponentBotChannelIRC(message)
         except Exception as e:
@@ -110,11 +111,11 @@ class MemoryMonitor(threading.Thread):
     def GameOver(self):
         try:
             # Get Win/Lose from server after 50 seconds
-            if self.parameters.data.get('writeIWonLostInChat'):
+            if self.settings.data.get('writeIWonLostInChat'):
                 self.winLostTimer = threading.Timer(50.0, self.GetWinLose)
                 self.winLostTimer.start()
             # Clear the overlay
-            if (self.parameters.data.get('clearOverlayAfterGameOver')):
+            if (self.settings.data.get('clearOverlayAfterGameOver')):
                 self.ircClient.queue.put("CLEAROVERLAY")
         except Exception as e:
             logging.info("Problem in GameOver")
@@ -123,7 +124,7 @@ class MemoryMonitor(threading.Thread):
 
     def GetWinLose(self):
         try:
-            statnumber = self.parameters.data.get('steamNumber')
+            statnumber = self.settings.data.get('steamNumber')
             statRequest = StatsRequest()
             statRequest.getMatchHistoryFromServer(statnumber)
             mostRecentWin = statRequest.getPlayerWinLastMatch(statnumber)
@@ -144,7 +145,7 @@ class MemoryMonitor(threading.Thread):
             f"in StartBets {len(self.gameData.playerList)}"
         )
         logging.info(info)
-        if (bool(self.parameters.data.get('writePlaceYourBetsInChat'))):
+        if (bool(self.settings.data.get('writePlaceYourBetsInChat'))):
             ps = ""
             outputList = []
             if self.gameData:
@@ -161,7 +162,7 @@ class MemoryMonitor(threading.Thread):
                         ps = f"{outputList[1]} Vs. {outputList[0]}"
                         pls = self.gameData.playerList[0].stats
                         if pls:
-                            sn = str(self.parameters.data.get('steamNumber'))
+                            sn = str(self.settings.data.get('steamNumber'))
                             psn = str(pls.steamNumber)
                             if sn == psn:
                                 ps = f"{outputList[0]} Vs. {outputList[1]}"

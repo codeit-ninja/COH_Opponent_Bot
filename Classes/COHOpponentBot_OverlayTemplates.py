@@ -1,4 +1,5 @@
 class OverlayTemplates:
+    """Templates for HTML and CSS output files."""
 
     overlayhtml = """
 <!DOCTYPE html>

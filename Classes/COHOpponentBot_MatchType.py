@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class MatchType(Enum):
-    """COH1 MatchTypes"""
+    """COH1 MatchTypes Enum"""
 
     BASIC = 0
     ONES = 1

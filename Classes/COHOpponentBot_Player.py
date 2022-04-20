@@ -2,6 +2,7 @@ from Classes.COHOpponentBot_Faction import Faction
 
 
 class Player:
+    """COH1 player, name and faction can be CPU, humans link to stats."""
 
     def __init__(self, name=None, factionString=None, faction=None):
         self.name = name

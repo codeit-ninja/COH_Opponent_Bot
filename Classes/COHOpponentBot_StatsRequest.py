@@ -3,15 +3,17 @@ import logging
 import os
 import ssl
 import urllib
-from Classes.COHOpponentBot_Parameters import Parameters
+from Classes.COHOpponentBot_Settings import Settings
 from Classes.COHOpponentBot_PlayerStat import PlayerStat
 
 
 class StatsRequest:
+    """Contacts Relic COH1 server via proxy to get steam player data."""
+
     def __init__(self, parameters=None):
         self.parameters = parameters
         if not parameters:
-            self.parameters = Parameters()
+            self.parameters = Settings()
 
         # Declare instance variables for storing data
         # returned from server (nested List/Dictionary)
