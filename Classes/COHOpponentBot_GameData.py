@@ -538,10 +538,16 @@ class GameData():
 
         if self.playerList:
             for item in self.playerList:
-                if (str(item.faction) == str(Faction.US)) or (str(item.faction)== str(Faction.CW)):
+                if (
+                    str(item.faction) == str(Faction.US)
+                    or str(item.faction) == str(Faction.CW)
+                ):
                     if item.name != "":
                         alliesTeam.append(item)
-                if (str(item.faction) == str(Faction.WM)) or (str(item.faction)== str(Faction.PE)):
+                if (
+                    str(item.faction) == str(Faction.WM)
+                    or str(item.faction) == str(Faction.PE)
+                ):
                     if item.name != "":
                         axisTeam.append(item)
 
@@ -550,39 +556,62 @@ class GameData():
                 self.saveOverlayHTML(axisTeam, alliesTeam)
 
             # output to chat if customoutput ticked
-            if (self.parameters.data.get('useCustomPreFormat')):	
+            if (self.parameters.data.get('useCustomPreFormat')):
                 if (int(self.numberOfComputers) > 0):
-                    self.ircStringOutputList.append("Game with " + str(self.numberOfComputers) + " computer AI, ("+str(self.easyCPUCount)+") Easy, ("+str(self.normalCPUCount)+") Normal, ("+str(self.hardCPUCount)+") Hard, ("+str(self.expertCPUCount)+") Expert.")	
+                    self.ircStringOutputList.append(
+                        "Game with " + str(self.numberOfComputers) +
+                        " computer AI, (" + str(self.easyCPUCount) +
+                        ") Easy, (" + str(self.normalCPUCount) +
+                        ") Normal, (" + str(self.hardCPUCount) +
+                        ") Hard, (" + str(self.expertCPUCount) +
+                        ") Expert."
+                    )
                 for item in self.playerList:
-                    #check if item has stats if not it is a computer
+                    # check if item has stats if not it is a computer
                     if item.stats:
-                        if(item.stats.steamNumber == self.parameters.data.get('steamNumber')):
+                        steamNumber = self.parameters.data.get('steamNumber')
+                        if(item.stats.steamNumber == steamNumber):
                             if (self.parameters.data.get('showOwn')):
-                                self.ircStringOutputList = self.ircStringOutputList + self.createCustomOutput(item)
+                                self.ircStringOutputList = (
+                                    self.ircStringOutputList +
+                                    self.createCustomOutput(item)
+                                )
                         else:
-                            self.ircStringOutputList = self.ircStringOutputList + self.createCustomOutput(item)					
+                            self.ircStringOutputList = (
+                                self.ircStringOutputList +
+                                self.createCustomOutput(item)
+                            )
+
                 for item in self.ircStringOutputList:
-                    self.ircClient.SendPrivateMessageToIRC(str(item)) # outputs the information to IRC
+                    self.ircClient.SendPrivateMessageToIRC(str(item))
+                    # outputs the information to IRC
 
-
-    def createCustomOutput(self, player):
-        stringFormattingDictionary = self.populateStringFormattingDictionary(player)
-        customPreFormattedOutputString = self.parameters.data.get('customStringPreFormat')
-        theString = self.formatPreFormattedString(customPreFormattedOutputString, stringFormattingDictionary)
+    def createCustomOutput(self, player) -> list:
+        stringFormattingDictionary = (
+            self.populateStringFormattingDictionary(player)
+        )
+        customPreFormattedOutputString = (
+            self.parameters.data.get('customStringPreFormat')
+        )
+        theString = (
+            self.formatPreFormattedString(
+                customPreFormattedOutputString,
+                stringFormattingDictionary)
+        )
         outputList = list(self.split_by_n(theString, 500))
-        # removed separate message for steamProfile
-        #if (self.parameters.data.get('showSteamProfile')):
-        #	outputList.append("Steam profile " + str(player.stats.steamProfileAddress))
+
         return outputList
 
-    def populateStringFormattingDictionary(self, player, overlay = False):
+    def populateStringFormattingDictionary(self, player, overlay=False):
         prefixDiv = ""
         postfixDivClose = ""
         if overlay:
             prefixDiv = '<div class = "textVariables">'
             postfixDivClose = '</div>'
-        stringFormattingDictionary = dict(self.parameters.stringFormattingDictionary)
-        #loads default values from parameters into stringFormattingDictionary (Key: Value:None)
+        stringFormattingDictionary = dict(
+            self.parameters.stringFormattingDictionary)
+        # loads default values from parameters into
+        # stringFormattingDictionary (Key: Value:None)
         nameDiv = ""
         factionDiv = ""
         matchDiv = ""
@@ -623,99 +652,238 @@ class GameData():
         playerName = self.sanatizeUserName(player.name)
         if not playerName:
             playerName = ""
-        stringFormattingDictionary['$NAME$'] =  prefixDiv + nameDiv + str(playerName) + postfixDivClose + postfixDivClose
-        
+        stringFormattingDictionary['$NAME$'] = (
+            prefixDiv + nameDiv + str(playerName) + postfixDivClose +
+            postfixDivClose
+        )
+
         if overlay:
-            stringFormattingDictionary['$NAME$'] =  prefixDiv + nameDiv + str(html.escape(playerName)) + postfixDivClose + postfixDivClose
-        
+            stringFormattingDictionary['$NAME$'] = (
+                prefixDiv + nameDiv + str(html.escape(playerName)) +
+                postfixDivClose + postfixDivClose
+            )
+
         if type(player.faction) is Faction:
-            stringFormattingDictionary['$FACTION$'] =  prefixDiv + factionDiv + str(player.faction.name) + postfixDivClose + postfixDivClose
+            stringFormattingDictionary['$FACTION$'] = (
+                prefixDiv + factionDiv + str(player.faction.name) +
+                postfixDivClose + postfixDivClose
+            )
 
         if (self.matchType == MatchType.BASIC):
-            stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + matchDiv + "Basic" + postfixDivClose + postfixDivClose
+            stringFormattingDictionary['$MATCHTYPE$'] = (
+                prefixDiv + matchDiv + "Basic" + postfixDivClose +
+                postfixDivClose
+            )
+
         if (self.matchType == MatchType.ONES):
-            stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + matchDiv + "1v1" + postfixDivClose + postfixDivClose
+            stringFormattingDictionary['$MATCHTYPE$'] = (
+                prefixDiv + matchDiv + "1v1" + postfixDivClose +
+                postfixDivClose
+            )
+
         if (self.matchType == MatchType.TWOS):
-            stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + matchDiv + "2v2" + postfixDivClose + postfixDivClose
+            stringFormattingDictionary['$MATCHTYPE$'] = (
+                prefixDiv + matchDiv + "2v2" + postfixDivClose +
+                postfixDivClose
+            )
+
         if (self.matchType == MatchType.THREES):
-            stringFormattingDictionary['$MATCHTYPE$'] =  prefixDiv + matchDiv + "3v3" + postfixDivClose + postfixDivClose
+            stringFormattingDictionary['$MATCHTYPE$'] = (
+                prefixDiv + matchDiv + "3v3" + postfixDivClose +
+                postfixDivClose
+            )
 
         # if a computer it will have no stats
         if player.stats:
-            stringFormattingDictionary['$COUNTRY$'] =  prefixDiv + countryDiv + str(player.stats.country) + postfixDivClose + postfixDivClose
-            stringFormattingDictionary['$TOTALWINS$'] =  prefixDiv + totalWinsDiv + str(player.stats.totalWins) + postfixDivClose + postfixDivClose
-            stringFormattingDictionary['$TOTALLOSSES$'] =  prefixDiv + totalLossesDiv + str(player.stats.totalLosses) + postfixDivClose + postfixDivClose
-            stringFormattingDictionary['$TOTALWLRATIO$'] =  prefixDiv + totalWinLossRatioDiv + str(player.stats.totalWLRatio) + postfixDivClose + postfixDivClose
-            stringFormattingDictionary['$STEAMPROFILE$'] =  prefixDiv + steamprofile + str(player.stats.steamProfileAddress) + postfixDivClose + postfixDivClose
-            stringFormattingDictionary['$COHSTATSLINK$'] =  prefixDiv + cohstatslink + str(player.stats.cohstatsLink) + postfixDivClose + postfixDivClose
+            stringFormattingDictionary['$COUNTRY$'] = (
+                prefixDiv + countryDiv + str(player.stats.country) +
+                postfixDivClose + postfixDivClose
+            )
 
+            stringFormattingDictionary['$TOTALWINS$'] = (
+                prefixDiv + totalWinsDiv + str(player.stats.totalWins) +
+                postfixDivClose + postfixDivClose
+            )
 
-            #set default null values for all parameters in dictionary
-            stringFormattingDictionary['$WINS$'] =  prefixDiv + winsDiv + "0" + postfixDivClose + postfixDivClose
-            stringFormattingDictionary['$LOSSES$'] =  prefixDiv + lossesDiv + "0" + postfixDivClose + postfixDivClose
-            stringFormattingDictionary['$DISPUTES$'] =  prefixDiv + disputesDiv + "0" + postfixDivClose + postfixDivClose
-            stringFormattingDictionary['$STREAK$'] =  prefixDiv + streakDiv + "0" + postfixDivClose + postfixDivClose
-            stringFormattingDictionary['$DROPS$'] =  prefixDiv + dropsDiv + "0" + postfixDivClose + postfixDivClose
-            stringFormattingDictionary['$RANK$'] =  prefixDiv + rankDiv + "-" + postfixDivClose + postfixDivClose
-            stringFormattingDictionary['$LEVEL$'] =  prefixDiv + levelDiv + "0" + postfixDivClose + postfixDivClose
-            stringFormattingDictionary['$WLRATIO$'] =  prefixDiv + wlRatioDiv + "-" + postfixDivClose	+ postfixDivClose	
+            stringFormattingDictionary['$TOTALLOSSES$'] = (
+                prefixDiv + totalLossesDiv + str(player.stats.totalLosses) +
+                postfixDivClose + postfixDivClose
+            )
+
+            stringFormattingDictionary['$TOTALWLRATIO$'] = (
+                prefixDiv + totalWinLossRatioDiv +
+                str(player.stats.totalWLRatio) + postfixDivClose +
+                postfixDivClose
+            )
+
+            stringFormattingDictionary['$STEAMPROFILE$'] = (
+                prefixDiv + steamprofile +
+                str(player.stats.steamProfileAddress) +
+                postfixDivClose + postfixDivClose
+            )
+
+            stringFormattingDictionary['$COHSTATSLINK$'] = (
+                prefixDiv + cohstatslink + str(player.stats.cohstatsLink) +
+                postfixDivClose + postfixDivClose
+            )
+
+            # set default null values for all parameters in dictionary
+            stringFormattingDictionary['$WINS$'] = (
+                prefixDiv + winsDiv + "0" + postfixDivClose + postfixDivClose
+            )
+
+            stringFormattingDictionary['$LOSSES$'] = (
+                prefixDiv + lossesDiv + "0" + postfixDivClose +
+                postfixDivClose
+            )
+
+            stringFormattingDictionary['$DISPUTES$'] = (
+                prefixDiv + disputesDiv + "0" + postfixDivClose +
+                postfixDivClose
+            )
+
+            stringFormattingDictionary['$STREAK$'] = (
+                prefixDiv + streakDiv + "0" + postfixDivClose +
+                postfixDivClose
+            )
+
+            stringFormattingDictionary['$DROPS$'] = (
+                prefixDiv + dropsDiv + "0" + postfixDivClose + postfixDivClose
+            )
+
+            stringFormattingDictionary['$RANK$'] = (
+                prefixDiv + rankDiv + "-" + postfixDivClose + postfixDivClose
+            )
+
+            stringFormattingDictionary['$LEVEL$'] = (
+                prefixDiv + levelDiv + "0" + postfixDivClose + postfixDivClose
+            )
+
+            stringFormattingDictionary['$WLRATIO$'] = (
+                prefixDiv + wlRatioDiv + "-" + postfixDivClose +
+                postfixDivClose
+            )
 
             for value in player.stats.leaderboardData:
-                if (str(player.stats.leaderboardData[value].matchType) == str(self.matchType)):
-                    if (str(player.stats.leaderboardData[value].faction) == str(player.faction)):
-                
-                        stringFormattingDictionary['$WINS$'] =  prefixDiv + winsDiv + str(player.stats.leaderboardData[value].wins) + postfixDivClose + postfixDivClose
-                        stringFormattingDictionary['$LOSSES$'] =  prefixDiv + lossesDiv + str(player.stats.leaderboardData[value].losses) + postfixDivClose + postfixDivClose
-                        stringFormattingDictionary['$DISPUTES$'] =  prefixDiv + disputesDiv + str(player.stats.leaderboardData[value].disputes) + postfixDivClose + postfixDivClose
-                        stringFormattingDictionary['$STREAK$'] =  prefixDiv + streakDiv + str(player.stats.leaderboardData[value].streak) + postfixDivClose + postfixDivClose
-                        stringFormattingDictionary['$DROPS$'] =  prefixDiv + dropsDiv + str(player.stats.leaderboardData[value].drops) + postfixDivClose + postfixDivClose
-                        stringFormattingDictionary['$RANK$'] =  prefixDiv + rankDiv + str(player.stats.leaderboardData[value].rank) + postfixDivClose + postfixDivClose
-                        stringFormattingDictionary['$LEVEL$'] =  prefixDiv + levelDiv + str(player.stats.leaderboardData[value].rankLevel) + postfixDivClose + postfixDivClose
-                        stringFormattingDictionary['$WLRATIO$'] =  prefixDiv + wlRatioDiv + str(player.stats.leaderboardData[value].winLossRatio) + postfixDivClose + postfixDivClose
-                     
+                matchType = str(player.stats.leaderboardData[value].matchType)
+                if matchType == str(self.matchType):
+                    faction = str(player.stats.leaderboardData[value].faction)
+                    if faction == str(player.faction):
+                        stringFormattingDictionary['$WINS$'] = (
+                            prefixDiv + winsDiv +
+                            str(player.stats.leaderboardData[value].wins) +
+                            postfixDivClose + postfixDivClose
+                        )
+
+                        stringFormattingDictionary['$LOSSES$'] = (
+                            prefixDiv + lossesDiv +
+                            str(player.stats.leaderboardData[value].losses) +
+                            postfixDivClose + postfixDivClose
+                        )
+
+                        stringFormattingDictionary['$DISPUTES$'] = (
+                            prefixDiv + disputesDiv +
+                            str(player.stats.leaderboardData[value].disputes) +
+                            postfixDivClose + postfixDivClose
+                        )
+
+                        stringFormattingDictionary['$STREAK$'] = (
+                            prefixDiv + streakDiv +
+                            str(player.stats.leaderboardData[value].streak) +
+                            postfixDivClose + postfixDivClose
+                        )
+
+                        stringFormattingDictionary['$DROPS$'] = (
+                            prefixDiv + dropsDiv +
+                            str(player.stats.leaderboardData[value].drops) +
+                            postfixDivClose + postfixDivClose
+                        )
+
+                        stringFormattingDictionary['$RANK$'] = (
+                            prefixDiv + rankDiv +
+                            str(player.stats.leaderboardData[value].rank) +
+                            postfixDivClose + postfixDivClose
+                        )
+
+                        rl = player.stats.leaderboardData[value].rankLevel
+                        stringFormattingDictionary['$LEVEL$'] = (
+                            prefixDiv + levelDiv + str(rl) + postfixDivClose +
+                            postfixDivClose
+                        )
+
+                        wlr = player.stats.leaderboardData[value].winLossRatio
+                        stringFormattingDictionary['$WLRATIO$'] = (
+                            prefixDiv + wlRatioDiv + str(wlr) +
+                            postfixDivClose + postfixDivClose
+                        )
 
         return stringFormattingDictionary
 
     def populateImageFormattingDictionary(self, player):
-        imageOverlayFormattingDictionary = self.parameters.imageOverlayFormattingDictionary
-        
-        #faction icons
+        imageOverlayFDict = (
+            self.parameters.imageOverlayFormattingDictionary)
+
+        # faction icons
         if player.faction:
             fileExists = False
             factionIcon = ""
             if type(player.faction) is Faction:
-                factionIcon = "OverlayImages\\Armies\\" + str(player.faction.name).lower() + ".png"
+                factionIcon = "OverlayImages\\Armies\\" + str(
+                    player.faction.name).lower() + ".png"
                 fileExists = os.path.isfile(factionIcon)
             logging.info(factionIcon)
             if fileExists:
-                imageOverlayFormattingDictionary['$FACTIONICON$'] = '<div class = "factionflagimg"><img src="{0}" ></div>'.format(factionIcon)
-                logging.info(imageOverlayFormattingDictionary.get('$FACTIONICON$'))
+                imageOverlayFDict['$FACTIONICON$'] = (
+                    "<div class = 'factionflagimg'>" +
+                    f"<img src='{factionIcon}' ></div>"
+                )
+
+                logging.info(
+                    imageOverlayFDict.get('$FACTIONICON$'))
             else:
-                imageOverlayFormattingDictionary['$FACTIONICON$'] = '<div class = "factionflagimg"><img src="data:," alt></div>'		
+                imageOverlayFDict['$FACTIONICON$'] = (
+                    '<div class = "factionflagimg">'
+                    '<img src="data:," alt></div>'
+                )
 
         # if a computer it will have no stats therefore no country flag or rank
-        # set default values for flags and faction rank	
+        # set default values for flags and faction rank
 
+        imageOverlayFDict['$FLAGICON$'] = (
+            '<div class = "countryflagimg">'
+            '<img src="data:," alt></div>'
+        )
 
-        imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="data:," alt></div>'
         defaultFlagIcon = "OverlayImages\\Flagssmall\\unknown_flag.png"
         fileExists = os.path.isfile(defaultFlagIcon)
         if fileExists:
-            imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="{0}" ></div>'.format(defaultFlagIcon)
+            imageOverlayFDict['$FLAGICON$'] = (
+                '<div class = "countryflagimg">'
+                '<img src="{0}" ></div>'.format(defaultFlagIcon)
+            )
 
         if player.stats:
             if player.stats.country:
-                countryIcon = "OverlayImages\\Flagssmall\\" + str(player.stats.country).lower() + ".png"
+                countryIcon = "OverlayImages\\Flagssmall\\" + str(
+                    player.stats.country).lower() + ".png"
                 fileExists = os.path.isfile(countryIcon)
                 if fileExists:
-                    imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="{0}" ></div>'.format(countryIcon)
+                    imageOverlayFDict['$FLAGICON$'] = (
+                        '<div class = "countryflagimg">'
+                        '<img src="{0}" ></div>'.format(countryIcon)
+                    )
                 else:
-                    imageOverlayFormattingDictionary['$FLAGICON$'] = '<div class = "countryflagimg"><img src="data:," alt></div>'
+                    imageOverlayFDict['$FLAGICON$'] = (
+                        '<div class = "countryflagimg">'
+                        '<img src="data:," alt></div>'
+                    )
 
-            #rank icons
+            # rank icons
             for value in player.stats.leaderboardData:
-                if (str(player.stats.leaderboardData[value].matchType) == str(self.matchType)):
-                    if (str(player.stats.leaderboardData[value].faction) == str(player.faction)):
+                matchType = str(player.stats.leaderboardData[value].matchType)
+                if matchType == str(self.matchType):
+                    faction = str(player.stats.leaderboardData[value].faction)
+                    if faction == str(player.faction):
                         iconPrefix = ""
                         if str(player.faction) == str(Faction.PE):
                             iconPrefix = "panzer_"
@@ -724,66 +892,102 @@ class GameData():
                         if str(player.faction) == str(Faction.US):
                             iconPrefix = "us_"
                         if str(player.faction) == str(Faction.WM):
-                            iconPrefix = "heer_"												
-                        level = str(player.stats.leaderboardData[value].rankLevel).zfill(2)
-                        levelIcon = "OverlayImages\\Ranks\\" + iconPrefix + level + ".png"
+                            iconPrefix = "heer_"
+
+                        level = str(
+                            player.stats.leaderboardData[value].rankLevel
+                        ).zfill(2)
+
+                        levelIcon = (
+                            "OverlayImages\\Ranks\\" + iconPrefix + level +
+                            ".png"
+                        )
+
                         logging.info("levelIcon : " + str(levelIcon))
                         fileExists = os.path.isfile(levelIcon)
                         if fileExists:
-                            imageOverlayFormattingDictionary['$LEVELICON$'] =  '<div class = "rankimg"><img src="{0}" ></div>'.format(levelIcon)
-                            logging.info(imageOverlayFormattingDictionary.get('$LEVELICON$'))
+
+                            imageOverlayFDict['$LEVELICON$'] = (
+                                '<div class = "rankimg">'
+                                '<img src="{0}" ></div>'.format(levelIcon)
+                            )
                         else:
-                            imageOverlayFormattingDictionary['$LEVELICON$'] = '<div class = "rankimg"><img src="data:," alt></div>'
+                            imageOverlayFDict['$LEVELICON$'] = (
+                                '<div class = "rankimg">'
+                                '<img src="data:," alt></div>'
+                            )
+
                             levelIcon = "OverlayImages\\Ranks\\no_rank_yet.png"
                             if os.path.isfile(levelIcon):
-                                imageOverlayFormattingDictionary['$LEVELICON$'] =  '<div class = "rankimg"><img src="{0}" ></div>'.format(levelIcon)
+                                imageOverlayFDict['$LEVELICON$'] = (
+                                    '<div class = "rankimg">'
+                                    '<img src="{0}" ></div>'.format(levelIcon)
+                                )
 
-        return imageOverlayFormattingDictionary
+        return imageOverlayFDict
 
     def sanatizeUserName(self, userName):
         try:
             if userName:
-                userName = str(userName) # ensure type of string
+                userName = str(userName)  # ensure type of string
                 userName = userName.lstrip("!")
-                # add 1 extra whitespace to username if it starts with . or / using rjust to prevent . and / twitch chat commands causing problems
-                if (bool(re.match("""^[/\.]""" , userName))):
+                # add 1 extra whitespace to username if
+                # it starts with . or / using rjust to prevent .
+                # and / twitch chat commands causing problems
+                if (bool(re.match(r"""^[/\.]""", userName))):
                     userName = str(userName.rjust(len(userName)+1))
                 # escape any single quotes
-                userName = userName.replace("'","\'")
+                userName = userName.replace("'", "\'")
                 # escape any double quotes
                 userName = userName.replace('"', '\"')
             return userName
         except Exception as e:
             logging.info("In sanitizeUserName username less than 2 chars")
-            logging.exception("Exception : "+ str(e))
+            logging.exception("Exception : " + str(e))
 
-    def formatPreFormattedString(self, theString, stringFormattingDictionary, overlay = False):
+    def formatPreFormattedString(
+        self,
+        theString,
+        sfDict,
+        overlay=False
+    ):
 
         if overlay:
             prefixDiv = '<div class = "nonVariableText">'
             postfixDiv = '</div>'
 
-            #compile a pattern for all the keys
-            pattern = re.compile(r'(' + '|'.join(re.escape(key) for key in stringFormattingDictionary.keys()) + r')')
+            # compile a pattern for all the keys
+            pattern = re.compile(
+                r'(' + '|'.join(
+                    re.escape(key) for key in sfDict.keys()
+                    ) + r')'
+            )
 
             logging.info("pattern " + str(pattern))
-            #split the string to include the dictionary keys
+            # split the string to include the dictionary keys
             fullSplit = re.split(pattern, theString)
-            
+
             logging.info("fullSplit " + str(fullSplit))
-            
-            #Then replace the Non key values with the postfix and prefix
+
+            # Then replace the Non key values with the postfix and prefix
             for x in range(len(fullSplit)):
-                if not fullSplit[x] in stringFormattingDictionary.keys():
+                if not fullSplit[x] in sfDict.keys():
                     fullSplit[x] = prefixDiv + fullSplit[x] + postfixDiv
 
-            #This string can then be processed to replace the keys with their appropriate values
+            # This string can then be processed to replace
+            # the keys with their appropriate values
+
             theString = "".join(fullSplit)
 
-
         # I'm dammed if I know how this regular expression works but it does.
-        pattern = re.compile(r'(?<!\w)(' + '|'.join(re.escape(key) for key in stringFormattingDictionary.keys()) + r')(?!\w)')
-        result = pattern.sub(lambda x: stringFormattingDictionary[x.group()], theString)
+        pattern = re.compile(
+            r'(?<!\w)(' + '|'.join(
+                re.escape(key) for key in sfDict.keys()
+                ) + r')(?!\w)'
+        )
+        result = pattern.sub(
+            lambda x: sfDict[x.group()], theString
+        )
         return result
 
     def saveOverlayHTML(self, axisTeamList, alliesTeamList):
@@ -796,56 +1000,90 @@ class GameData():
             team1List.clear()
             team2List.clear()
 
-            #by default player team is allies unless the player is steam number is present in the axisTeamList
+            # by default player team is allies unless
+            # the player is steam number is present in the axisTeamList
             team1List = alliesTeamList
             team2List = axisTeamList
 
             for item in axisTeamList:
                 if item.stats:
-                    if (str(self.parameters.data.get('steamNumber')) == str(item.stats.steamNumber)):
-                        #logging.info ("Player team is AXIS")
+                    steamNumber = str(self.parameters.data.get('steamNumber'))
+                    if steamNumber == str(item.stats.steamNumber):
+                        # logging.info ("Player team is AXIS")
                         team1List = axisTeamList
                         team2List = alliesTeamList
 
-            useOverlayPreFormat = bool(self.parameters.data.get('useOverlayPreFormat'))
+            uopf = self.parameters.data.get('useOverlayPreFormat')
+            useOverlayPreFormat = bool(uopf)
             if (useOverlayPreFormat):
                 for item in team1List:
-                    preFormattedString = self.parameters.data.get('overlayStringPreFormatLeft')
+                    pf = self.parameters.data.get('overlayStringPreFormatLeft')
+                    preFormattedString = pf
                     # first substitute all the text in the preformat
-                    stringFormattingDictionary = self.populateStringFormattingDictionary(item, overlay = True)
-                    #theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary, overlay = True)
+                    sfDict = self.populateStringFormattingDictionary(
+                        item,
+                        overlay=True
+                    )
                     # second substitue all the html images if used
-                    stringFormattingDictionary.update(self.populateImageFormattingDictionary(item))
-                    theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary, overlay= True)
+                    sfDict.update(self.populateImageFormattingDictionary(item))
+                    theString = self.formatPreFormattedString(
+                        preFormattedString,
+                        sfDict,
+                        overlay=True
+                    )
                     team1 += str(theString) + str("<BR>") + "\n"
                 for item in team2List:
-                    preFormattedString = self.parameters.data.get('overlayStringPreFormatRight')
+                    preFormattedString = self.parameters.data.get(
+                        'overlayStringPreFormatRight'
+                    )
                     # first substitute all the text in the preformat
-                    stringFormattingDictionary.clear()
-                    stringFormattingDictionary = self.populateStringFormattingDictionary(item, overlay = True)
-                    #theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary,overlay = True)
+                    sfDict.clear()
+                    sfDict = self.populateStringFormattingDictionary(
+                        item,
+                        overlay=True
+                    )
+
                     # second substitue all the html images if used
-                    stringFormattingDictionary.update(self.populateImageFormattingDictionary(item))
-                    theString = self.formatPreFormattedString(preFormattedString, stringFormattingDictionary, overlay= True)
+                    sfDict.update(
+                        self.populateImageFormattingDictionary(item)
+                    )
+                    theString = self.formatPreFormattedString(
+                        preFormattedString,
+                        sfDict,
+                        overlay=True
+                    )
                     team2 += str(theString) + str("<BR>") + "\n"
             else:
-            
+
                 for item in team1List:
                     team1 += str(item.name) + str("<BR>") + "\n"
                 for item in team2List:
                     team2 += str(item.name) + str("<BR>") + "\n"
-            
+
             cssFilePath = self.parameters.data.get('overlayStyleCSSFilePath')
-            #check if css file exists and if not output the default template to folder
+            # check if css file exists
+            # and if not output the default template to folder
             if not (os.path.isfile(cssFilePath)):
-                with open(cssFilePath , 'w' , encoding="utf-8") as outfile:
+                with open(
+                    cssFilePath,
+                    'w',
+                    encoding="utf-8"
+                ) as outfile:
                     outfile.write(OverlayTemplates().overlaycss)
 
-            htmlOutput = OverlayTemplates().overlayhtml.format(cssFilePath, team1, team2)
+            htmlOutput = OverlayTemplates().overlayhtml.format(
+                cssFilePath,
+                team1,
+                team2
+            )
             # create output overlay from template
-            with open("overlay.html" , 'w', encoding="utf-8") as outfile:
+            with open(
+                "overlay.html",
+                'w',
+                encoding="utf-8"
+            ) as outfile:
                 outfile.write(htmlOutput)
-                #logging.info("Creating Overlay File\n")
+                # logging.info("Creating Overlay File\n")
 
         except Exception as e:
             logging.error(str(e))
@@ -854,9 +1092,9 @@ class GameData():
     @staticmethod
     def clearOverlayHTML():
         try:
-            htmlOutput = OverlayTemplates().overlayhtml.format("","","")
+            htmlOutput = OverlayTemplates().overlayhtml.format("", "", "")
             # create output overlay from template
-            with open("overlay.html" , 'w') as outfile:
+            with open("overlay.html", 'w') as outfile:
                 outfile.write(htmlOutput)
         except Exception as e:
             logging.error(str(e))
@@ -868,42 +1106,45 @@ class GameData():
             yield seq[:n]
             seq = seq[n:]
 
-    def find_between(self, s, first, last ):
+    def find_between(self, s, first, last):
         try:
-            start = s.index( first ) + len( first )
-            end = s.index( last, start )
+            start = s.index(first) + len(first)
+            end = s.index(last, start)
             return s[start:end]
         except ValueError:
             return ""
 
     def __str__(self):
         output = "GameData : \n"
-        output += "Time Last Game Started : {}\n".format(str(self.gameStartedDate))
-        output += "player List : {}\n".format(str(self.playerList)) 
-        output += "numberOfPlayers : {}\n".format(str(self.numberOfPlayers))
-        output += "Number Of Computers : {}\n".format(str(self.numberOfComputers)) 
-        output += "Easy CPU : {}\n".format(str(self.easyCPUCount)) 
-        output += "Normal CPU : {}\n".format(str(self.normalCPUCount)) 
-        output += "Hard CPU : {}\n".format(str(self.hardCPUCount)) 
-        output += "Expert CPU : {}\n".format(str(self.expertCPUCount))
-        output += "Number Of Humans : {}\n".format(str(self.numberOfHumans))
-        output += "Match Type : {}\n".format(str(self.matchType.name))
-        output += "slots : {}\n".format(str(self.slots))
-        output += "mapName : {}\n".format(str(self.mapName))
-        output += "mapNameFull : {}\n".format(str(self.mapNameFull))
-        output += "mapDescription : {}\n".format(str(self.mapDescription))
-        output += "mapDescriptionFull : {}\n".format(str(self.mapDescriptionFull))
-        output += "randomStart : {}\n".format(str(self.randomStart)) 
-        output += "highResources : {}\n".format(str(self.highResources)) 
-        output += "VPCount : {}\n".format(str(self.VPCount))
-        output += "automatch : {}\n".format(str(self.automatch))
-        output += "modName : {}\n".format(str(self.modName))
-        output += "COH running : {}\n".format(str(self.cohRunning)) 
-        output += "Game In Progress : {}\n".format(str(self.gameInProgress)) 
-        output += "gameStartedDate : {}\n".format(str(self.gameStartedDate)) 
-        output += "cohProcessID : {}\n".format(str(self.cohProcessID)) 
-        output += "baseAddress : {}\n".format(str(self.baseAddress)) 
-        output += "gameDescriptionString : {}\n".format(str(self.gameDescriptionString)) 
+        output += f"Time Last Game Started : {str(self.gameStartedDate)}\n"
+        output += f"player List : {str(self.playerList)}\n"
+        output += f"numberOfPlayers : {str(self.numberOfPlayers)}\n"
+        output += f"Number Of Computers : {str(self.numberOfComputers)}\n"
+        output += f"Easy CPU : {str(self.easyCPUCount)}\n"
+        output += f"Normal CPU : {str(self.normalCPUCount)}\n"
+        output += f"Hard CPU : {str(self.hardCPUCount)}\n"
+        output += f"Expert CPU : {str(self.expertCPUCount)}\n"
+        output += f"Number Of Humans : {str(self.numberOfHumans)}\n"
+        output += f"Match Type : {str(self.matchType.name)}\n"
+        output += f"slots : {str(self.slots)}\n"
+        output += f"mapName : {str(self.mapName)}\n"
+        output += f"mapNameFull : {str(self.mapNameFull)}\n"
+        output += f"mapDescription : {str(self.mapDescription)}\n"
+        output += f"mapDescriptionFull : {str(self.mapDescriptionFull)}\n"
+        output += f"randomStart : {str(self.randomStart)}\n"
+        output += f"highResources : {str(self.highResources)}\n"
+        output += f"VPCount : {str(self.VPCount)}\n"
+        output += f"automatch : {str(self.automatch)}\n"
+        output += f"modName : {str(self.modName)}\n"
+        output += f"COH running : {str(self.cohRunning)}\n"
+        output += f"Game In Progress : {str(self.gameInProgress)}\n"
+        output += f"gameStartedDate : {str(self.gameStartedDate)}\n"
+        output += f"cohProcessID : {str(self.cohProcessID)}\n"
+        output += f"baseAddress : {str(self.baseAddress)}\n"
+        output += (
+            f"gameDescriptionString : "
+            f"{str(self.gameDescriptionString)}\n"
+        )
 
         return output
 
