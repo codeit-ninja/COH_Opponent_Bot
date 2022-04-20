@@ -222,8 +222,8 @@ class Parameters:
                 if steam_path:
                     self.data['steamFolder'] = steam_path[0]
             except Exception as e:
-                logging.error(str(e))
-
+                if e:
+                    pass
             try:
                 # 32 bit windows
                 access_registry = winreg.ConnectRegistry(
@@ -238,7 +238,8 @@ class Parameters:
                 if steam_path:
                     self.data['steamFolder'] = steam_path[0]
             except Exception as e:
-                logging.error(str(e))
+                if e:
+                    pass
 
         libraryFolder = "\\steamapps\\libraryfolders.vdf"
         filePath = self.data.get('steamFolder') + libraryFolder
