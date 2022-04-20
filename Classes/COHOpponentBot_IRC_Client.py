@@ -1,4 +1,3 @@
-from asyncio import Queue
 import socket
 import sys
 import collections  # for deque
@@ -7,6 +6,7 @@ import os.path
 import threading
 import logging
 from tkinter import END
+from queue import Queue
 
 # import all secret parameters from parameters file
 from Classes.COHOpponentBot_Parameters import Parameters
