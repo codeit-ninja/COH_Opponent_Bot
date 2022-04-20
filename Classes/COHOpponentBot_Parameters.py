@@ -7,6 +7,7 @@ import winreg  # to get steamlocation automatically
 import platform
 import html
 import ctypes.wintypes
+
 # for finding the windows home directory will throw error on linux
 
 
@@ -126,9 +127,12 @@ class Parameters:
         self.data['customStringPreFormat'] = temp
 
         # your personal steam number
-        self.data['steamNumber'] = 'EnterYourSteamNumberHere (17 digits)'
-        self.data['steamAlias'] = 'EnterYourSteamAliasHere'  # eg 'xereborn'
-        self.data['channel'] = 'EnterYourChannelNameHere'  # eg 'xereborn'
+        self.data['steamNumber'] = None
+        # 'EnterYourSteamNumberHere (17 digits)'
+        self.data['steamAlias'] = None
+        # 'EnterYourSteamAliasHere'  # eg 'xereborn'
+        self.data['channel'] = None
+        # 'EnterYourChannelNameHere'  # eg 'xereborn'
 
         # location of the COH log file
         CSIDL_PERSONAL = 5       # My Documents
@@ -160,23 +164,35 @@ class Parameters:
         self.imageOverlayFormattingDictionary['$FACTIONICON$'] = None
         self.imageOverlayFormattingDictionary['$LEVELICON$'] = None
 
+        # load all the values saved in the data.json file
+        self.load()
+
         # the following is windows specific code
         # using ctypes.win will not compile on linux
         # sets logpath from my documents folder location
         # sets steamNumber
-        try:
-            buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
-            ctypes.windll.shell32.SHGetFolderPathW(
-                None,
-                CSIDL_PERSONAL,
-                None,
-                SHGFP_TYPE_CURRENT,
-                buf
-            )
 
-            loc = "\\My Games\\Company of Heroes Relaunch\\warnings.log"
-            logPath = buf.value + loc
-            self.data['logPath'] = logPath
+        if (not self.data.get('logPath')):
+            try:
+                buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
+                ctypes.windll.shell32.SHGetFolderPathW(
+                    None,
+                    CSIDL_PERSONAL,
+                    None,
+                    SHGFP_TYPE_CURRENT,
+                    buf
+                )
+
+                print(str(buf.value))
+
+                loc = "\\My Games\\Company of Heroes Relaunch\\warnings.log"
+                logPath = buf.value + loc
+                self.data['logPath'] = logPath
+            except Exception as e:
+                logging.error(str(e))
+                logging.exception("Exception : ")
+
+        if not self.data.get('steamNumber'):
             # attempt to extract users steamNumber from logfile
             if (os.path.isfile(logPath)):
                 logging.info("the logPath file was found")
@@ -198,9 +214,6 @@ class Parameters:
                 except Exception as e:
                     logging.error(str(e))
                     logging.exception("Exception : ")
-        except Exception as e:
-            logging.error(str(e))
-            logging.exception("Exception : ")
 
         # Set the location of cohPath from all steam folder installations
         # Set cohPath
@@ -241,99 +254,104 @@ class Parameters:
                 if e:
                     pass
 
-        libraryFolder = "\\steamapps\\libraryfolders.vdf"
-        filePath = self.data.get('steamFolder') + libraryFolder
-        # print(filePath)
-        steamlibraryBases = []
+            libraryFolder = "\\steamapps\\libraryfolders.vdf"
+            filePath = self.data.get('steamFolder') + libraryFolder
+            # print(filePath)
+            steamlibraryBases = []
 
-        if self.data.get('steamFolder'):
-            steamlibraryBases.append(self.data['steamFolder'])
+            if self.data.get('steamFolder'):
+                steamlibraryBases.append(self.data['steamFolder'])
 
-        # Get all steam library install locations
-        try:
-            if (os.path.isfile(filePath)):
-                with open(filePath) as f:
-                    for line in f:
-                        words = line.split()
-                        try:
-                            if "path" in line:
-                                location = " ".join(words[1:]).replace('"', "")
-                                steamlibraryBases.append(location)
-                        except Exception as e:
-                            logging.error(str(e))
+            # Get all steam library install locations
+            try:
+                if (os.path.isfile(filePath)):
+                    with open(filePath) as f:
+                        for line in f:
+                            words = line.split()
+                            try:
+                                if "path" in line:
+                                    location = " ".join(words[1:]).replace(
+                                        '"',
+                                        ""
+                                    )
+                                    steamlibraryBases.append(location)
+                            except Exception as e:
+                                logging.error(str(e))
 
-            # Assign check each library install file
-            # for the location of cohPath
-            for steamBase in steamlibraryBases:
-                # print(steamBase)
-                gameLoc = (
-                    "\\steamapps\\common\\Company of Heroes Relaunch"
-                    "\\RelicCOH.exe"
-                )
-                cohPath = steamBase + gameLoc
-                if (os.path.isfile(cohPath)):
-                    self.data['cohPath'] = cohPath
-                    langUCS = (
-                        "\\steamapps\\common\\Company of Heroes"
-                        " Relaunch\\CoH\\Engine\\Locale\\English"
-                        "\\RelicCOH.English.ucs"
+                # Assign check each library install file
+                # for the location of cohPath
+                for steamBase in steamlibraryBases:
+                    # print(steamBase)
+                    gameLoc = (
+                        "\\steamapps\\common\\Company of Heroes Relaunch"
+                        "\\RelicCOH.exe"
                     )
-                    ucsPath = steamBase + langUCS
-                    if (os.path.isfile(ucsPath)):
-                        self.data['cohUCSPath'] = ucsPath
-                        logging.info(f"ucsPath {ucsPath}")
+                    cohPath = steamBase + gameLoc
+                    if (os.path.isfile(cohPath)):
+                        self.data['cohPath'] = cohPath
+                        langUCS = (
+                            "\\steamapps\\common\\Company of Heroes"
+                            " Relaunch\\CoH\\Engine\\Locale\\English"
+                            "\\RelicCOH.English.ucs"
+                        )
+                        ucsPath = steamBase + langUCS
+                        if (os.path.isfile(ucsPath)):
+                            self.data['cohUCSPath'] = ucsPath
+                            logging.info(f"ucsPath {ucsPath}")
 
-        except Exception as e:
-            logging.error("Problem in load")
-            logging.error(str(e))
-            logging.exception("Exception : ")
+            except Exception as e:
+                logging.error("Problem in load")
+                logging.error(str(e))
+                logging.exception("Exception : ")
 
-        logPath = self.data.get('logPath')
-        if logPath and isinstance(logPath, str):
-            self.data['temprecReplayPath'] = logPath.replace(
-                "warnings.log",
-                "playback\\temp.rec"
-            )
+        if not self.data.get('temprecReplayPath'):
+            logPath = self.data.get('logPath')
+            if logPath and isinstance(logPath, str):
+                self.data['temprecReplayPath'] = logPath.replace(
+                    "warnings.log",
+                    "playback\\temp.rec"
+                )
 
-        # Set channel
-        # Set steamAlias
-        # attempt to get userName from steamNumber
-        try:
-            statString = "/steam/" + str(self.data['steamNumber'])
-            if (
-                not os.environ.get('PYTHONHTTPSVERIFY', '')
-                and getattr(ssl, '_create_unverified_context', None)
-            ):
-                context = ssl._create_unverified_context
-                ssl._create_default_https_context = context
-            # ensure steam64Number is valid
-            # check stat number is 17 digit and can be converted
-            # to int if not int
-            steam64ID = str(self.data['steamNumber'])
-            stringLength = len(steam64ID)
-            assert(stringLength == 17)
-            assert(int(steam64ID))
+        if (
+            not self.data.get('channel')
+            and not self.data.get('alias')
+        ):
+            # Set channel
+            # Set steamAlias
+            # attempt to get userName from steamNumber
+            try:
+                statString = "/steam/" + str(self.data['steamNumber'])
+                if (
+                    not os.environ.get('PYTHONHTTPSVERIFY', '')
+                    and getattr(ssl, '_create_unverified_context', None)
+                ):
+                    context = ssl._create_unverified_context
+                    ssl._create_default_https_context = context
+                # ensure steam64Number is valid
+                # check stat number is 17 digit and can be converted
+                # to int if not int
+                steam64ID = str(self.data['steamNumber'])
+                stringLength = len(steam64ID)
+                assert(stringLength == 17)
+                assert(int(steam64ID))
 
-            response = urllib.request.urlopen(
-                str(self.privatedata.get('relicServerProxyStatRequest'))
-                + str(self.data['steamNumber'])
-            ).read()
-            statdata = json.loads(response.decode('utf-8'))
-            # print(statdata)
-            if (statdata['result']['message'] == "SUCCESS"):
-                logging.info("statdata load succeeded")
-                if statdata['statGroups'][0]['members'][0]['alias']:
-                    for item in statdata['statGroups']:
-                        for value in item['members']:
-                            if (value['name'] == statString):
-                                self.data['channel'] = value['alias']
-                                self.data['steamAlias'] = value['alias']
-        except Exception as e:
-            logging.error(str(e))
-            logging.exception("Exception : ")
-
-        # override values from file
-        self.load()
+                response = urllib.request.urlopen(
+                    str(self.privatedata.get('relicServerProxyStatRequest'))
+                    + str(self.data['steamNumber'])
+                ).read()
+                statdata = json.loads(response.decode('utf-8'))
+                # print(statdata)
+                if (statdata['result']['message'] == "SUCCESS"):
+                    logging.info("statdata load succeeded")
+                    if statdata['statGroups'][0]['members'][0]['alias']:
+                        for item in statdata['statGroups']:
+                            for value in item['members']:
+                                if (value['name'] == statString):
+                                    self.data['channel'] = value['alias']
+                                    self.data['steamAlias'] = value['alias']
+            except Exception as e:
+                logging.error(str(e))
+                logging.exception("Exception : ")
 
     def load(self, filePath="data.json"):
         try:

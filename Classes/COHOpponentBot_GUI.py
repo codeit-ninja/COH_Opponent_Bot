@@ -107,33 +107,27 @@ class GUI:
         self.entryWarningLogPath.grid(row=3, column=1)
         self.entryRelicCOHPath.grid(row=4, column=1)
 
-        steamName = self.parameters.data.get('steamAlias')
-
-        if (steamName):
-            self.entrySteamName.insert(0, str(steamName))
+        steamName = "Enter Your Steam Name Here"
+        if self.parameters.data.get('steamAlias'):
+            steamName = self.parameters.data.get('steamAlias')
+        self.entrySteamName.insert(0, str(steamName))
 
         logPath = self.parameters.data.get('logPath')
-
         if (logPath):
             self.entryWarningLogPath.insert(0, str(logPath))
 
         cohPath = self.parameters.data.get('cohPath')
-
         if (cohPath):
             self.entryRelicCOHPath.insert(0, str(cohPath))
 
-        steamNumber = "enter your steam number"
-
+        steamNumber = "Enter Your Steam Number Here (17 digits)"
         if self.parameters.data.get('steamNumber'):
             steamNumber = self.parameters.data.get('steamNumber')
-
         self.entrySteam64IDNumber.insert(0, steamNumber)
 
-        twitchName = "enter your twitch channel name"
-
+        twitchName = "Enter Your Twitch Channel Name Here"
         if self.parameters.data.get('channel'):
             twitchName = self.parameters.data.get('channel')
-
         self.entryTwitchChannel.insert(0, twitchName)
 
         self.entryTwitchChannel.config(state="disabled")
