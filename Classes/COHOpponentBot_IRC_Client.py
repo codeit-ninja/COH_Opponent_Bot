@@ -8,7 +8,7 @@ import logging
 from tkinter import END
 from queue import Queue
 
-# import all secret parameters from parameters file
+# import all settings from settings file
 from Classes.COHOpponentBot_Settings import Settings
 from Classes.COHOpponentBot_IRC_Channel import IRC_Channel
 
