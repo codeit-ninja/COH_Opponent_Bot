@@ -93,7 +93,6 @@ class Settings:
 
         self.data['botUserName'] = ""
         self.data['botOAuthKey'] = ""
-
         self.data['whisperTo'] = "xcoinbetbot"
         self.data['showOwn'] = False
         self.data['logErrorsToFile'] = True
@@ -103,14 +102,11 @@ class Settings:
         self.data['writeIWonLostInChat'] = True
         self.data['writePlaceYourBetsInChat'] = False
         self.data['clearOverlayAfterGameOver'] = True
-
         self.data['logPath'] = ""
         self.data['temprecReplayPath'] = ""
-
         self.data['steamFolder'] = ""
         self.data['cohPath'] = ""
         self.data['cohUCSPath'] = ""
-
         self.data['useOverlayPreFormat'] = True
         temp = "$NAME$ ($FLAGICON$) $LEVELICON$ $RANK$ $FACTIONICON$"
         self.data['overlayStringPreFormatLeft'] = temp
@@ -373,7 +369,8 @@ class Settings:
     def checkDataIntegrity(self, data):
         success = True
         for key, value in data.items():
-            if not self.data.get(key):
+            if key not in self.data:
+                logging.error(f"Key missing from data.json {str(key)}")
                 success = False
                 break
         return success
