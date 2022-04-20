@@ -2,10 +2,9 @@ import datetime
 import logging
 import threading
 
-from ..Classes.COHOpponentBot_GameData import GameData
-from ..Classes.COHOpponentBot_Settings import Settings
-from ..Classes.COHOpponentBot_ReplayParser import ReplayParser
-
+from Classes.COHOpponentBot_GameData import GameData
+from Classes.COHOpponentBot_Settings import Settings
+from Classes.COHOpponentBot_ReplayParser import ReplayParser
 
 for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
@@ -54,7 +53,7 @@ cohrecReplayAddress = 0x00902030
 cohrecOffsets = [0x4, 0x160, 0x4, 0x110, 0x110, 0x0]
 myListOfCOHRECPointers.append([cohrecReplayAddress, cohrecOffsets])
 
-parameters = Settings()
+settings = Settings()
 
 gameData = GameData()
 gameData.GetCOHMemoryAddress()
@@ -105,7 +104,7 @@ while gameData.GetCOHMemoryAddress():
                     logging.info("Pointing to COH__REC")
                     startTimeProcessMemory = datetime.datetime.now()
                     replayByteData = bytearray(replayByteData)
-                    replayParser = ReplayParser(parameters=parameters)
+                    replayParser = ReplayParser(parameters=settings)
                     replayParser.data = bytearray(replayByteData)
                     success = replayParser.processData()
                     endTimeProcessMemory = datetime.datetime.now()
