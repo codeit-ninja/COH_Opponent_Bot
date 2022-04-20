@@ -183,8 +183,6 @@ class Parameters:
                     buf
                 )
 
-                print(str(buf.value))
-
                 loc = "\\My Games\\Company of Heroes Relaunch\\warnings.log"
                 logPath = buf.value + loc
                 self.data['logPath'] = logPath
