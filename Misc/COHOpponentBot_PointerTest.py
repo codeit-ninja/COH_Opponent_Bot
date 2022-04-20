@@ -2,9 +2,9 @@ import datetime
 import logging
 import threading
 
-from Classes.COHOpponentBot_GameData import GameData
-from Classes.COHOpponentBot_Parameters import Parameters
-from Classes.COHOpponentBot_ReplayParser import ReplayParser
+from ..Classes.COHOpponentBot_GameData import GameData
+from ..Classes.COHOpponentBot_Settings import Settings
+from ..Classes.COHOpponentBot_ReplayParser import ReplayParser
 
 
 for handler in logging.root.handlers[:]:
@@ -54,7 +54,7 @@ cohrecReplayAddress = 0x00902030
 cohrecOffsets = [0x4, 0x160, 0x4, 0x110, 0x110, 0x0]
 myListOfCOHRECPointers.append([cohrecReplayAddress, cohrecOffsets])
 
-parameters = Parameters()
+parameters = Settings()
 
 gameData = GameData()
 gameData.GetCOHMemoryAddress()
