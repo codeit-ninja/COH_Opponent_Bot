@@ -189,12 +189,12 @@ class IRC_Client(threading.Thread):
         logging.info("in close in thread")
         try:
             # send closing message immediately
-
-            self.irc.send(
-                (
-                    f"PRIVMSG {self.channel} :closing opponent"
-                    " bot\r\n").encode('utf8')
-                )
+            if self.irc:
+                self.irc.send(
+                    (
+                        f"PRIVMSG {self.channel} :closing opponent"
+                        " bot\r\n").encode('utf8')
+                    )
             while self.channelThread.is_alive():
                 pass
             self.running = False
