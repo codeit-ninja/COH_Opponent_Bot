@@ -7,15 +7,15 @@ from Classes.COHOpponentBot_Settings import Settings
 class UCS:
     """Processes language UCS file strings and the in game symbolic aliases."""
 
-    def __init__(self, ucsPath=None, parameters=None) -> None:
+    def __init__(self, ucsPath=None, settings=None) -> None:
 
-        self.parameters = parameters
-        if not parameters:
-            self.parameters = Settings()
+        self.settings = settings
+        if not settings:
+            self.settings = Settings()
 
         self.ucsPath = ucsPath
         if not ucsPath:
-            self.ucsPath = self.parameters.data.get('cohUCSPath')
+            self.ucsPath = self.settings.data.get('cohUCSPath')
 
     def compareUCS(self, compareString) -> str:
         try:
