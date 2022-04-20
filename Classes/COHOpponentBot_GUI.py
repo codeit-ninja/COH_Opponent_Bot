@@ -29,8 +29,8 @@ class GUI:
     def __init__(self):
 
         # Enter Build Variables for marking About Box
-        self.VersionNumber = "3.0"
-        self.BuildDate = "12-Apr-2022"
+        self.VersionNumber = "3.0.1"
+        self.BuildDate = "20-Apr-2022"
 
         self.ircClient = None  # reference to the opponentbot
 
