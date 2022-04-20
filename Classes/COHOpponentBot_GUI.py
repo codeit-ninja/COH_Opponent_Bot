@@ -4,14 +4,16 @@ import os.path
 import base64
 import os
 import logging
-import tkinter as tk
 import threading
 
 from tkinter import (
     DISABLED, N, E, NORMAL, S, W, IntVar, Menu, StringVar, messagebox
     )
 from os.path import relpath
+
+import tkinter as tkinter
 from tkinter import ttk
+import tkinter.filedialog
 from tkinter.ttk import Style
 
 from Classes.COHOpponentBot_Icon import Icon
@@ -34,7 +36,7 @@ class GUI:
 
         self.parameters = COHOpponentBot_Parameters.Parameters()
 
-        self.master = tk.Tk()
+        self.master = tkinter.Tk()
 
         self.optionsMenu = None
 
@@ -72,17 +74,32 @@ class GUI:
         self.customOverlayEntry = None
         self.customChatOutputEntry = None
 
-        tk.Label(self.master, text="Twitch Channel").grid(row=0, sticky=W)
-        tk.Label(self.master, text="Steam Name").grid(row=1, sticky=W)
-        tk.Label(self.master, text="Steam64ID Number").grid(row=2, sticky=W)
-        tk.Label(self.master, text="warning.log path").grid(row=3, sticky=W)
-        tk.Label(self.master, text="RelicCOH.exe path").grid(row=4, sticky=W)
+        tkinter.Label(
+            self.master,
+            text="Twitch Channel"
+            ).grid(row=0, sticky=W)
+        tkinter.Label(
+            self.master,
+            text="Steam Name"
+            ).grid(row=1, sticky=W)
+        tkinter.Label(
+            self.master,
+            text="Steam64ID Number"
+            ).grid(row=2, sticky=W)
+        tkinter.Label(
+            self.master,
+            text="warning.log path"
+            ).grid(row=3, sticky=W)
+        tkinter.Label(
+            self.master,
+            text="RelicCOH.exe path"
+            ).grid(row=4, sticky=W)
 
-        self.entryTwitchChannel = tk.Entry(self.master, width=70)
-        self.entrySteamName = tk.Entry(self.master, width=70)
-        self.entrySteam64IDNumber = tk.Entry(self.master, width=70)
-        self.entryWarningLogPath = tk.Entry(self.master, width=70)
-        self.entryRelicCOHPath = tk.Entry(self.master, width=70)
+        self.entryTwitchChannel = tkinter.Entry(self.master, width=70)
+        self.entrySteamName = tkinter.Entry(self.master, width=70)
+        self.entrySteam64IDNumber = tkinter.Entry(self.master, width=70)
+        self.entryWarningLogPath = tkinter.Entry(self.master, width=70)
+        self.entryRelicCOHPath = tkinter.Entry(self.master, width=70)
 
         self.entryTwitchChannel.grid(row=0, column=1)
         self.entrySteamName.grid(row=1, column=1)
@@ -125,29 +142,29 @@ class GUI:
         self.entryWarningLogPath.config(state="disabled")
         self.entryRelicCOHPath.config(state="disabled")
 
-        self.buttonTwitchChannel = tk.Button(
+        self.buttonTwitchChannel = tkinter.Button(
             self.master, text="edit", command=lambda: self.editTwitchName()
             )
         self.buttonTwitchChannel.config(width=10)
         self.buttonTwitchChannel.grid(row=0, column=2)
-        self.buttonSteamName = tk.Button(
+        self.buttonSteamName = tkinter.Button(
             self.master, text="edit", command=lambda: self.editSteamName())
         self.buttonSteamName.config(width=10)
         self.buttonSteamName.grid(row=1, column=2)
-        self.buttonSteam64IDNumber = tk.Button(
+        self.buttonSteam64IDNumber = tkinter.Button(
             self.master, text="edit", command=lambda: self.editSteamNumber())
         self.buttonSteam64IDNumber.config(width=10)
         self.buttonSteam64IDNumber.grid(row=2, column=2)
-        self.buttonLocateWarningLog = tk.Button(
+        self.buttonLocateWarningLog = tkinter.Button(
             self.master, text="browse", command=lambda: self.locateWarningLog()
             )
         self.buttonLocateWarningLog.config(width=10)
         self.buttonLocateWarningLog.grid(row=3, column=2)
-        self.cohBrowseButton = tk.Button(
+        self.cohBrowseButton = tkinter.Button(
             self.master, text="browse", command=lambda: self.locateCOH())
         self.cohBrowseButton.config(width=10)
         self.cohBrowseButton.grid(row=4, column=2)
-        self.buttonOptions = tk.Button(
+        self.buttonOptions = tkinter.Button(
             self.master, text="options", command=self.createOptionsMenu)
         self.buttonOptions.config(width=10)
         self.buttonOptions.grid(row=5, column=2)
@@ -167,21 +184,24 @@ class GUI:
 
         self.consoleDisplayBool = IntVar()
 
-        self.testButton = tk.Button(
+        self.testButton = tkinter.Button(
             self.master, text="Test Output", command=self.testStats)
         self.testButton.config(width=10)
         self.testButton.grid(row=8, column=2, sticky=E)
         self.testButton.config(state=DISABLED)
 
-        self.clearOverlayButton = tk.Button(
+        self.clearOverlayButton = tkinter.Button(
             self.master, text="Clear Overlay",
             command=GameData.clearOverlayHTML)
         self.clearOverlayButton.config(width=10)
         self.clearOverlayButton.grid(row=9, column=2, sticky=E)
 
-        tk.Label(self.master, text="Console Output:").grid(row=10, sticky=W)
+        tkinter.Label(
+            self.master,
+            text="Console Output:"
+        ).grid(row=10, sticky=W)
         # create a Text widget
-        self.txt = tk.Text(self.master)
+        self.txt = tkinter.Text(self.master)
         self.txt.grid(row=11, columnspan=3, sticky="nsew", padx=2, pady=2)
 
         # create a Scrollbar and associate it with txt
@@ -232,7 +252,7 @@ class GUI:
         files = [('Json', '*.json'), ('All Files', '*.*')]
         workingDirectory = os.getcwd()
         print("workingDirectory : {}".format(workingDirectory))
-        self.master.filename = tk.filedialog.asksaveasfilename(
+        self.master.filename = tkinter.filedialog.asksaveasfilename(
             initialdir=workingDirectory,
             initialfile="data.json",
             title="Save Preferences File",
@@ -250,7 +270,7 @@ class GUI:
         files = [('Json', '*.json'), ('All Files', '*.*')]
         workingDirectory = os.getcwd()
         print("workingDirectory : {}".format(workingDirectory))
-        self.master.filename = tk.filedialog.askopenfilename(
+        self.master.filename = tkinter.filedialog.askopenfilename(
             initialdir=workingDirectory,
             initialfile="data.json",
             title="Load Preferences File",
@@ -269,91 +289,96 @@ class GUI:
         self.parameters = COHOpponentBot_Parameters.Parameters()
 
     def showAboutDialogue(self):
-        InformationString = f"Version : {self.VersionNumber}\n\n"
-        f"Build Date : {self.BuildDate}\n\n"
-        "Created by : XcomReborn\n\n"
-        "Special thanks : AveatorReborn"
-        tk.messagebox.showinfo("Information", InformationString)
+        InformationString = (
+            f"Version : {self.VersionNumber}\n\n"
+            f"Build Date : {self.BuildDate}\n\n"
+            "Created by : XcomReborn\n\n"
+            "Special thanks : AveatorReborn"
+        )
+        tkinter.messagebox.showinfo("Information", InformationString)
 
     def doNothing(self):
         pass
 
     def createOptionsMenu(self):
         if not self.optionsMenu:
-            self.optionsMenu = tk.Toplevel(self.master)
+            self.optionsMenu = tkinter.Toplevel(self.master)
             self.optionsMenu.protocol(
                 "WM_DELETE_WINDOW",
                 self.on_close_options)
             self.optionsMenu.title("Chat Display Options")
 
-            self.frameReportOptions = tk.LabelFrame(
+            self.frameReportOptions = tkinter.LabelFrame(
                 self.optionsMenu,
                 padx=5,
                 pady=5)
             self.frameReportOptions.grid()
-            self.framePlayerInfo = tk.LabelFrame(
+            self.framePlayerInfo = tkinter.LabelFrame(
                 self.optionsMenu,
                 text="Player Info",
                 padx=5,
                 pady=5)
             self.framePlayerInfo.grid(sticky=N+W+E+S)
 
-            self.frameAutoTrigger = tk.LabelFrame(
+            self.frameAutoTrigger = tkinter.LabelFrame(
                 self.optionsMenu,
                 text="Auto Trigger",
                 padx=5,
                 pady=5)
             self.frameAutoTrigger.grid(sticky=N+W+E)
 
-            self.frameCustomFormat = tk.LabelFrame(
+            self.frameCustomFormat = tkinter.LabelFrame(
                 self.optionsMenu,
                 text="Custom Format",
                 padx=5,
                 pady=5)
             self.frameCustomFormat.grid(sticky=N+W+E+S)
 
-            self.frameCSSFilePath = tk.LabelFrame(
+            self.frameCSSFilePath = tkinter.LabelFrame(
                 self.optionsMenu,
                 text="CSS Format File",
                 padx=5,
                 pady=5)
             self.frameCSSFilePath.grid(sticky=N+W+E+S)
 
-            self.frameOptionalBotCredentials = tk.LabelFrame(
+            self.frameOptionalBotCredentials = tkinter.LabelFrame(
                 self.optionsMenu,
                 text="Optional Bot Credentials",
                 padx=5,
                 pady=5)
-            self.frameOptionalBotCredentials.grid(sticky=tk.N+W+E+S)
+            self.frameOptionalBotCredentials.grid(sticky=N+W+E+S)
 
-            self.frameMisc = tk.LabelFrame(
+            self.frameMisc = tkinter.LabelFrame(
                 self.optionsMenu,
                 text="Misc",
                 padx=5,
                 pady=5)
             self.frameMisc.grid(sticky=N+W+E+S)
 
-            tk.Label(self.frameReportOptions, text="Report Options").grid()
+            tkinter.Label(
+                self.frameReportOptions,
+                text="Report Options"
+            ).grid()
 
-            self.checkUseCustomChatOutput = tk.Checkbutton(
+            self.checkUseCustomChatOutput = tkinter.Checkbutton(
                 self.frameCustomFormat,
                 text="Use Custom Chat Output Pre-Format",
                 variable=self.useCustomPreFormat,
                 command=self.toggleUseCustomPreFormat)
             self.checkUseCustomChatOutput.grid(sticky=W)
 
-            self.customChatOutputEntry = tk.Entry(
+            self.customChatOutputEntry = tkinter.Entry(
                 self.frameCustomFormat,
                 width=70,
                 textvariable=self.customChatOutputPreFormatString,
                 validate="focusout",
                 validatecommand=self.saveCustomChatPreFormat)
-            self.customChatOutputEntry.grid(sticky=tk.W)
+            self.customChatOutputEntry.grid(sticky=W)
             if self.parameters.data.get('customStringPreFormat'):
                 self.customChatOutputPreFormatString.set(
                     self.parameters.data.get('customStringPreFormat'))
 
-            self.frameCustomChatVariables = tk.LabelFrame(
+            self.frameCustomChatVariables = tkinter.LabelFrame(
                 self.frameCustomFormat,
                 text="Custom Chat/Overlay Text Variables",
                 padx=5,
@@ -369,7 +394,7 @@ class GUI:
             sfd = self.parameters.stringFormattingDictionary
             for key, value in sfd.items():
 
-                myLabelFrame = tk.LabelFrame(
+                myLabelFrame = tkinter.LabelFrame(
                     self.frameCustomChatVariables,
                     padx=5,
                     pady=5)
@@ -377,7 +402,7 @@ class GUI:
                     columnNumber,
                     minsize=100)
                 self.myLabelFrames.append(myLabelFrame)
-                myLabel = tk.Label(myLabelFrame, text=str(key))
+                myLabel = tkinter.Label(myLabelFrame, text=str(key))
                 myLabel.grid()
 
                 myLabelFrame.grid(
@@ -390,7 +415,7 @@ class GUI:
                     columnNumber = 0
                 self.stringFormatLabels.append(myLabel)
 
-            self.frameOverlayImageIcons = tk.LabelFrame(
+            self.frameOverlayImageIcons = tkinter.LabelFrame(
                 self.frameCustomFormat,
                 text="HTML Overlay Only Image Icons",
                 padx=5,
@@ -403,14 +428,14 @@ class GUI:
             iofd = self.parameters.imageOverlayFormattingDictionary.items()
             for key, value in iofd:
 
-                myLabelFrame = tk.LabelFrame(
+                myLabelFrame = tkinter.LabelFrame(
                     self.frameOverlayImageIcons,
                     padx=5,
                     pady=5)
                 self.frameOverlayImageIcons.columnconfigure(
                     columnNumber, minsize=100)
                 self.myLabelFrames.append(myLabelFrame)
-                myLabel = tk.Label(myLabelFrame, text=str(key))
+                myLabel = tkinter.Label(myLabelFrame, text=str(key))
                 myLabel.grid()
 
                 myLabelFrame.grid(
@@ -423,14 +448,14 @@ class GUI:
                     columnNumber = 0
                 self.stringFormatLabels.append(myLabel)
 
-            self.checkUseCustomOverlayString = tk.Checkbutton(
+            self.checkUseCustomOverlayString = tkinter.Checkbutton(
                 self.frameCustomFormat,
                 text="Use Custom HTML Overlay Pre-Format",
                 variable=self.useOverlayPreFormat,
                 command=self.toggleUseOverlayPreFormat)
             self.checkUseCustomOverlayString.grid(sticky=W)
 
-            self.customOverlayEntryLeft = tk.Entry(
+            self.customOverlayEntryLeft = tkinter.Entry(
                 self.frameCustomFormat,
                 width=70,
                 textvariable=self.customOverlayPreFormatStringLeft,
@@ -441,7 +466,7 @@ class GUI:
                 self.customOverlayPreFormatStringLeft.set(
                     self.parameters.data.get('overlayStringPreFormatLeft'))
 
-            self.customOverlayEntryRight = tk.Entry(
+            self.customOverlayEntryRight = tkinter.Entry(
                 self.frameCustomFormat,
                 width=70,
                 textvariable=self.customOverlayPreFormatStringRight,
@@ -452,51 +477,51 @@ class GUI:
                 self.customOverlayPreFormatStringRight.set(
                     self.parameters.data.get('overlayStringPreFormatRight'))
 
-            self.checkUseMirrorOverlay = tk.Checkbutton(
+            self.checkUseMirrorOverlay = tkinter.Checkbutton(
                 self.frameCustomFormat,
                 text="Mirror Left/Right HTML Overlay",
                 variable=self.mirrorLeftToRightOverlay,
                 command=self.toggleMirrorLeftRightOverlay)
 
-            tk.Label(self.frameCustomFormat, text="Left").grid(sticky=W)
+            tkinter.Label(self.frameCustomFormat, text="Left").grid(sticky=W)
             self.customOverlayEntryLeft.grid(sticky=W)
 
             self.checkUseMirrorOverlay.grid(sticky=W)
 
-            tk.Label(self.frameCustomFormat, text="Right").grid(sticky=W)
+            tkinter.Label(self.frameCustomFormat, text="Right").grid(sticky=W)
             self.customOverlayEntryRight.grid(sticky=W)
 
             self.toggleUseOverlayPreFormat()
 
-            self.checkOwn = tk.Checkbutton(
+            self.checkOwn = tkinter.Checkbutton(
                 self.framePlayerInfo,
                 text="Show Own Stats",
                 variable=self.showOwn,
                 command=self.saveToggles)
 
-            self.checkOwn.grid(sticky=tk.W)
+            self.checkOwn.grid(sticky=W)
 
-            self.checkAutomaticTrigger = tk.Checkbutton(
+            self.checkAutomaticTrigger = tkinter.Checkbutton(
                 self.frameAutoTrigger,
                 text="Automatic Trigger",
                 variable=self.automaticTrigger,
                 command=self.automaticTriggerToggle)
             self.checkAutomaticTrigger.grid(sticky=W)
-            self.checkWriteIWonLostInChat = tk.Checkbutton(
+            self.checkWriteIWonLostInChat = tkinter.Checkbutton(
                 self.frameAutoTrigger,
                 text="Win/Lose message in Chat",
                 variable=self.writeIWonLostInChat,
                 command=self.saveToggles)
 
             self.checkWriteIWonLostInChat.grid(sticky=W)
-            self.checkWritePlaceYourBetsInChat = tk.Checkbutton(
+            self.checkWritePlaceYourBetsInChat = tkinter.Checkbutton(
                 self.frameAutoTrigger,
                 text="Write '!Place Your Bets' in Chat at game start",
                 variable=self.writePlaceYourBetsInChat,
                 command=self.saveToggles)
 
             self.checkWritePlaceYourBetsInChat.grid(sticky=W)
-            self.checkClearOverlayAfterGame = tk.Checkbutton(
+            self.checkClearOverlayAfterGame = tkinter.Checkbutton(
                 self.frameAutoTrigger,
                 text="Clear overlay after game over",
                 variable=self.clearOverlayAfterGameOver,
@@ -511,9 +536,14 @@ class GUI:
             # self.automode() # setdisabled if auto on first run
 
             # CSS File Location
-            tk.Label(self.frameCSSFilePath, text="CSS Path").grid(
-                row=0, sticky=tk.W)
-            self.entryCSSFilePath = tk.Entry(self.frameCSSFilePath, width=49)
+            tkinter.Label(
+                self.frameCSSFilePath,
+                text="CSS Path"
+            ).grid(row=0, sticky=W)
+            self.entryCSSFilePath = tkinter.Entry(
+                self.frameCSSFilePath,
+                width=49
+            )
             self.entryCSSFilePath.grid(row=0, column=1)
 
             if(self.parameters.data.get('overlayStyleCSSFilePath')):
@@ -523,7 +553,7 @@ class GUI:
 
             self.entryCSSFilePath.config(state=DISABLED)
 
-            self.buttonCSSFilePath = tk.Button(
+            self.buttonCSSFilePath = tkinter.Button(
                 self.frameCSSFilePath,
                 text="Browse",
                 command=lambda: self.browseCSSFilePathButton())
@@ -531,17 +561,17 @@ class GUI:
             self.buttonCSSFilePath.grid(row=0, column=2, sticky=W)
 
             # CustomBotCredientials
-            tk.Label(
+            tkinter.Label(
                 self.frameOptionalBotCredentials,
                 text="Bot Account Name").grid(row=0, sticky=W)
-            tk.Label(
+            tkinter.Label(
                 self.frameOptionalBotCredentials,
                 text="Bot oAuth Key").grid(row=1, sticky=W)
 
-            self.entryBotAccountName = tk.Entry(
+            self.entryBotAccountName = tkinter.Entry(
                 self.frameOptionalBotCredentials,
                 width=40)
-            self.entryBotoAuthKey = tk.Entry(
+            self.entryBotoAuthKey = tkinter.Entry(
                 self.frameOptionalBotCredentials,
                 width=40)
 
@@ -563,13 +593,13 @@ class GUI:
             self.entryBotAccountName.config(state="disabled")
             self.entryBotoAuthKey.config(state="disabled")
 
-            self.buttonBotAccountName = tk.Button(
+            self.buttonBotAccountName = tkinter.Button(
                 self.frameOptionalBotCredentials,
                 text="edit",
                 command=lambda: self.editBotName())
             self.buttonBotAccountName.config(width=10)
             self.buttonBotAccountName.grid(row=0, column=2)
-            self.buttonBotOAuthKey = tk.Button(
+            self.buttonBotOAuthKey = tkinter.Button(
                 self.frameOptionalBotCredentials,
                 text="edit",
                 command=lambda: self.editOAuthKey())
@@ -577,11 +607,12 @@ class GUI:
             self.buttonBotOAuthKey.grid(row=1, column=2)
 
             # Misc tickbox
-            self.checkLogErrorToFile = tk.Checkbutton(
+            self.checkLogErrorToFile = tkinter.Checkbutton(
                 self.frameMisc,
                 text="Log Errors To File",
                 variable=self.logErrorsToFile,
-                command=self.toggleLogErrorsToFile)
+                command=self.toggleLogErrorsToFile
+            )
             self.checkLogErrorToFile.grid(sticky=W)
 
         try:
@@ -890,7 +921,7 @@ class GUI:
 
     def locateWarningLog(self):
         self.disableEverything()
-        self.master.filename = tk.filedialog.askopenfilename(
+        self.master.filename = tkinter.filedialog.askopenfilename(
                 initialdir="/",
                 title="Select warning.log file",
                 filetypes=(("log file", "*.log"), ("all files", "*.*")))
@@ -903,7 +934,7 @@ class GUI:
             theFilename = re.sub(pattern, "/", self.master.filename)
             self.parameters.data['logPath'] = theFilename.replace("/", '\\')
             self.entryWarningLogPath.config(state=NORMAL)
-            self.entryWarningLogPath.delete(0, tk.END)
+            self.entryWarningLogPath.delete(0, tkinter.END)
             logpath = self.parameters.data.get('logPath')
             if logpath:
                 self.entryWarningLogPath.insert(0, str(logpath))
@@ -913,7 +944,7 @@ class GUI:
 
     def locateCOH(self):
         self.disableEverything()
-        self.master.filename = tk.filedialog.askopenfilename(
+        self.master.filename = tkinter.filedialog.askopenfilename(
             initialdir="/",
             title="Select location of RelicCOH.exe file",
             filetypes=(("RelicCOH", "*.exe"), ("all files", "*.*")))
@@ -931,7 +962,7 @@ class GUI:
             if (os.path.isfile(ucsPath)):
                 self.parameters.data['cohUCSPath'] = ucsPath
             self.entryRelicCOHPath.config(state=NORMAL)
-            self.entryRelicCOHPath.delete(0, tk.END)
+            self.entryRelicCOHPath.delete(0, tkinter.END)
             cohpath = self.parameters.data.get('cohPath')
             if cohpath:
                 self.entryRelicCOHPath.insert(0, str(cohpath))
@@ -942,13 +973,14 @@ class GUI:
     def browseCSSFilePathButton(self):
         self.disableEverything()
         cwd = os.getcwd()
-        self.master.filename = tk.filedialog.askopenfilename(
+        self.master.filename = tkinter.filedialog.askopenfilename(
             initialdir=cwd,
             title="Select location of CSS file",
             filetypes=(("css file", "*.css"), ("all files", "*.*")))
-        self.master.filename = relpath(self.master.filename, cwd)
-        logging.info("File Path : " + str(self.master.filename))
-        print("File Path : " + str(self.master.filename))
+        if os.path.isfile(self.master.filename):
+            self.master.filename = relpath(self.master.filename, cwd)
+            logging.info("File Path : " + str(self.master.filename))
+            print("File Path : " + str(self.master.filename))
         if(self.master.filename != ""):
             pattern = re.compile(r"\u20A9|\uFFE6|\u00A5|\uFFE5")
             # replaces both Won sign varients for korean language
@@ -957,7 +989,7 @@ class GUI:
             theFilename = theFilename.replace("/", '\\')
             self.parameters.data['overlayStyleCSSFilePath'] = theFilename
             self.entryCSSFilePath.config(state=NORMAL)
-            self.entryCSSFilePath.delete(0, tk.END)
+            self.entryCSSFilePath.delete(0, tkinter.END)
             cssPath = self.parameters.data.get('overlayStyleCSSFilePath')
             if cssPath:
                 self.entryCSSFilePath.insert(0, str(cssPath))
