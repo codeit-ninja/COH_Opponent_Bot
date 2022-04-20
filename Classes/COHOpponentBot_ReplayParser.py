@@ -270,7 +270,7 @@ class ReplayParser:
         # until resolved this takes time because file reading
         # so moved to separate function call
         # get mapNameFull and mapDescriptionFull from ucs file
-        ucs = UCS(parameters=self.parameters)
+        ucs = UCS(settings=self.parameters)
         self.mapNameFull = ucs.compareUCS(self.mapName)
         self.mapDescriptionFull = ucs.compareUCS(self.mapDescription)
 
