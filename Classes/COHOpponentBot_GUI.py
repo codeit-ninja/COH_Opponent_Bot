@@ -732,7 +732,7 @@ class GUI:
         self.settings.save()
         try:
             if self.ircClient:
-                self.ircClient.parameters = self.settings
+                self.ircClient.settings = self.settings
         except Exception as e:
             logging.error(str(e))
             logging.exception('Exception : ')
@@ -1024,7 +1024,8 @@ class GUI:
                 self.ircClient = COHOpponentBot_IRC_Client.IRC_Client(
                     self.txt,
                     bool(self.consoleDisplayBool.get()),
-                    parameters=self.settings)
+                    settings=self.settings
+                )
                 self.ircClient.start()
                 if (bool(self.settings.data.get('automaticTrigger'))):
                     self.startMonitors()
@@ -1043,7 +1044,7 @@ class GUI:
             self.automaticMemoryMonitor = MemoryMonitor(
                 pollInterval=self.settings.data.get('filePollInterval'),
                 ircClient=self.ircClient,
-                parameters=self.settings)
+                settings=self.settings)
             self.automaticMemoryMonitor.start()
 
     def closeMonitors(self):
