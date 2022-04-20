@@ -126,7 +126,7 @@ class MemoryMonitor(threading.Thread):
             statnumber = self.parameters.data.get('steamNumber')
             statRequest = StatsRequest()
             statRequest.getMatchHistoryFromServer(statnumber)
-            mostRecentWin = statRequest.getPlayerWinLoseLastMatch(statnumber)
+            mostRecentWin = statRequest.getPlayerWinLastMatch(statnumber)
             if mostRecentWin:
                 self.ircClient.SendPrivateMessageToIRC("!I won")
             else:

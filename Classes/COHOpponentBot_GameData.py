@@ -404,9 +404,11 @@ class GameData():
                             self.gameInProgress = True
                             return replayParser
 
+        # Sets gameInProgress to False if COH__REC was not found
+        # eg game is not in progress.
         self.gameInProgress = False
 
-    def Get_replayParser_BySearch(self):
+    def Get_replayParser_BySearch(self) -> ReplayParser:
         """Gets an instance of the replayParser containing COH game info."""
 
         if self.pm:
