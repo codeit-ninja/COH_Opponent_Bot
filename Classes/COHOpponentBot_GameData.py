@@ -335,7 +335,11 @@ class GameData():
             True if COH is running.
         """
 
-        self.pm = pymem.Pymem("RelicCOH.exe")
+        try:
+            self.pm = pymem.Pymem("RelicCOH.exe")
+        except Exception as e:
+            if e:
+                pass
         if self.pm:
             self.cohProcessID = self.pm.process_id
             logging.info(f"self.pm : {str(self.pm)}")
@@ -404,6 +408,7 @@ class GameData():
                         replayByteData = bytearray(rd)
                         replayParser = ReplayParser(parameters=self.settings)
                         replayParser.data = bytearray(replayByteData)
+                        logging.info("Successfully Parsed Replay Data")
                         success = replayParser.processData()
                         if success:
                             self.gameInProgress = True
@@ -482,7 +487,7 @@ class GameData():
                                     pass
                     statList = []
                     for item in steamNumberList:
-                        statRquest = StatsRequest(parameters=self.settings)
+                        statRquest = StatsRequest(settings=self.settings)
                         stat = statRquest.returnStats(item)
                         statList.append(stat)
                     return statList

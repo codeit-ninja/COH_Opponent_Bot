@@ -11,10 +11,10 @@ from Classes.COHOpponentBot_PlayerStat import PlayerStat
 class StatsRequest:
     """Contacts Relic COH1 server via proxy to get steam player data."""
 
-    def __init__(self, parameters=None):
-        self.parameters = parameters
-        if not parameters:
-            self.parameters = Settings()
+    def __init__(self, settings=None):
+        self.settings = settings
+        if not settings:
+            self.settings = Settings()
 
         # Declare instance variables for storing data
         # returned from server (nested List/Dictionary)
@@ -50,7 +50,7 @@ class StatsRequest:
                     context = ssl._create_unverified_context
                     ssl._create_default_https_context = context
 
-            pd = self.parameters.privatedata
+            pd = self.settings.privatedata
             rs = pd.get('relicServerProxyStatRequest')
             response = urllib.request.urlopen(rs + str(steam64ID)).read()
             # Decode server response as a json into a
@@ -78,7 +78,7 @@ class StatsRequest:
                     context = ssl._create_unverified_context
                     ssl._create_default_https_context = context
 
-            pd = self.parameters.privatedata
+            pd = self.settings.privatedata
             mh = pd.get('relicServerProxyMatchHistoryRequest')
             response = urllib.request.urlopen(mh + str(steam64ID)).read()
             # Decode server response as a json into
@@ -101,7 +101,7 @@ class StatsRequest:
 
         if self.userMatchHistoryCache:
             if not userSteam64Number:
-                userSteam64Number = self.parameters.data.get('steamNumber')
+                userSteam64Number = self.settings.data.get('steamNumber')
             if userSteam64Number:
                 playersProfileID = self.getProfileID(userSteam64Number)
                 mostRecentMatch = self.getMostRecentMatch()

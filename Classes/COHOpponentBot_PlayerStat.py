@@ -60,24 +60,23 @@ class PlayerStat:
                         i = 0
                         for matchType in MatchType:
                             for faction in Faction:
-                                if item.get('leaderboard_id') == i:
-                                    self.leaderboardData[i] = FactionResult(
-                                        faction=faction,
-                                        matchType=matchType,
-                                        name="Americans",
-                                        nameShort="US",
-                                        leaderboard_id=item.get(
-                                            'leaderboard_id'),
-                                        wins=item.get('wins'),
-                                        losses=item.get('losses'),
-                                        streak=item.get('streak'),
-                                        disputes=item.get('disputes'),
-                                        drops=item.get('drops'),
-                                        rank=item.get('rank'),
-                                        rankLevel=item.get('ranklevel'),
-                                        lastMatch=item.get('lastMatchDate')
-                                    )
-                                    i += 1
+                                self.leaderboardData[i] = FactionResult(
+                                    faction=faction,
+                                    matchType=matchType,
+                                    name="Americans",
+                                    nameShort="US",
+                                    leaderboard_id=item.get(
+                                        'leaderboard_id'),
+                                    wins=item.get('wins'),
+                                    losses=item.get('losses'),
+                                    streak=item.get('streak'),
+                                    disputes=item.get('disputes'),
+                                    drops=item.get('drops'),
+                                    rank=item.get('rank'),
+                                    rankLevel=item.get('ranklevel'),
+                                    lastMatch=item.get('lastMatchDate')
+                                )
+                                i += 1
 
             for value in self.leaderboardData:
                 try:
