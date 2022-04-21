@@ -38,32 +38,19 @@ class PlayerStat:
                             self.steamString = value.get('name')
                             self.country = value.get('country')
                 if statdata.get('leaderboardStats'):
-                    # following number compare to leaderboard_id
-                    # 0 is basic american
-                    # 1 is basic wher
-                    # 2 is basic commonWeath
-                    # 3 is basic pe
-                    # 4 is american 1v1
-                    # 5 is wher 1v1
-                    # 6 is commonWeath 1v1
-                    # 7 is pe 1v1
-                    # 8 is american 2v2
-                    # 9 is wher 2v2
-                    # 10 is commonweath 2v2
-                    # 11 is pe 2v2
-                    # 12 is american 3v3
-                    # 13 is wher 3v3
-                    # 14 is commonWeath 3v3
-                    # 15 is pe 3v3
+
                     for item in statdata.get('leaderboardStats'):
                         item_leaderboard_id = item.get('leaderboard_id')
                         if item_leaderboard_id:
-                            leaderboards = availableLeaderboards.get('leaderboards')
+                            leaderboards = availableLeaderboards.get(
+                                'leaderboards'
+                            )
                             leaderboard = None
                             for index in leaderboards:
                                 if index.get('id') == item_leaderboard_id:
                                     try:
-                                        leaderboard = leaderboards[item_leaderboard_id]
+                                        leaderboard = (
+                                            leaderboards[item_leaderboard_id])
                                     except Exception as e:
                                         logging.error(str(e))
                                     break
@@ -71,27 +58,34 @@ class PlayerStat:
                             if leaderboard:
                                 faction = None
                                 matchType = None
-                                leaderboardmap = leaderboard.get('leaderboardmap')
-                                if leaderboardmap:
+                                lboardmap = leaderboard.get(
+                                    'leaderboardmap')
+                                if lboardmap:
                                     try:
-                                        faction = Faction(leaderboardmap[0].get('race_id'))
-                                        matchType = MatchType(leaderboardmap[0].get('matchtype_id'))
+                                        faction = Faction(lboardmap[0].get(
+                                            'race_id'))
+                                        matchType = MatchType(lboardmap[0].get(
+                                            'matchtype_id'))
                                     except Exception as e:
                                         logging.error(str(e))
 
-                                self.leaderboardData[leaderboard.get('id')] = FactionResult(
-                                    faction=faction,
-                                    matchType=matchType,
-                                    name=leaderboard.get('name'),
-                                    leaderboard_id=item.get('leaderboard_id'),
-                                    wins=item.get('wins'),
-                                    losses=item.get('losses'),
-                                    streak=item.get('streak'),
-                                    disputes=item.get('disputes'),
-                                    drops=item.get('drops'),
-                                    rank=item.get('rank'),
-                                    rankLevel=item.get('ranklevel'),
-                                    lastMatch=item.get('lastMatchDate')
+                                self.leaderboardData[leaderboard.get('id')] = (
+                                    FactionResult(
+
+                                        faction=faction,
+                                        matchType=matchType,
+                                        name=leaderboard.get('name'),
+                                        leaderboard_id=item.get(
+                                            'leaderboard_id'),
+                                        wins=item.get('wins'),
+                                        losses=item.get('losses'),
+                                        streak=item.get('streak'),
+                                        disputes=item.get('disputes'),
+                                        drops=item.get('drops'),
+                                        rank=item.get('rank'),
+                                        rankLevel=item.get('ranklevel'),
+                                        lastMatch=item.get('lastMatchDate')
+                                    )
                                 )
 
             for value in self.leaderboardData:
