@@ -7,7 +7,7 @@ from Classes.COHOpponentBot_MatchType import MatchType
 class PlayerStat:
     """Human player stats."""
 
-    def __init__(self, statdata, steamNumber):
+    def __init__(self, statdata, availableLeaderboards, steamNumber):
 
         # steamNumber is required in addition to statData
         # to compare the steamNumber to the internal profiles
@@ -27,18 +27,17 @@ class PlayerStat:
         statString = "/steam/"+str(steamNumber)
 
         if statdata:
-            if (statdata['result']['message'] == "SUCCESS"):
-
-                if statdata['statGroups'][0]['members'][0]['alias']:
-                    for item in statdata['statGroups']:
-                        for value in item['members']:
-                            if (value.get('name') == statString):
-                                self.profile_id = value.get('profile_id')
-                                self.alias = value.get('alias')
-                                self.steamString = value.get('name')
-                                self.country = value.get('country')
+            result = statdata.get('result')
+            message = result.get('message')
+            if (message == "SUCCESS"):
+                for item in statdata.get('statGroups'):
+                    for value in item.get('members'):
+                        if (value.get('name') == statString):
+                            self.profile_id = value.get('profile_id')
+                            self.alias = value.get('alias')
+                            self.steamString = value.get('name')
+                            self.country = value.get('country')
                 if statdata.get('leaderboardStats'):
-                    # print(json.dumps(statdata, indent=4, sort_keys= True))
                     # following number compare to leaderboard_id
                     # 0 is basic american
                     # 1 is basic wher
@@ -56,17 +55,35 @@ class PlayerStat:
                     # 13 is wher 3v3
                     # 14 is commonWeath 3v3
                     # 15 is pe 3v3
-                    for item in statdata['leaderboardStats']:
-                        i = 0
-                        for matchType in MatchType:
-                            for faction in Faction:
-                                self.leaderboardData[i] = FactionResult(
+                    for item in statdata.get('leaderboardStats'):
+                        item_leaderboard_id = item.get('leaderboard_id')
+                        if item_leaderboard_id:
+                            leaderboards = availableLeaderboards.get('leaderboards')
+                            leaderboard = None
+                            for index in leaderboards:
+                                if index.get('id') == item_leaderboard_id:
+                                    try:
+                                        leaderboard = leaderboards[item_leaderboard_id]
+                                    except Exception as e:
+                                        logging.error(str(e))
+                                    break
+
+                            if leaderboard:
+                                faction = None
+                                matchType = None
+                                leaderboardmap = leaderboard.get('leaderboardmap')
+                                if leaderboardmap:
+                                    try:
+                                        faction = Faction(leaderboardmap[0].get('race_id'))
+                                        matchType = MatchType(leaderboardmap[0].get('matchtype_id'))
+                                    except Exception as e:
+                                        logging.error(str(e))
+
+                                self.leaderboardData[leaderboard.get('id')] = FactionResult(
                                     faction=faction,
                                     matchType=matchType,
-                                    name="Americans",
-                                    nameShort="US",
-                                    leaderboard_id=item.get(
-                                        'leaderboard_id'),
+                                    name=leaderboard.get('name'),
+                                    leaderboard_id=item.get('leaderboard_id'),
                                     wins=item.get('wins'),
                                     losses=item.get('losses'),
                                     streak=item.get('streak'),
@@ -76,7 +93,6 @@ class PlayerStat:
                                     rankLevel=item.get('ranklevel'),
                                     lastMatch=item.get('lastMatchDate')
                                 )
-                                i += 1
 
             for value in self.leaderboardData:
                 try:

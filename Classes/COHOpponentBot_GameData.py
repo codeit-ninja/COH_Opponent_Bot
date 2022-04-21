@@ -48,7 +48,7 @@ class GameData():
         self.expertCPUCount = 0
         self.numberOfPlayers = 0
         self.slots = 0
-        self.matchType = MatchType.BASIC
+        self.matchType = MatchType.CUSTOM
         self.cohRunning = False
         self.gameInProgress = False
         self.gameStartedDate = None
@@ -79,7 +79,7 @@ class GameData():
         self.expertCPUCount = 0
         self.numberOfPlayers = 0
         self.slots = 0
-        self.matchType = MatchType.BASIC
+        self.matchType = MatchType.CUSTOM
         self.cohRunning = False
         self.gameInProgress = False
         self.gameStartedDate = None
@@ -188,9 +188,9 @@ class GameData():
 
         # Set the current MatchType
 
-        self.matchType = MatchType.BASIC
+        self.matchType = MatchType.CUSTOM
         if (int(self.numberOfComputers) > 0):
-            self.matchType = MatchType.BASIC
+            self.matchType = MatchType.CUSTOM
         if (0 <= int(self.slots) <= 2):
             if (int(self.numberOfComputers) == 0):
                 self.matchType = MatchType.ONES
@@ -498,7 +498,7 @@ class GameData():
             self.settings = Settings()
 
         steamNumber = self.settings.data.get('steamNumber')
-        statsRequest = StatsRequest(parameters=self.settings)
+        statsRequest = StatsRequest(settings=self.settings)
         streamerStats = statsRequest.returnStats(str(steamNumber))
         streamerPlayer = Player(name=self.settings.data.get('channel'))
         streamerPlayer.stats = streamerStats
@@ -681,7 +681,7 @@ class GameData():
                 postfixDivClose + postfixDivClose
             )
 
-        if (self.matchType == MatchType.BASIC):
+        if (self.matchType == MatchType.CUSTOM):
             stringFormattingDictionary['$MATCHTYPE$'] = (
                 prefixDiv + matchDiv + "Basic" + postfixDivClose +
                 postfixDivClose

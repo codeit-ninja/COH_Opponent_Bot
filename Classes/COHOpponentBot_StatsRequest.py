@@ -20,15 +20,18 @@ class StatsRequest:
         # returned from server (nested List/Dictionary)
         self.userStatCache = None
         self.userMatchHistoryCache = None
+        self.availableLeaderboards = None
 
     def returnStats(self, steam64ID):
         try:
             self.getUserStatFromServer(steam64ID)
+            self.getAvailableLeaderboardsFromServer()
             # Determine server response succeeded
             # and use it to create PlayerStat object
             if (self.userStatCache['result']['message'] == "SUCCESS"):
-                playerStat = PlayerStat(self.userStatCache, steam64ID)
-                return playerStat
+                if self.availableLeaderboards['result']['message'] == "SUCCESS":
+                    playerStat = PlayerStat(self.userStatCache, self.availableLeaderboards, steam64ID)
+                    return playerStat
         except Exception as e:
             logging.error("Problem in returnStats")
             logging.error(str(e))
@@ -90,6 +93,31 @@ class StatsRequest:
                 # implement custom match history class
                 # and instatiate object here
                 pass
+
+        except Exception as e:
+            logging.error("Problem in getMatchHistory")
+            logging.error(str(e))
+            logging.exception("Exception : ")
+
+    def getAvailableLeaderboardsFromServer(self):
+        """Cache the available leaderboards."""
+
+        try:
+            if not os.environ.get('PYTHONHTTPSVERIFY', ''):
+                if getattr(ssl, '_create_unverified_context', None):
+                    context = ssl._create_unverified_context
+                    ssl._create_default_https_context = context
+
+            pd = self.settings.privatedata
+            rs = pd.get('relicServerProxyLeaderBoards')
+            response = urllib.request.urlopen(rs).read()
+            # Decode server response as a json into
+            # a nested list/directory and store as instance variable
+            self.availableLeaderboards = json.loads(response.decode('utf-8'))
+            # Determine server response succeeded and use it
+            # to create PlayerStat object
+            if (self.availableLeaderboards['result']['message'] == "SUCCESS"):
+                return True
 
         except Exception as e:
             logging.error("Problem in getMatchHistory")

@@ -7,25 +7,26 @@ class FactionResult():
     """Contains Stat data for each COH1 game type and faction."""
 
     def __init__(
-        self, faction=None, matchType='-1', name='-1', nameShort='-1',
-        leaderboard_id='-1', wins='-1', losses='-1', streak='-1',
-        disputes='-1', drops='-1', rank='-1', rankLevel='-1', lastMatch='-1'
+        self, faction=None, matchType=None, name=None, nameShort=None,
+        leaderboard_id=None, wins=None, losses=None, streak=None,
+        disputes=None, drops=None, rank=None, rankLevel=None, lastMatch=None
                 ):
         self.faction = faction
-        self.matchType = re.sub(r"^-1\b", "", str(matchType))
+        self.matchType = matchType
         self.name = name
         self.nameShort = nameShort
         self.id = leaderboard_id
-        self.wins = re.sub(r"^-1\b", "", str(wins))
-        self.losses = re.sub(r"^-1\b", "", str(losses))
-        self.streak = re.sub(r"^-1\b", "", str(streak))
-        self.disputes = re.sub(r"^-1\b", "", str(disputes))
-        self.drops = re.sub(r"^-1\b", "", str(drops))
-        self.rank = re.sub(r"^-1\b", "", str(rank))
-        self.rankLevel = re.sub(r"^-1\b", "", str(rankLevel))
-        self.lastMatch = re.sub(r"^-1\b", "", str(lastMatch))
+        self.wins = wins
+        self.losses = losses
+        self.streak = streak
+        self.disputes = disputes
+        self.drops = drops
+        self.rank = rank
+        self.rankLevel = rankLevel
+        self.lastMatch = lastMatch
         self.lastTime = None
         self.winLossRatio = None
+
         if isinstance(self.lastMatch, str):
             notNone = (str(self.lastMatch) != "None")
             notEmpty = (str(self.lastMatch) != "")
@@ -34,6 +35,18 @@ class FactionResult():
                 ts = int(self.lastMatch)
                 utc = datetime.utcfromtimestamp(ts)
                 self.lastTime = str(utc.strftime('%Y-%m-%d %H:%M:%S'))
+
+        if "American" in self.name:
+            self.nameShort = "US"
+
+        if "Wehrmacht" in self.name:
+            self.nameShort = "WM"
+
+        if "British" in self.name:
+            self.nameShort = "CW"
+
+        if "Panzer" in self.name:
+            self.nameShort = "PE"
 
         try:
             if (int(self.losses) != 0):
