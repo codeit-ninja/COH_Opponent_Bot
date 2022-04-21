@@ -485,12 +485,13 @@ class GameData():
                             except Exception as e:
                                 if e:
                                     pass
-                    statList = []
-                    for item in steamNumberList:
-                        statRquest = StatsRequest(settings=self.settings)
-                        stat = statRquest.returnStats(item)
-                        statList.append(stat)
-                    return statList
+
+                statList = []
+                for item in steamNumberList:
+                    statRquest = StatsRequest(settings=self.settings)
+                    stat = statRquest.returnStats(item)
+                    statList.append(stat)
+                return statList
 
     def TestOutput(self):
         """Produces text output according to Preformat."""
