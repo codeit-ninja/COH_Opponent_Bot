@@ -110,7 +110,7 @@ class GameData():
 
         # Check if a game is currently in progress if not return false.
         # replayParser = self.Get_replayParser_BySearch()
-        replayParser = self.get_replayParser_by_pointer()
+        replayParser = self.get_replayParser_by_search()
         if not replayParser:
             return False
 
