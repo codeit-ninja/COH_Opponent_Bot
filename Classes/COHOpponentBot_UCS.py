@@ -17,7 +17,7 @@ class UCS:
         if not ucsPath:
             self.ucsPath = self.settings.data.get('cohUCSPath')
 
-    def compareUCS(self, compareString) -> str:
+    def compare_UCS(self, compareString) -> str:
         try:
             if compareString:
                 if (os.path.isfile(self.ucsPath)):

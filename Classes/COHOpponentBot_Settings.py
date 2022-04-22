@@ -353,7 +353,7 @@ class Settings:
             if (os.path.isfile(filePath)):
                 with open(filePath) as json_file:
                     data = json.load(json_file)
-                    success = self.checkDataIntegrity(data)
+                    success = self.check_data_integrity(data)
                     if success:
                         self.data = data
                         logging.info("data loaded sucessfully")
@@ -366,7 +366,7 @@ class Settings:
             logging.error(str(e))
             logging.exception("Exception : ")
 
-    def checkDataIntegrity(self, data):
+    def check_data_integrity(self, data):
         success = True
         for key, value in data.items():
             if key not in self.data:

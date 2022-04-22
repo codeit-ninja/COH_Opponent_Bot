@@ -67,7 +67,7 @@ class GameData():
         # This holds a list of IRC string outputs.
         self.ircStringOutputList = []
 
-    def ClearData(self):
+    def clear_data(self):
         """Clears all the variable information in the GameData instance."""
 
         self.playerList = []
@@ -98,19 +98,19 @@ class GameData():
         # This holds a list of IRC string outputs.
         self.ircStringOutputList = []
 
-    def GetDataFromGame(self):
+    def get_data_from_game(self):
         """Attempts to get all the COH information from memory."""
 
         # First Clear all data that can be aquired from the game
-        self.ClearData()
+        self.clear_data()
 
         # Check if company of heroes is running if not return false
-        if not self.GetCOHMemoryAddress():
+        if not self.get_COH_memory_address():
             return False
 
         # Check if a game is currently in progress if not return false.
         # replayParser = self.Get_replayParser_BySearch()
-        replayParser = self.Get_replayParser_ByPointer()
+        replayParser = self.get_replayParser_by_pointer()
         if not replayParser:
             return False
 
@@ -134,7 +134,7 @@ class GameData():
             player = Player(name=username, factionString=factionString)
             self.playerList.append(player)
 
-        statList = self.getStatsFromGame()
+        statList = self.get_stats_from_game()
 
         for player in self.playerList:
             if statList:
@@ -203,7 +203,7 @@ class GameData():
 
         return True
 
-    def GetGameDescriptionString(self) -> str:
+    def get_game_description_string(self) -> str:
         """Produces a single-line game description string."""
 
         offset = time.timezone
@@ -223,7 +223,7 @@ class GameData():
         # Get the map full name from ucs file this takes time and so
         # should only be called when output is intended.
 
-        self.GetMapNameFullFromUCSFile()
+        self.get_mapNameFull_from_UCS_file()
 
         try:
             numberOfHumans = str(int(self.numberOfHumans))
@@ -267,7 +267,7 @@ class GameData():
         self.gameDescriptionString = message
         return self.gameDescriptionString
 
-    def GetMapDescriptionFromUCSFile(self):
+    def get_mapDescriptionFull_from_UCS_file(self):
         """mapDescriptionFull will be None until resolved.
 
         This takes time because file reading. gets mapDescriptionFull
@@ -276,14 +276,14 @@ class GameData():
 
         try:
             ucs = UCS(settings=self.settings)
-            self.mapDescriptionFull = ucs.compareUCS(self.mapDescription)
+            self.mapDescriptionFull = ucs.compare_UCS(self.mapDescription)
 
         except Exception as e:
             logging.error("Problem in GetMapDescription")
             logging.exception("Exception : ")
             logging.error(str(e))
 
-    def GetMapNameFullFromUCSFile(self):
+    def get_mapNameFull_from_UCS_file(self):
         """mapNameFull will be None until resolved.
 
         This takes time because file reading
@@ -292,13 +292,13 @@ class GameData():
 
         try:
             ucs = UCS(settings=self.settings)
-            self.mapNameFull = ucs.compareUCS(self.mapName)
+            self.mapNameFull = ucs.compare_UCS(self.mapName)
         except Exception as e:
             logging.error("Problem in GetMapNameFull")
             logging.exception("Exception : ")
             logging.error(str(e))
 
-    def GetPtrAddr(self, base: int, offsets: list) -> int | None:
+    def get_pointer_address(self, base: int, offsets: list) -> int | None:
         """Gets memory address from a pointer address (base) and applies offsets.
 
         Parameters
@@ -326,7 +326,7 @@ class GameData():
             if e:
                 return None
 
-    def GetCOHMemoryAddress(self) -> bool:
+    def get_COH_memory_address(self) -> bool:
         """Gets the active process for RelicCOH.exe
 
         Returns
@@ -361,7 +361,7 @@ class GameData():
             logging.info(f"self.cohRunning {self.cohRunning}")
             return False
 
-    def Get_replayParser_ByPointer(self) -> ReplayParser:
+    def get_replayParser_by_pointer(self) -> ReplayParser:
         """Gets an instance of the replayParser containing COH game info."""
 
         # There are four pointers to the replay that appear to be 'static'
@@ -390,7 +390,7 @@ class GameData():
 
         for count, item in enumerate(myListOfCOHRECPointers):
             logging.info(f"{count} {item}")
-            ad = self.GetPtrAddr(self.baseAddress + item[0], item[1])
+            ad = self.get_pointer_address(self.baseAddress + item[0], item[1])
             actualCOHRECMemoryAddress = ad
             info = (
                 f"actualCOHRECMemoryAddress :"
@@ -409,7 +409,7 @@ class GameData():
                         replayParser = ReplayParser(parameters=self.settings)
                         replayParser.data = bytearray(replayByteData)
                         logging.info("Successfully Parsed Replay Data")
-                        success = replayParser.processData()
+                        success = replayParser.process_data()
                         if success:
                             self.gameInProgress = True
                             return replayParser
@@ -418,7 +418,7 @@ class GameData():
         # eg game is not in progress.
         self.gameInProgress = False
 
-    def Get_replayParser_BySearch(self) -> ReplayParser:
+    def get_replayParser_by_search(self) -> ReplayParser:
         """Gets an instance of the replayParser containing COH game info."""
 
         if self.pm:
@@ -441,7 +441,7 @@ class GameData():
                                 rd = bytearray(rd)
                                 rp = ReplayParser(parameters=self.settings)
                                 rp.data = bytearray(rd)
-                                success = rp.processData()
+                                success = rp.process_data()
                                 if success:
                                     self.gameInProgress = True
                                     return rp
@@ -451,7 +451,7 @@ class GameData():
                     else:
                         self.gameInProgress = False
 
-    def getStatsFromGame(self):
+    def get_stats_from_game(self):
         """Provides stats from playerList names from game memory."""
 
         if self.pm:
@@ -489,18 +489,18 @@ class GameData():
                 statList = []
                 for item in steamNumberList:
                     statRquest = StatsRequest(settings=self.settings)
-                    stat = statRquest.returnStats(item)
+                    stat = statRquest.return_stats(item)
                     statList.append(stat)
                 return statList
 
-    def TestOutput(self):
+    def test_output(self):
         """Produces text output according to Preformat."""
         if not self.settings:
             self.settings = Settings()
 
         steamNumber = self.settings.data.get('steamNumber')
         statsRequest = StatsRequest(settings=self.settings)
-        streamerStats = statsRequest.returnStats(str(steamNumber))
+        streamerStats = statsRequest.return_stats(str(steamNumber))
         streamerPlayer = Player(name=self.settings.data.get('channel'))
         streamerPlayer.stats = streamerStats
         if streamerPlayer.stats:
@@ -533,14 +533,14 @@ class GameData():
             self.ircClient.SendToOutputField(output)
 
     def __produceOutput(self, streamerPlayer):
-        sFD = self.populateStringFormattingDictionary(streamerPlayer)
+        sFD = self.populate_string_formatting_dictionary(streamerPlayer)
         cPFOS = self.settings.data.get('customStringPreFormat')
-        theString = self.formatPreFormattedString(cPFOS, sFD)
+        theString = self.format_preformatted_string(cPFOS, sFD)
         outputList = list(self.split_by_n(theString, 500))
         for item in outputList:
             self.ircClient.SendToOutputField(item)
 
-    def outputOpponentData(self):
+    def output_opponent_data(self):
 
         logging.info("In output opponent data")
         logging.info(str(self))
@@ -566,7 +566,7 @@ class GameData():
 
             # output each player to file
             if (self.settings.data.get('useOverlayPreFormat')):
-                self.saveOverlayHTML(axisTeam, alliesTeam)
+                self.save_overlay_HTML(axisTeam, alliesTeam)
 
             # output to chat if customoutput ticked
             if (self.settings.data.get('useCustomPreFormat')):
@@ -587,27 +587,27 @@ class GameData():
                             if (self.settings.data.get('showOwn')):
                                 self.ircStringOutputList = (
                                     self.ircStringOutputList +
-                                    self.createCustomOutput(item)
+                                    self.create_custom_output(item)
                                 )
                         else:
                             self.ircStringOutputList = (
                                 self.ircStringOutputList +
-                                self.createCustomOutput(item)
+                                self.create_custom_output(item)
                             )
 
                 for item in self.ircStringOutputList:
                     self.ircClient.SendPrivateMessageToIRC(str(item))
                     # outputs the information to IRC
 
-    def createCustomOutput(self, player) -> list:
+    def create_custom_output(self, player) -> list:
         stringFormattingDictionary = (
-            self.populateStringFormattingDictionary(player)
+            self.populate_string_formatting_dictionary(player)
         )
         customPreFormattedOutputString = (
             self.settings.data.get('customStringPreFormat')
         )
         theString = (
-            self.formatPreFormattedString(
+            self.format_preformatted_string(
                 customPreFormattedOutputString,
                 stringFormattingDictionary)
         )
@@ -615,7 +615,7 @@ class GameData():
 
         return outputList
 
-    def populateStringFormattingDictionary(self, player, overlay=False):
+    def populate_string_formatting_dictionary(self, player, overlay=False):
         prefixDiv = ""
         postfixDivClose = ""
         if overlay:
@@ -662,7 +662,7 @@ class GameData():
             steamprofile = '<div class = "steamprofile">'
             cohstatslink = '<div class = "cohstatslink">'
 
-        playerName = self.sanatizeUserName(player.name)
+        playerName = self.sanatize_user_name(player.name)
         if not playerName:
             playerName = ""
         stringFormattingDictionary['$NAME$'] = (
@@ -832,7 +832,7 @@ class GameData():
 
         return stringFormattingDictionary
 
-    def populateImageFormattingDictionary(self, player):
+    def populate_image_formatting_dictionary(self, player):
         imageOverlayFDict = (
             self.settings.imageOverlayFormattingDictionary)
 
@@ -939,7 +939,7 @@ class GameData():
 
         return imageOverlayFDict
 
-    def sanatizeUserName(self, userName):
+    def sanatize_user_name(self, userName):
         try:
             if userName:
                 userName = str(userName)  # ensure type of string
@@ -958,7 +958,7 @@ class GameData():
             logging.info("In sanitizeUserName username less than 2 chars")
             logging.exception("Exception : " + str(e))
 
-    def formatPreFormattedString(
+    def format_preformatted_string(
         self,
         theString,
         sfDict,
@@ -1003,7 +1003,7 @@ class GameData():
         )
         return result
 
-    def saveOverlayHTML(self, axisTeamList, alliesTeamList):
+    def save_overlay_HTML(self, axisTeamList, alliesTeamList):
         try:
             team1 = ""
             team2 = ""
@@ -1033,13 +1033,13 @@ class GameData():
                     pf = self.settings.data.get('overlayStringPreFormatLeft')
                     preFormattedString = pf
                     # first substitute all the text in the preformat
-                    sfDict = self.populateStringFormattingDictionary(
+                    sfDict = self.populate_string_formatting_dictionary(
                         item,
                         overlay=True
                     )
                     # second substitue all the html images if used
-                    sfDict.update(self.populateImageFormattingDictionary(item))
-                    theString = self.formatPreFormattedString(
+                    sfDict.update(self.populate_image_formatting_dictionary(item))
+                    theString = self.format_preformatted_string(
                         preFormattedString,
                         sfDict,
                         overlay=True
@@ -1051,16 +1051,16 @@ class GameData():
                     )
                     # first substitute all the text in the preformat
                     sfDict.clear()
-                    sfDict = self.populateStringFormattingDictionary(
+                    sfDict = self.populate_string_formatting_dictionary(
                         item,
                         overlay=True
                     )
 
                     # second substitue all the html images if used
                     sfDict.update(
-                        self.populateImageFormattingDictionary(item)
+                        self.populate_image_formatting_dictionary(item)
                     )
-                    theString = self.formatPreFormattedString(
+                    theString = self.format_preformatted_string(
                         preFormattedString,
                         sfDict,
                         overlay=True
@@ -1103,7 +1103,7 @@ class GameData():
             logging.exception("Exception : ")
 
     @staticmethod
-    def clearOverlayHTML():
+    def clear_overlay_HTML():
         try:
             htmlOutput = OverlayTemplates().overlayhtml.format("", "", "")
             # create output overlay from template

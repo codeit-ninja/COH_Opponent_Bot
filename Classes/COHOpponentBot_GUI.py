@@ -70,7 +70,7 @@ class GUI:
         self.customChatOutputPreFormatString = StringVar()
 
         # Start or stop logging based on the self.logErrorsToFile variable
-        self.toggleLogErrorsToFile()
+        self.toggle_log_errors_to_file()
 
         self.customOverlayEntry = None
         self.customChatOutputEntry = None
@@ -138,29 +138,29 @@ class GUI:
         self.entryRelicCOHPath.config(state="disabled")
 
         self.buttonTwitchChannel = tkinter.Button(
-            self.master, text="edit", command=lambda: self.editTwitchName()
+            self.master, text="edit", command=lambda: self.edit_twitch_name()
             )
         self.buttonTwitchChannel.config(width=10)
         self.buttonTwitchChannel.grid(row=0, column=2)
         self.buttonSteamName = tkinter.Button(
-            self.master, text="edit", command=lambda: self.editSteamName())
+            self.master, text="edit", command=lambda: self.edit_steam_name())
         self.buttonSteamName.config(width=10)
         self.buttonSteamName.grid(row=1, column=2)
         self.buttonSteam64IDNumber = tkinter.Button(
-            self.master, text="edit", command=lambda: self.editSteamNumber())
+            self.master, text="edit", command=lambda: self.edit_steam_number())
         self.buttonSteam64IDNumber.config(width=10)
         self.buttonSteam64IDNumber.grid(row=2, column=2)
         self.buttonLocateWarningLog = tkinter.Button(
-            self.master, text="browse", command=lambda: self.locateWarningLog()
+            self.master, text="browse", command=lambda: self.locate_warning_log()
             )
         self.buttonLocateWarningLog.config(width=10)
         self.buttonLocateWarningLog.grid(row=3, column=2)
         self.cohBrowseButton = tkinter.Button(
-            self.master, text="browse", command=lambda: self.locateCOH())
+            self.master, text="browse", command=lambda: self.locate_COH())
         self.cohBrowseButton.config(width=10)
         self.cohBrowseButton.grid(row=4, column=2)
         self.buttonOptions = tkinter.Button(
-            self.master, text="options", command=self.createOptionsMenu)
+            self.master, text="options", command=self.create_options_menu)
         self.buttonOptions.config(width=10)
         self.buttonOptions.grid(row=5, column=2)
 
@@ -171,7 +171,7 @@ class GUI:
             'W.TButton', font='calibri', size=10, foreground='red')
         self.connectButton = ttk.Button(
             self.master, text="Connect", style='W.TButton',
-            command=lambda: self.connectIRC(self.ircClient)
+            command=lambda: self.connect_IRC(self.ircClient)
             )
 
         self.connectButton.grid(
@@ -180,14 +180,14 @@ class GUI:
         self.consoleDisplayBool = IntVar()
 
         self.testButton = tkinter.Button(
-            self.master, text="Test Output", command=self.testStats)
+            self.master, text="Test Output", command=self.test_stats)
         self.testButton.config(width=10)
         self.testButton.grid(row=8, column=2, sticky=E)
         self.testButton.config(state=DISABLED)
 
         self.clearOverlayButton = tkinter.Button(
             self.master, text="Clear Overlay",
-            command=GameData.clearOverlayHTML)
+            command=GameData.clear_overlay_HTML)
         self.clearOverlayButton.config(width=10)
         self.clearOverlayButton.grid(row=9, column=2, sticky=E)
 
@@ -223,10 +223,10 @@ class GUI:
         self.fileMenu = Menu(self.menubar, tearoff=0)
         self.fileMenu.add_command(
             label="Load Preferences",
-            command=self.loadPreferences)
+            command=self.load_preferences)
         self.fileMenu.add_command(
             label="Save Preferences",
-            command=self.savePreferences)
+            command=self.save_preferences)
         self.fileMenu.add_separator()
         self.fileMenu.add_command(label="Exit", command=self.master.quit)
         self.menubar.add_cascade(label="File", menu=self.fileMenu)
@@ -234,7 +234,7 @@ class GUI:
         self.helpmenu = Menu(self.menubar, tearoff=0)
         self.helpmenu.add_command(
             label="About...",
-            command=self.showAboutDialogue)
+            command=self.show_about_dialogue)
         self.menubar.add_cascade(label="Help", menu=self.helpmenu)
 
         self.master.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -243,7 +243,7 @@ class GUI:
 
         self.master.mainloop()
 
-    def savePreferences(self):
+    def save_preferences(self):
         files = [('Json', '*.json'), ('All Files', '*.*')]
         workingDirectory = os.getcwd()
         print("workingDirectory : {}".format(workingDirectory))
@@ -261,7 +261,7 @@ class GUI:
             theFilename = re.sub(pattern, "/", self.master.filename)
             self.settings.save(theFilename)
 
-    def loadPreferences(self):
+    def load_preferences(self):
         files = [('Json', '*.json'), ('All Files', '*.*')]
         workingDirectory = os.getcwd()
         print("workingDirectory : {}".format(workingDirectory))
@@ -278,12 +278,12 @@ class GUI:
             # and Yen symbol for Japanese language paths
             theFilename = re.sub(pattern, "/", self.master.filename)
             self.settings.load(theFilename)
-            self.refreshParameters()
+            self.refresh_settings()
 
-    def refreshParameters(self):
+    def refresh_settings(self):
         self.settings = COHOpponentBot_Settings.Settings()
 
-    def showAboutDialogue(self):
+    def show_about_dialogue(self):
         InformationString = (
             f"Version : {self.VersionNumber}\n\n"
             f"Build Date : {self.BuildDate}\n\n"
@@ -292,10 +292,7 @@ class GUI:
         )
         tkinter.messagebox.showinfo("Information", InformationString)
 
-    def doNothing(self):
-        pass
-
-    def createOptionsMenu(self):
+    def create_options_menu(self):
         if not self.optionsMenu:
             self.optionsMenu = tkinter.Toplevel(self.master)
             self.optionsMenu.protocol(
@@ -359,7 +356,7 @@ class GUI:
                 self.frameCustomFormat,
                 text="Use Custom Chat Output Pre-Format",
                 variable=self.useCustomPreFormat,
-                command=self.toggleUseCustomPreFormat)
+                command=self.toggle_use_custom_preformat)
             self.checkUseCustomChatOutput.grid(sticky=W)
 
             self.customChatOutputEntry = tkinter.Entry(
@@ -367,7 +364,7 @@ class GUI:
                 width=70,
                 textvariable=self.customChatOutputPreFormatString,
                 validate="focusout",
-                validatecommand=self.saveCustomChatPreFormat)
+                validatecommand=self.save_custom_chat_preformat)
             self.customChatOutputEntry.grid(sticky=W)
             if self.settings.data.get('customStringPreFormat'):
                 self.customChatOutputPreFormatString.set(
@@ -447,7 +444,7 @@ class GUI:
                 self.frameCustomFormat,
                 text="Use Custom HTML Overlay Pre-Format",
                 variable=self.useOverlayPreFormat,
-                command=self.toggleUseOverlayPreFormat)
+                command=self.toggle_use_overlay_preformat)
             self.checkUseCustomOverlayString.grid(sticky=W)
 
             self.customOverlayEntryLeft = tkinter.Entry(
@@ -455,7 +452,7 @@ class GUI:
                 width=70,
                 textvariable=self.customOverlayPreFormatStringLeft,
                 validate="focusout",
-                validatecommand=self.saveCustomOverlayPreFormatLeft)
+                validatecommand=self.save_custom_overlay_preformat_left)
 
             if self.settings.data.get('overlayStringPreFormatLeft'):
                 self.customOverlayPreFormatStringLeft.set(
@@ -466,7 +463,7 @@ class GUI:
                 width=70,
                 textvariable=self.customOverlayPreFormatStringRight,
                 validate="focusout",
-                validatecommand=self.saveCustomOverlayPreFormatRight)
+                validatecommand=self.save_custom_overlay_preformat_right)
 
             if self.settings.data.get('overlayStringPreFormatRight'):
                 self.customOverlayPreFormatStringRight.set(
@@ -476,7 +473,7 @@ class GUI:
                 self.frameCustomFormat,
                 text="Mirror Left/Right HTML Overlay",
                 variable=self.mirrorLeftToRightOverlay,
-                command=self.toggleMirrorLeftRightOverlay)
+                command=self.toggle_mirror_left_right_overlay)
 
             tkinter.Label(self.frameCustomFormat, text="Left").grid(sticky=W)
             self.customOverlayEntryLeft.grid(sticky=W)
@@ -486,13 +483,13 @@ class GUI:
             tkinter.Label(self.frameCustomFormat, text="Right").grid(sticky=W)
             self.customOverlayEntryRight.grid(sticky=W)
 
-            self.toggleUseOverlayPreFormat()
+            self.toggle_use_overlay_preformat()
 
             self.checkOwn = tkinter.Checkbutton(
                 self.framePlayerInfo,
                 text="Show Own Stats",
                 variable=self.showOwn,
-                command=self.saveToggles)
+                command=self.save_toggles)
 
             self.checkOwn.grid(sticky=W)
 
@@ -500,34 +497,34 @@ class GUI:
                 self.frameAutoTrigger,
                 text="Automatic Trigger",
                 variable=self.automaticTrigger,
-                command=self.automaticTriggerToggle)
+                command=self.automatic_trigger_toggle)
             self.checkAutomaticTrigger.grid(sticky=W)
             self.checkWriteIWonLostInChat = tkinter.Checkbutton(
                 self.frameAutoTrigger,
                 text="Win/Lose message in Chat",
                 variable=self.writeIWonLostInChat,
-                command=self.saveToggles)
+                command=self.save_toggles)
 
             self.checkWriteIWonLostInChat.grid(sticky=W)
             self.checkWritePlaceYourBetsInChat = tkinter.Checkbutton(
                 self.frameAutoTrigger,
                 text="Write '!Place Your Bets' in Chat at game start",
                 variable=self.writePlaceYourBetsInChat,
-                command=self.saveToggles)
+                command=self.save_toggles)
 
             self.checkWritePlaceYourBetsInChat.grid(sticky=W)
             self.checkClearOverlayAfterGame = tkinter.Checkbutton(
                 self.frameAutoTrigger,
                 text="Clear overlay after game over",
                 variable=self.clearOverlayAfterGameOver,
-                command=self.saveToggles)
+                command=self.save_toggles)
 
             self.checkClearOverlayAfterGame.grid(sticky=W)
 
-            self.automaticTriggerToggle()
-            self.toggleUseCustomPreFormat()
+            self.automatic_trigger_toggle()
+            self.toggle_use_custom_preformat()
             # setdisabled if custom format on first run
-            self.toggleUseOverlayPreFormat()
+            self.toggle_use_overlay_preformat()
             # self.automode() # setdisabled if auto on first run
 
             # CSS File Location
@@ -551,7 +548,7 @@ class GUI:
             self.buttonCSSFilePath = tkinter.Button(
                 self.frameCSSFilePath,
                 text="Browse",
-                command=lambda: self.browseCSSFilePathButton())
+                command=lambda: self.browse_CSS_file_path_button())
             self.buttonCSSFilePath.config(width=10)
             self.buttonCSSFilePath.grid(row=0, column=2, sticky=W)
 
@@ -591,13 +588,13 @@ class GUI:
             self.buttonBotAccountName = tkinter.Button(
                 self.frameOptionalBotCredentials,
                 text="edit",
-                command=lambda: self.editBotName())
+                command=lambda: self.edit_bot_name())
             self.buttonBotAccountName.config(width=10)
             self.buttonBotAccountName.grid(row=0, column=2)
             self.buttonBotOAuthKey = tkinter.Button(
                 self.frameOptionalBotCredentials,
                 text="edit",
-                command=lambda: self.editOAuthKey())
+                command=lambda: self.edit_oauth_key())
             self.buttonBotOAuthKey.config(width=10)
             self.buttonBotOAuthKey.grid(row=1, column=2)
 
@@ -606,7 +603,7 @@ class GUI:
                 self.frameMisc,
                 text="Log Errors To File",
                 variable=self.logErrorsToFile,
-                command=self.toggleLogErrorsToFile
+                command=self.toggle_log_errors_to_file
             )
             self.checkLogErrorToFile.grid(sticky=W)
 
@@ -615,7 +612,7 @@ class GUI:
         except Exception as e:
             logging.error('Exception : ' + str(e))
 
-    def toggleLogErrorsToFile(self):
+    def toggle_log_errors_to_file(self):
         # work in progress
         if (bool(self.logErrorsToFile.get())):
             logging.getLogger().disabled = False
@@ -625,9 +622,9 @@ class GUI:
             logging.info("Stop Logging")
             logging.getLogger().disabled = True
 
-        self.saveToggles()
+        self.save_toggles()
 
-    def toggleMirrorLeftRightOverlay(self):
+    def toggle_mirror_left_right_overlay(self):
         if (bool(self.mirrorLeftToRightOverlay.get())):
             self.customOverlayEntryRight.config(state=DISABLED)
             # write in the left version mirror
@@ -636,34 +633,34 @@ class GUI:
             leftList.reverse()
             rightString = " ".join(leftList)
             self.customOverlayPreFormatStringRight.set(rightString)
-            self.saveCustomOverlayPreFormatRight()
+            self.save_custom_overlay_preformat_right()
         else:
             if(bool(self.useOverlayPreFormat.get())):
                 self.customOverlayEntryRight.config(state=NORMAL)
-        self.saveToggles()
+        self.save_toggles()
 
-    def saveCustomChatPreFormat(self):
+    def save_custom_chat_preformat(self):
         if self.customChatOutputEntry:
             cco = self.customChatOutputPreFormatString.get()
             self.settings.data['customStringPreFormat'] = cco
         self.settings.save()
         return True  # must return true to a validate entry method
 
-    def saveCustomOverlayPreFormatLeft(self):
+    def save_custom_overlay_preformat_left(self):
         if self.customOverlayEntryLeft:
             ospf = self.customOverlayPreFormatStringLeft.get()
             self.settings.data['overlayStringPreFormatLeft'] = ospf
         self.settings.save()
         return True  # must return true to a validate entry method
 
-    def saveCustomOverlayPreFormatRight(self):
+    def save_custom_overlay_preformat_right(self):
         if self.customOverlayEntryRight:
             ospf = self.customOverlayPreFormatStringRight.get()
             self.settings.data['overlayStringPreFormatRight'] = ospf
         self.settings.save()
         return True  # must return true to a validate entry method
 
-    def toggleUseOverlayPreFormat(self):
+    def toggle_use_overlay_preformat(self):
         if (bool(self.useOverlayPreFormat.get())):
             self.customOverlayEntryLeft.config(state=NORMAL)
             if (self.mirrorLeftToRightOverlay.get()):
@@ -673,36 +670,36 @@ class GUI:
         else:
             self.customOverlayEntryLeft.config(state=DISABLED)
             self.customOverlayEntryRight.config(state=DISABLED)
-        self.saveToggles()
+        self.save_toggles()
 
-    def toggleUseCustomPreFormat(self):
+    def toggle_use_custom_preformat(self):
         if (bool(self.useCustomPreFormat.get())):
             self.customChatOutputEntry.config(state=NORMAL)
         else:
             self.customChatOutputEntry.config(state=DISABLED)
-        self.saveToggles()
+        self.save_toggles()
 
-    def testStats(self):
+    def test_stats(self):
         logging.info("Testing Stats")
         if (self.ircClient):
             self.ircClient.queue.put('TEST')
 
-    def automaticTriggerToggle(self):
+    def automatic_trigger_toggle(self):
         if(bool(self.automaticTrigger.get())):
             self.checkWriteIWonLostInChat.config(state=NORMAL)
             self.checkWritePlaceYourBetsInChat.config(state=NORMAL)
             self.checkClearOverlayAfterGame.config(state=NORMAL)
             if (self.ircClient):
                 logging.info("in automatic trigger toggle")
-                self.startMonitors()
+                self.start_monitors()
         else:
-            self.closeMonitors()
+            self.close_monitors()
             self.checkWriteIWonLostInChat.config(state=DISABLED)
             self.checkWritePlaceYourBetsInChat.config(state=DISABLED)
             self.checkClearOverlayAfterGame.config(state=DISABLED)
-        self.saveToggles()
+        self.save_toggles()
 
-    def saveToggles(self):
+    def save_toggles(self):
         self.settings.data['showOwn'] = bool(self.showOwn.get())
 
         automaticTrigger = bool(self.automaticTrigger.get())
@@ -741,7 +738,7 @@ class GUI:
         self.optionsMenu.destroy()
         self.optionsMenu = None
 
-    def disableEverything(self):
+    def disable_everything(self):
         self.buttonTwitchChannel.config(state=DISABLED)
         self.buttonSteamName.config(state=DISABLED)
         self.buttonSteam64IDNumber.config(state=DISABLED)
@@ -769,7 +766,7 @@ class GUI:
             if self.buttonCSSFilePath:
                 self.buttonCSSFilePath.config(state=DISABLED)
 
-    def enableButtons(self):
+    def enable_buttons(self):
         self.buttonTwitchChannel.config(state=NORMAL)
         self.buttonSteamName.config(state=NORMAL)
         self.buttonSteam64IDNumber.config(state=NORMAL)
@@ -787,17 +784,17 @@ class GUI:
             if self.buttonCSSFilePath:
                 self.buttonCSSFilePath.config(state=NORMAL)
 
-    def editSteamNumber(self):
+    def edit_steam_number(self):
         theState = self.entrySteam64IDNumber.cget('state')
         if(theState == "disabled"):
-            self.disableEverything()
+            self.disable_everything()
             self.buttonSteam64IDNumber.config(state=NORMAL)
             self.entrySteam64IDNumber.config(state=NORMAL)
 
         if(theState == "normal"):
-            if self.checkSteamNumber(self.entrySteam64IDNumber.get()):
+            if self.check_steam_number(self.entrySteam64IDNumber.get()):
                 self.entrySteam64IDNumber.config(state=DISABLED)
-                self.enableButtons()
+                self.enable_buttons()
                 steam64ID = self.entrySteam64IDNumber.get()
                 self.settings.data['steamNumber'] = steam64ID
                 self.settings.save()
@@ -806,17 +803,17 @@ class GUI:
                     "Invaid Steam Number", "Please enter your steam number\n"
                     "It Should be an integer 17 characters long")
 
-    def editTwitchName(self):
+    def edit_twitch_name(self):
         theState = self.entryTwitchChannel.cget('state')
         if(theState == DISABLED):
-            self.disableEverything()
+            self.disable_everything()
             self.entryTwitchChannel.config(state=NORMAL)
             self.buttonTwitchChannel.config(state=NORMAL)
 
         if(theState == NORMAL):
             if(self.special_match(self.entryTwitchChannel.get())):
                 self.entryTwitchChannel.config(state=DISABLED)
-                self.enableButtons()
+                self.enable_buttons()
                 self.settings.data['channel'] = self.entryTwitchChannel.get()
                 self.settings.save()
             else:
@@ -826,30 +823,30 @@ class GUI:
                     "Twitch user names should be 4-24 characters long\n"
                     "and only contain letters numbers and underscores.")
 
-    def editSteamName(self):
+    def edit_steam_name(self):
         theState = self.entrySteamName.cget('state')
         if(theState == DISABLED):
-            self.disableEverything()
+            self.disable_everything()
             self.entrySteamName.config(state=NORMAL)
             self.buttonSteamName.config(state=NORMAL)
 
         if(theState == NORMAL):
             self.entrySteamName.config(state=DISABLED)
-            self.enableButtons()
+            self.enable_buttons()
             self.settings.data['steamAlias'] = self.entrySteamName.get()
             self.settings.save()
 
-    def editBotName(self):
+    def edit_bot_name(self):
         theState = self.entryBotAccountName.cget('state')
         if(theState == "disabled"):
-            self.disableEverything()
+            self.disable_everything()
             self.buttonBotAccountName.config(state=NORMAL)
             self.entryBotAccountName.config(state=NORMAL)
 
         if(theState == "normal"):
             if(self.special_match(self.entryBotAccountName.get())):
                 self.entryBotAccountName.config(state="disabled")
-                self.enableButtons()
+                self.enable_buttons()
                 botacc = self.entryBotAccountName.get()
                 self.settings.data['botUserName'] = botacc
                 self.settings.save()
@@ -860,17 +857,17 @@ class GUI:
                     "Twitch user names should be 4-24 characters long\n"
                     "and only contain letters numbers and underscores.")
 
-    def editOAuthKey(self):
+    def edit_oauth_key(self):
         theState = self.entryBotoAuthKey.cget('state')
         if(theState == "disabled"):
-            self.disableEverything()
+            self.disable_everything()
             self.buttonBotOAuthKey.config(state=NORMAL)
             self.entryBotoAuthKey.config(state=NORMAL)
 
         if(theState == "normal"):
-            if self.checkOAuthKey(self.entryBotoAuthKey.get()):
+            if self.check_oauth_key(self.entryBotoAuthKey.get()):
                 self.entryBotoAuthKey.config(state="disabled")
-                self.enableButtons()
+                self.enable_buttons()
                 oAuth = self.entryBotoAuthKey.get()
                 self.settings.data['botOAuthKey'] = oAuth
                 self.settings.save()
@@ -893,7 +890,7 @@ class GUI:
         # Allowed twitch username returns True,
         # if None, it returns False
 
-    def checkOAuthKey(self, oauthkey):
+    def check_oauth_key(self, oauthkey):
         try:
             if (oauthkey[:6] == "oauth:") or (oauthkey == ""):
                 return True
@@ -903,7 +900,7 @@ class GUI:
             logging.exception("Exception : ")
             return False
 
-    def checkSteamNumber(self, number):
+    def check_steam_number(self, number):
         try:
             number = int(number)
             if isinstance(number, int):
@@ -914,8 +911,8 @@ class GUI:
             logging.error(str(e))
             logging.exception("Exception : ")
 
-    def locateWarningLog(self):
-        self.disableEverything()
+    def locate_warning_log(self):
+        self.disable_everything()
         self.master.filename = tkinter.filedialog.askopenfilename(
                 initialdir="/",
                 title="Select warning.log file",
@@ -935,10 +932,10 @@ class GUI:
                 self.entryWarningLogPath.insert(0, str(logpath))
             self.entryWarningLogPath.config(state=DISABLED)
             self.settings.save()
-        self.enableButtons()
+        self.enable_buttons()
 
-    def locateCOH(self):
-        self.disableEverything()
+    def locate_COH(self):
+        self.disable_everything()
         self.master.filename = tkinter.filedialog.askopenfilename(
             initialdir="/",
             title="Select location of RelicCOH.exe file",
@@ -963,10 +960,10 @@ class GUI:
                 self.entryRelicCOHPath.insert(0, str(cohpath))
             self.entryRelicCOHPath.config(state=DISABLED)
             self.settings.save()
-        self.enableButtons()
+        self.enable_buttons()
 
-    def browseCSSFilePathButton(self):
-        self.disableEverything()
+    def browse_CSS_file_path_button(self):
+        self.disable_everything()
         cwd = os.getcwd()
         self.master.filename = tkinter.filedialog.askopenfilename(
             initialdir=cwd,
@@ -990,11 +987,11 @@ class GUI:
                 self.entryCSSFilePath.insert(0, str(cssPath))
             self.entryCSSFilePath.config(state=DISABLED)
             self.settings.save()
-        self.enableButtons()
+        self.enable_buttons()
 
-    def connectIRC(self, thread):
+    def connect_IRC(self, thread):
         if (
-            self.checkSteamNumber(self.settings.data.get('steamNumber'))
+            self.check_steam_number(self.settings.data.get('steamNumber'))
             and self.special_match(self.settings.data.get('channel'))
             and os.path.isfile(self.settings.data.get('logPath'))
         ):
@@ -1005,20 +1002,20 @@ class GUI:
                 try:
                     if(self.ircClient):
                         self.ircClient.close()
-                    self.closeMonitors()
+                    self.close_monitors()
 
                 except Exception as e:
                     logging.error(str(e))
                     logging.exception("Exception : ")
 
                 self.testButton.config(state=DISABLED)
-                self.enableButtons()
+                self.enable_buttons()
                 self.connectButton.config(text="Connect")
                 self.ircClient = None
 
             else:
                 # start thread
-                self.disableEverything()
+                self.disable_everything()
                 self.connectButton.config(text="Disconnect")
                 self.testButton.config(state=NORMAL)
                 self.ircClient = COHOpponentBot_IRC_Client.IRC_Client(
@@ -1028,7 +1025,7 @@ class GUI:
                 )
                 self.ircClient.start()
                 if (bool(self.settings.data.get('automaticTrigger'))):
-                    self.startMonitors()
+                    self.start_monitors()
                 self.connectButton.config(state=NORMAL)
         else:
             messagebox.showerror(
@@ -1036,9 +1033,9 @@ class GUI:
                 "Please check that your twitch username, Steam Number"
                 " and warning.log file path are valid.")
 
-    def startMonitors(self):
+    def start_monitors(self):
         # Ensure they are off if running
-        self.closeMonitors()
+        self.close_monitors()
         # Create Monitor Threads and start them.
         if self.ircClient:
             self.automaticMemoryMonitor = MemoryMonitor(
@@ -1047,16 +1044,16 @@ class GUI:
                 settings=self.settings)
             self.automaticMemoryMonitor.start()
 
-    def closeMonitors(self):
+    def close_monitors(self):
         if self.automaticMemoryMonitor:
-            self.automaticMemoryMonitor.Close()
+            self.automaticMemoryMonitor.close()
 
     def on_closing(self):
         logging.info("In on_closing program (Closing)")
         try:
             if(self.ircClient):
                 self.ircClient.close()
-            self.closeMonitors()
+            self.close_monitors()
         except Exception as e:
             logging.error(str(e))
             logging.exception("Exception : ")

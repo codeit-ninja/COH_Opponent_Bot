@@ -71,12 +71,13 @@ class IRC_Client(threading.Thread):
 
         # irc send message buffer
         self.ircMessageBuffer = collections.deque()
+        self.messageBufferTimer = None
 
         self.running = True
 
         # Start checking send buffer every 3 seconds.
 
-        self.CheckIRCSendBufferEveryThreeSeconds()  # only call this once.
+        self.check_IRC_send_buffer_every_three_seconds()  # only call this once.
 
         try:
             self.ircSocket.connect((self.server, self.port))
@@ -118,7 +119,7 @@ class IRC_Client(threading.Thread):
 
     def run(self):
         self.running = True
-        timeoutTimer = threading.Timer(5, self.connectionTimedOut)
+        timeoutTimer = threading.Timer(5, self.connection_timedout)
         timeoutTimer.start()
         # create readbuffer to hold strings from IRC
         readbuffer = ""
@@ -140,7 +141,7 @@ class IRC_Client(threading.Thread):
                     if (self.displayConsoleOut):
                         try:
                             message = "".join(line) + "\n"
-                            self.SendToOutputField(message)
+                            self.send_to_outputfield(message)
                         except Exception as e:
                             logging.error("In run")
                             logging.error(str(e))
@@ -156,13 +157,13 @@ class IRC_Client(threading.Thread):
                         timeoutTimer.cancel()
                         try:
                             message = "Joined "+self.channel+" successfully.\n"
-                            self.SendToOutputField(message)
+                            self.send_to_outputfield(message)
                             message = (
                                 "You can type 'test' in the "
                                 f"{self.channel[1:]}"
                                 "channel to say hello!\n"
                             )
-                            self.SendToOutputField(message)
+                            self.send_to_outputfield(message)
                         except Exception as e:
                             logging.error(str(e))
                             logging.exception("Exception : ")
@@ -173,19 +174,21 @@ class IRC_Client(threading.Thread):
                 if e:
                     pass
 
-    def connectionTimedOut(self):
+    def connection_timedout(self):
         try:
             message = (
                 f"Connection to {self.channel} timed out, was the channel"
                 " spelt correctly and is port 6667 open?\n"
             )
-            self.SendToOutputField(message)
+            self.send_to_outputfield(message)
         except Exception as e:
             logging.error(str(e))
             logging.exception("Exception : ")
         self.close()
 
     def close(self):
+        """Close handles cleanup of closing the IRC connection."""
+
         self.queue.put("EXITTHREAD")
         logging.info("in close in thread")
         try:
@@ -199,27 +202,34 @@ class IRC_Client(threading.Thread):
             while self.channelThread.is_alive():
                 pass
             self.running = False
+            if self.messageBufferTimer:
+                self.messageBufferTimer.cancel()
         except Exception as e:
             logging.error("In close")
             logging.error(str(e))
             logging.exception("Exception : ")
 
-    def AssurePathExists(self, path):
+    def assure_path_exists(self, path):
         dir = os.path.dirname(path)
         if not os.path.exists(dir):
             os.makedirs(dir)
 
-    def CheckIRCSendBufferEveryThreeSeconds(self):
+    def check_IRC_send_buffer_every_three_seconds(self):
+        """Starts a new threading timer that calls itself every 3 seconds.
+        
+        Calls the IRCSendCalledEveryThreeSeconds method in each loop.
+        """
+
         if (self.running):
-            threading.Timer(
+            self.messageBufferTimer = threading.Timer(
                 3.0,
-                self.CheckIRCSendBufferEveryThreeSeconds
+                self.check_IRC_send_buffer_every_three_seconds
             ).start()
-        self.IRCSendCalledEveryThreeSeconds()
+        self.IRC_send_called_every_three_seconds()
     # above is the send to IRC timer loop that runs every three seconds
 
-    def SendPrivateMessageToIRC(self, message):
-        self.SendToOutputField(message)  # output message to text window
+    def send_private_message_to_IRC(self, message):
+        self.send_to_outputfield(message)  # output message to text window
         message = (
             "PRIVMSG " + str(self.channel) + " :" +
             str(message) + "\r\n"
@@ -227,7 +237,7 @@ class IRC_Client(threading.Thread):
         self.ircMessageBuffer.append(message)
         # removed this to stop message being sent to IRC
 
-    def SendWhisperToIRC(self, message, whisperTo):
+    def send_whisper_to_IRC(self, message, whisperTo):
         try:
             # whisper is currently disabled by twitch
             self.ircMessageBuffer.append(
@@ -239,7 +249,9 @@ class IRC_Client(threading.Thread):
             logging.error(str(e))
             logging.exception("Exception : ")
 
-    def SendMessageToOpponentBotChannelIRC(self, message):
+    def send_message_to_opponentbot_channel(self, message):
+        """Sends a message to the opponent bot channel."""
+
         try:
             self.ircMessageBuffer.append(
                 (
@@ -252,7 +264,9 @@ class IRC_Client(threading.Thread):
             logging.error(str(e))
             logging.exception("Exception : ")
 
-    def SendToOutputField(self, message):
+    def send_to_outputfield(self, message):
+        """Sends a message to the output field of the GUI."""
+
         try:
             # First strip characters outside of range
             # that cannot be handled by tkinter output field
@@ -270,8 +284,9 @@ class IRC_Client(threading.Thread):
             logging.error(str(e))
             logging.exception("Exception : ")
 
-    def IRCSendCalledEveryThreeSeconds(self):
-        # print("called")
+    def IRC_send_called_every_three_seconds(self):
+        """Sends a message from the message buffer every three seconds."""
+
         if (self.ircMessageBuffer):
             try:
                 # print("Buffered")

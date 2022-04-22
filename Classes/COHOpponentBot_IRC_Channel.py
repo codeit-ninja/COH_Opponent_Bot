@@ -35,24 +35,24 @@ class IRC_Channel(threading.Thread):
             if (line[0] == "EXITTHREAD"):
                 self.close()
             if (line[0] == "OPPONENT"):
-                self.CheckForUserCommand("self", "opp")
+                self.check_for_user_command("self", "opp")
             if (line[0] == "TEST"):
-                self.testOutput()
+                self.test_output()
             if (line[0] == "IWON"):
                 self.ircClient.SendPrivateMessageToIRC("!i won")
             if (line[0] == "ILOST"):
                 self.ircClient.SendPrivateMessageToIRC("!i lost")
             if (line[0] == "CLEAROVERLAY"):
-                GameData.clearOverlayHTML()
+                GameData.clear_overlay_HTML()
             if (
                 len(line) >= 4
                 and "PRIVMSG" == line[2]
                 and "jtv" not in line[0]
             ):
                 # call function to handle user message
-                self.UserMessage(line)
+                self.user_message(line)
 
-    def UserMessage(self, line):
+    def user_message(self, line):
         # Dissect out the useful parts of the raw data line
         # into username and message and remove certain characters
         msgFirst = line[1]
@@ -66,7 +66,7 @@ class IRC_Channel(threading.Thread):
         logging.info(str(messageString).encode('utf8'))
 
         # Check for UserCommands
-        self.CheckForUserCommand(msgUserName, msgMessage)
+        self.check_for_user_command(msgUserName, msgMessage)
 
         if (
             msgMessage == "exit"
@@ -75,7 +75,7 @@ class IRC_Channel(threading.Thread):
             self.ircClient.SendPrivateMessageToIRC("Exiting")
             self.close()
 
-    def CheckForUserCommand(self, userName, message):
+    def check_for_user_command(self, userName, message):
         logging.info("Checking For User Comamnd")
         try:
             if (
@@ -88,8 +88,8 @@ class IRC_Channel(threading.Thread):
                     ircClient=self.ircClient,
                     settings=self.settings
                 )
-                if self.gameData.GetDataFromGame():
-                    self.gameData.outputOpponentData()
+                if self.gameData.get_data_from_game():
+                    self.gameData.output_opponent_data()
                 else:
                     self.ircClient.SendPrivateMessageToIRC(
                         "Can't find the opponent right now."
@@ -115,28 +115,28 @@ class IRC_Channel(threading.Thread):
                 )
 
             if (bool(re.match(r"^(!)?gameinfo(\?)?$", message.lower()))):
-                self.gameInfo()
+                self.game_info()
 
             if (bool(re.match(r"^(!)?story(\?)?$", message.lower()))):
                 self.story()
 
             if (bool(re.match(r"^(!)?debug(\?)?$", message.lower()))):
-                self.PrintInfoToDebug()
+                self.print_info_to_debug()
 
         except Exception as e:
             logging.error("Problem in CheckForUserCommand")
             logging.error(str(e))
             logging.exception("Exception : ")
 
-    def PrintInfoToDebug(self):
+    def print_info_to_debug(self):
         try:
             self.gameData = GameData(
                 self.ircClient,
                 settings=self.settings
             )
-            self.gameData.GetDataFromGame()
-            self.gameData.GetMapDescriptionFromUCSFile()
-            self.gameData.GetMapNameFullFromUCSFile()
+            self.gameData.get_data_from_game()
+            self.gameData.get_mapDescriptionFull_from_UCS_file()
+            self.gameData.get_mapNameFull_from_UCS_file()
             logging.info(self.gameData)
             self.ircClient.SendPrivateMessageToIRC(
                 "GameData saved to log file."
@@ -146,9 +146,9 @@ class IRC_Channel(threading.Thread):
             logging.error(str(e))
             logging.exception("Exception : ")
 
-    def gameInfo(self):
+    def game_info(self):
         self.gameData = GameData(self.ircClient, settings=self.settings)
-        if self.gameData.GetDataFromGame():
+        if self.gameData.get_data_from_game():
             self.ircClient.SendPrivateMessageToIRC(
                 f"Map : {self.gameData.mapNameFull},"
                 f" High Resources : {self.gameData.highResources},"
@@ -160,22 +160,22 @@ class IRC_Channel(threading.Thread):
     def story(self):
         self.gameData = GameData(self.ircClient, settings=self.settings)
         logging.info(str(self.gameData))
-        if self.gameData.GetDataFromGame():
+        if self.gameData.get_data_from_game():
             logging.info(str(self.gameData))
             # Requires parsing the map description from
             # the UCS file this takes time so must be done first
-            self.gameData.GetMapDescriptionFromUCSFile()
+            self.gameData.get_mapDescriptionFull_from_UCS_file()
             self.ircClient.SendPrivateMessageToIRC(
                 "{}.".format(self.gameData.mapDescriptionFull))
 
-    def testOutput(self):
+    def test_output(self):
         if not self.gameData:
             self.gameData = GameData(
                 self.ircClient,
                 settings=self.settings
             )
-            self.gameData.GetDataFromGame()
-        self.gameData.TestOutput()
+            self.gameData.get_data_from_game()
+        self.gameData.test_output()
 
     def close(self):
         self.running = False

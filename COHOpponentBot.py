@@ -14,6 +14,6 @@ logging.basicConfig(
     filemode="w",
     level=logging.INFO)
 
-GameData.clearOverlayHTML()
+GameData.clear_overlay_HTML()
 
 main = GUI()

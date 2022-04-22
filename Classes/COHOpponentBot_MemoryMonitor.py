@@ -42,16 +42,16 @@ class MemoryMonitor(threading.Thread):
     def run(self):
         try:
             while self.running:
-                self.GetGameData()
+                self.get_gamedata()
                 if self.gameInProgress:
 
                     if self.gameData.gameInProgress != self.gameInProgress:
                         # coh was running and now its not (game over)
-                        self.GameOver()
+                        self.game_over()
                 else:
                     if self.gameData.gameInProgress != self.gameInProgress:
                         # coh wasn't running and now it is (game started)
-                        self.GameStarted()
+                        self.game_started()
 
                 # set local gameInProgress flag to it can be compared with
                 # any changes to it in the next loop
@@ -62,57 +62,57 @@ class MemoryMonitor(threading.Thread):
             logging.error(str(e))
             logging.exception("Exception : ")
 
-    def GetGameData(self):
+    def get_gamedata(self):
         try:
             self.gameData = GameData(
                 ircClient=self.ircClient,
                 settings=self.settings)
-            self.gameData.GetDataFromGame()
+            self.gameData.get_data_from_game()
         except Exception as e:
             logging.error("In getGameData")
             logging.info(str(e))
             logging.exception("Exception : ")
 
-    def GameStarted(self):
+    def game_started(self):
         try:
-            self.gameData.outputOpponentData()
-            self.PostSteamNumber()
-            self.PostData()
-            self.StartBets()
+            self.gameData.output_opponent_data()
+            self.post_steam_number()
+            self.post_data()
+            self.start_bets()
 
         except Exception as e:
             logging.info("Problem in GameStarted")
             logging.error(str(e))
             logging.exception("Exception : ")
 
-    def PostSteamNumber(self):
+    def post_steam_number(self):
         try:
             channel = str(self.settings.data.get('channel'))
             steamNumber = str(self.settings.data.get('steamNumber'))
             message = f"!setsteam,{channel},{steamNumber}"
-            self.ircClient.SendMessageToOpponentBotChannelIRC(message)
+            self.ircClient.send_message_to_opponentbot_channel(message)
         except Exception as e:
             logging.error("Problem in PostSteamNumber")
             logging.exception("Exception : ")
             logging.error(str(e))
 
-    def PostData(self):
+    def post_data(self):
         # Sending to cohopponentbot channel about game,
         # this requires parsing mapName First
         try:
-            message = self.gameData.GetGameDescriptionString()
-            self.ircClient.SendMessageToOpponentBotChannelIRC(message)
+            message = self.gameData.get_game_description_string()
+            self.ircClient.send_message_to_opponentbot_channel(message)
 
         except Exception as e:
             logging.error("Problem in PostData")
             logging.error(str(e))
             logging.exception("Exception : ")
 
-    def GameOver(self):
+    def game_over(self):
         try:
             # Get Win/Lose from server after 50 seconds
             if self.settings.data.get('writeIWonLostInChat'):
-                self.winLostTimer = threading.Timer(50.0, self.GetWinLose)
+                self.winLostTimer = threading.Timer(50.0, self.get_win_lose)
                 self.winLostTimer.start()
             # Clear the overlay
             if (self.settings.data.get('clearOverlayAfterGameOver')):
@@ -122,23 +122,23 @@ class MemoryMonitor(threading.Thread):
             logging.error(str(e))
             logging.exception("Exception : ")
 
-    def GetWinLose(self):
+    def get_win_lose(self):
         try:
             statnumber = self.settings.data.get('steamNumber')
             statRequest = StatsRequest()
-            statRequest.getMatchHistoryFromServer(statnumber)
-            mostRecentWin = statRequest.getPlayerWinLastMatch(statnumber)
+            statRequest.get_match_history_from_server(statnumber)
+            mostRecentWin = statRequest.get_player_win_last_match(statnumber)
             if mostRecentWin:
-                self.ircClient.SendPrivateMessageToIRC("!I won")
+                self.ircClient.send_private_message_to_IRC("!I won")
             else:
-                self.ircClient.SendPrivateMessageToIRC("!I lost")
+                self.ircClient.send_private_message_to_IRC("!I lost")
 
         except Exception as e:
             logging.info("Problem in GetWinLose")
             logging.error(str(e))
             logging.exception("Exception : ")
 
-    def StartBets(self):
+    def start_bets(self):
 
         info = (
             f"Size of self.gameData.playerList "
@@ -168,9 +168,9 @@ class MemoryMonitor(threading.Thread):
                                 ps = f"{outputList[0]} Vs. {outputList[1]}"
 
                     message = "!startbets {}".format(ps)
-                    self.ircClient.SendPrivateMessageToIRC(message)
+                    self.ircClient.send_private_message_to_IRC(message)
 
-    def Close(self):
+    def close(self):
         logging.info("Memory Monitor Closing!")
         self.running = False
         # break out of loops if waiting
@@ -182,7 +182,7 @@ class MemoryMonitor(threading.Thread):
             self.winLostTimer.cancel()
             # self.GetWinLose()
 
-    def Find_between(self, s, first, last):
+    def find_between(self, s, first, last):
         try:
             start = s.index(first) + len(first)
             end = s.index(last, start)

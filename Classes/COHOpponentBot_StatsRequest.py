@@ -22,10 +22,10 @@ class StatsRequest:
         self.userMatchHistoryCache = None
         self.availableLeaderboards = None
 
-    def returnStats(self, steam64ID):
+    def return_stats(self, steam64ID):
         try:
-            self.getUserStatFromServer(steam64ID)
-            self.getAvailableLeaderboardsFromServer()
+            self.get_user_stat_from_server(steam64ID)
+            self.get_available_leaderboards_from_server()
             # Determine server response succeeded
             # and use it to create PlayerStat object
             if (self.userStatCache['result']['message'] == "SUCCESS"):
@@ -37,7 +37,7 @@ class StatsRequest:
             logging.error(str(e))
             logging.exception("Exception : ")
 
-    def getUserStatFromServer(self, steam64ID):
+    def get_user_stat_from_server(self, steam64ID):
         """Cache the user stats."""
 
         try:
@@ -65,7 +65,7 @@ class StatsRequest:
             logging.error(str(e))
             logging.exception("Exception : ")
 
-    def getMatchHistoryFromServer(self, steam64ID):
+    def get_match_history_from_server(self, steam64ID):
         """Cache the player match history."""
 
         try:
@@ -99,7 +99,7 @@ class StatsRequest:
             logging.error(str(e))
             logging.exception("Exception : ")
 
-    def getAvailableLeaderboardsFromServer(self):
+    def get_available_leaderboards_from_server(self):
         """Cache the available leaderboards."""
 
         try:
@@ -124,15 +124,15 @@ class StatsRequest:
             logging.error(str(e))
             logging.exception("Exception : ")
 
-    def getPlayerWinLastMatch(self, userSteam64Number):
+    def get_player_win_last_match(self, userSteam64Number):
         """Gets Win or Loss from match history."""
 
         if self.userMatchHistoryCache:
             if not userSteam64Number:
                 userSteam64Number = self.settings.data.get('steamNumber')
             if userSteam64Number:
-                playersProfileID = self.getProfileID(userSteam64Number)
-                mostRecentMatch = self.getMostRecentMatch()
+                playersProfileID = self.get_profile_ID(userSteam64Number)
+                mostRecentMatch = self.get_most_recent_match()
                 if mostRecentMatch:
                     matches = mostRecentMatch.get('matchhistoryreportresults')
                     for item in matches:
@@ -142,7 +142,7 @@ class StatsRequest:
                             else:
                                 return False
 
-    def getMostRecentMatch(self):
+    def get_most_recent_match(self):
         """Gets the players most recent match from match history."""
 
         if (self.userMatchHistoryCache):
@@ -153,7 +153,7 @@ class StatsRequest:
             if hL:
                 return hL[0]
 
-    def getSteamNumber(self, profileID):
+    def get_steam_number(self, profileID):
         """Gets a player steam number from match history."""
 
         try:
@@ -170,7 +170,7 @@ class StatsRequest:
             logging.error(str(e))
             logging.exception("Exception : ")
 
-    def getProfileID(self, steam64ID):
+    def get_profile_ID(self, steam64ID):
         """Gets the profile ID from match history."""
 
         try:

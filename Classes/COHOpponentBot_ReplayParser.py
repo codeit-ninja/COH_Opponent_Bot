@@ -48,7 +48,7 @@ class ReplayParser:
         if filePath:
             self.load(self.filePath)
 
-    def read_UnsignedLong4Bytes(self) -> int:
+    def read_unsigned_long_4_bytes(self) -> int:
         """Reads 4 bytes as an unsigned long int."""
 
         try:
@@ -67,7 +67,7 @@ class ReplayParser:
             logging.exception("Stack Trace: ")
             self.success = False
 
-    def read_Bytes(self, numberOfBytes):
+    def read_bytes(self, numberOfBytes):
         """reads a number of bytes from the data array"""
 
         try:
@@ -82,7 +82,7 @@ class ReplayParser:
             logging.exception("Stack Trace: ")
             self.success = False
 
-    def read_LengthString(self):
+    def read_length_string(self):
         """Reads an indexed String.
 
         Reads the first 4 bytes containing the string length
@@ -91,8 +91,8 @@ class ReplayParser:
 
         try:
             if self.data:
-                stringLength = self.read_UnsignedLong4Bytes()
-                theString = self.read_2ByteString(stringLength=stringLength)
+                stringLength = self.read_unsigned_long_4_bytes()
+                theString = self.read_2_byte_string(stringLength=stringLength)
                 return theString
         except Exception as e:
             logging.error(str(e))
@@ -100,7 +100,7 @@ class ReplayParser:
             logging.exception("Stack Trace: ")
             self.success = False
 
-    def read_2ByteString(self, stringLength=0) -> str:
+    def read_2_byte_string(self, stringLength=0) -> str:
         """Reads a 2byte encoded little-endian string of specified length."""
 
         try:
@@ -116,12 +116,13 @@ class ReplayParser:
             logging.exception("Stack Trace: ")
             self.success = False
 
-    def read_LengthASCIIString(self) -> str:
+    def read_length_ASCII_string(self) -> str:
         """Reads ASCII string, the length defined by the first four bytes."""
+
         try:
             if self.data:
-                stringLength = self.read_UnsignedLong4Bytes()
-                theString = self.read_ASCIIString(stringLength=stringLength)
+                stringLength = self.read_unsigned_long_4_bytes()
+                theString = self.read_ASCII_string(stringLength=stringLength)
                 return theString
         except Exception as e:
             logging.error(str(e))
@@ -129,7 +130,7 @@ class ReplayParser:
             logging.exception("Stack Trace: ")
             self.success = False
 
-    def read_ASCIIString(self, stringLength=0) -> str:
+    def read_ASCII_string(self, stringLength=0) -> str:
         """Reads and ASCII string of specfied length.
 
         Reads a byte array of spcified length
@@ -149,7 +150,7 @@ class ReplayParser:
             logging.exception("Stack Trace: ")
             self.success = False
 
-    def read_NULLTerminated_2ByteString(self) -> str:
+    def read_null_terminated_2_byte_string(self) -> str:
         """Reads a Utf-16 little endian character string.
 
         Reads until the first two byte NULL value.
@@ -159,7 +160,7 @@ class ReplayParser:
             if self.data:
                 characters = ""
                 for character in iter(
-                        partial(self.read_Bytes, 2),
+                        partial(self.read_bytes, 2),
                         bytearray(b"\x00\x00")
                 ):
                     characters += bytearray(character).decode('utf-16le')
@@ -170,14 +171,14 @@ class ReplayParser:
             logging.exception("Stack Trace: ")
             self.success = False
 
-    def read_NULLTerminated_ASCIIString(self) -> str:
+    def read_null_terminated_ASCII_string(self) -> str:
         """Reads a byte array until the first NULL and converts to a string."""
 
         try:
             if self.data:
                 characters = ""
                 for character in iter(
-                    partial(self.read_Bytes, 1),
+                    partial(self.read_bytes, 1),
                     bytearray(b"\x00")
                 ):
                     characters += bytearray(character).decode('ascii')
@@ -211,35 +212,35 @@ class ReplayParser:
     def load(self, filePath=""):
         with open(filePath, "rb") as fileHandle:
             self.data = fileHandle.read()
-        self.processData()
+        self.process_data()
 
-    def processData(self):
+    def process_data(self):
         # Set return flag
         self.success = True
 
         # Process the file Header
-        self.fileVersion = self.read_UnsignedLong4Bytes()  # int (8)
+        self.fileVersion = self.read_unsigned_long_4_bytes()  # int (8)
 
-        self.read_ASCIIString(stringLength=8)  # COH__REC
+        self.read_ASCII_string(stringLength=8)  # COH__REC
 
-        self.localDateString = self.read_NULLTerminated_2ByteString()
+        self.localDateString = self.read_null_terminated_2_byte_string()
 
         # Parse localDateString as a datetime object
-        self.localDate = self.decodeDate(self.localDateString)
+        self.localDate = self.decode_date(self.localDateString)
 
         self.seek(76, 0)
 
         firstRelicChunkyAddress = self.dataIndex
 
-        self.read_ASCIIString(stringLength=12)  # relicChunky
+        self.read_ASCII_string(stringLength=12)  # relicChunky
 
-        self.read_UnsignedLong4Bytes()  # unknown
+        self.read_unsigned_long_4_bytes()  # unknown
 
-        self.chunkyVersion = self.read_UnsignedLong4Bytes()  # 3
+        self.chunkyVersion = self.read_unsigned_long_4_bytes()  # 3
 
-        self.read_UnsignedLong4Bytes()  # unknown
+        self.read_unsigned_long_4_bytes()  # unknown
 
-        self.chunkyHeaderLength = self.read_UnsignedLong4Bytes()
+        self.chunkyHeaderLength = self.read_unsigned_long_4_bytes()
 
         self.seek(-28, 1)  # sets file pointer back to start of relic chunky
         self.seek(self.chunkyHeaderLength, 1)  # seeks to begining of FOLDPOST
@@ -250,45 +251,45 @@ class ReplayParser:
 
         secondRelicChunkyAddress = self.dataIndex
 
-        self.read_ASCIIString(stringLength=12)  # relicChunky
+        self.read_ASCII_string(stringLength=12)  # relicChunky
 
-        self.read_UnsignedLong4Bytes()  # unknown
-        self.read_UnsignedLong4Bytes()  # chunkyVersion 3
-        self.read_UnsignedLong4Bytes()  # unknown
-        chunkLength = self.read_UnsignedLong4Bytes()
+        self.read_unsigned_long_4_bytes()  # unknown
+        self.read_unsigned_long_4_bytes()  # chunkyVersion 3
+        self.read_unsigned_long_4_bytes()  # unknown
+        chunkLength = self.read_unsigned_long_4_bytes()
 
         self.seek(secondRelicChunkyAddress, 0)
         self.seek(chunkLength, 1)  # seek to position of first viable chunk
 
-        self.parseChunk(0)
-        self.parseChunk(0)
+        self.parse_chunk(0)
+        self.parse_chunk(0)
 
         return self.success
 
-    def ResolveMapNameFullAndMapDescriptionFromUCS(self):
+    def resolve_mapNameFull_And_mapDescription_From_UCS(self):
         # mapNameFull and mapDescriptionFull will be None
         # until resolved this takes time because file reading
         # so moved to separate function call
         # get mapNameFull and mapDescriptionFull from ucs file
         ucs = UCS(settings=self.parameters)
-        self.mapNameFull = ucs.compareUCS(self.mapName)
-        self.mapDescriptionFull = ucs.compareUCS(self.mapDescription)
+        self.mapNameFull = ucs.compare_UCS(self.mapName)
+        self.mapDescriptionFull = ucs.compare_UCS(self.mapDescription)
 
-    def parseChunk(self, level):
+    def parse_chunk(self, level):
 
-        chunkType = self.read_ASCIIString(stringLength=8)
+        chunkType = self.read_ASCII_string(stringLength=8)
         # Reads FOLDFOLD, FOLDDATA, DATASDSC, DATAINFO etc
 
-        chunkVersion = self.read_UnsignedLong4Bytes()
+        chunkVersion = self.read_unsigned_long_4_bytes()
 
-        chunkLength = self.read_UnsignedLong4Bytes()
+        chunkLength = self.read_unsigned_long_4_bytes()
 
-        chunkNameLength = self.read_UnsignedLong4Bytes()
+        chunkNameLength = self.read_unsigned_long_4_bytes()
 
         self.seek(8, 1)
 
         if chunkNameLength > 0:
-            self.read_ASCIIString(stringLength=chunkNameLength)  # chunkName
+            self.read_ASCII_string(stringLength=chunkNameLength)  # chunkName
 
         chunkStart = self.dataIndex
 
@@ -297,89 +298,89 @@ class ReplayParser:
             if (chunkType.startswith("FOLD")):
 
                 while (self.dataIndex < (chunkStart + chunkLength)):
-                    self.parseChunk(level=level+1)
+                    self.parse_chunk(level=level+1)
 
         if (chunkType == "DATASDSC") and (int(chunkVersion) == 2004):
 
-            self.read_UnsignedLong4Bytes()  # unknown
-            self.unknownDate = self.read_LengthString()
-            self.read_UnsignedLong4Bytes()  # unknown
-            self.read_UnsignedLong4Bytes()  # unknown
-            self.read_UnsignedLong4Bytes()  # unknown
-            self.modName = self.read_LengthASCIIString()
-            self.mapFileName = self.read_LengthASCIIString()
-            self.read_UnsignedLong4Bytes()  # unknown
-            self.read_UnsignedLong4Bytes()  # unknown
-            self.read_UnsignedLong4Bytes()  # unknown
-            self.read_UnsignedLong4Bytes()  # unknown
-            self.read_UnsignedLong4Bytes()  # unknown
-            self.mapName = self.read_LengthString()
+            self.read_unsigned_long_4_bytes()  # unknown
+            self.unknownDate = self.read_length_string()
+            self.read_unsigned_long_4_bytes()  # unknown
+            self.read_unsigned_long_4_bytes()  # unknown
+            self.read_unsigned_long_4_bytes()  # unknown
+            self.modName = self.read_length_ASCII_string()
+            self.mapFileName = self.read_length_ASCII_string()
+            self.read_unsigned_long_4_bytes()  # unknown
+            self.read_unsigned_long_4_bytes()  # unknown
+            self.read_unsigned_long_4_bytes()  # unknown
+            self.read_unsigned_long_4_bytes()  # unknown
+            self.read_unsigned_long_4_bytes()  # unknown
+            self.mapName = self.read_length_string()
 
-            value = self.read_UnsignedLong4Bytes()
+            value = self.read_unsigned_long_4_bytes()
             if value != 0:  # test to see if data is replicated or not
-                self.read_2ByteString(value)  # unknown
-            self.mapDescription = self.read_LengthString()
-            self.read_UnsignedLong4Bytes()  # unknown
-            self.mapWidth = self.read_UnsignedLong4Bytes()
-            self.mapHeight = self.read_UnsignedLong4Bytes()
-            self.read_UnsignedLong4Bytes()  # unknown
-            self.read_UnsignedLong4Bytes()  # unknown
-            self.read_UnsignedLong4Bytes()  # unknown
+                self.read_2_byte_string(value)  # unknown
+            self.mapDescription = self.read_length_string()
+            self.read_unsigned_long_4_bytes()  # unknown
+            self.mapWidth = self.read_unsigned_long_4_bytes()
+            self.mapHeight = self.read_unsigned_long_4_bytes()
+            self.read_unsigned_long_4_bytes()  # unknown
+            self.read_unsigned_long_4_bytes()  # unknown
+            self.read_unsigned_long_4_bytes()  # unknown
 
         if(chunkType == "DATABASE") and (int(chunkVersion == 11)):
 
             self.seek(16, 1)
 
             self.randomStart = True
-            self.randomStart = not (self.read_UnsignedLong4Bytes() == 0)
+            self.randomStart = not (self.read_unsigned_long_4_bytes() == 0)
             #  0 is fixed 1 is random
 
-            self.read_UnsignedLong4Bytes()  # COLS
+            self.read_unsigned_long_4_bytes()  # COLS
 
-            self.highResources = (self.read_UnsignedLong4Bytes() == 1)
+            self.highResources = (self.read_unsigned_long_4_bytes() == 1)
 
-            self.read_UnsignedLong4Bytes()  # TSSR
+            self.read_unsigned_long_4_bytes()  # TSSR
 
-            self.VPCount = 250 * (1 << (int)(self.read_UnsignedLong4Bytes()))
+            self.VPCount = 250 * (1 << (int)(self.read_unsigned_long_4_bytes()))
 
             self.seek(5, 1)
 
-            self.replayName = self.read_LengthString()
+            self.replayName = self.read_length_string()
 
             self.seek(8, 1)
 
-            self.VPGame = (self.read_UnsignedLong4Bytes() == 0x603872a3)
+            self.VPGame = (self.read_unsigned_long_4_bytes() == 0x603872a3)
 
             self.seek(23, 1)
 
-            self.read_LengthASCIIString()
+            self.read_length_ASCII_string()
 
             self.seek(4, 1)
 
-            self.read_LengthASCIIString()
+            self.read_length_ASCII_string()
 
             self.seek(8, 1)
 
-            if (self.read_UnsignedLong4Bytes() == 2):
-                self.read_LengthASCIIString()
-                self.gameVersion = self.read_LengthASCIIString()
-            self.read_LengthASCIIString()
-            self.matchType = self.read_LengthASCIIString()
+            if (self.read_unsigned_long_4_bytes() == 2):
+                self.read_length_ASCII_string()
+                self.gameVersion = self.read_length_ASCII_string()
+            self.read_length_ASCII_string()
+            self.matchType = self.read_length_ASCII_string()
 
         if(chunkType == "DATAINFO") and (chunkVersion == 6):
 
-            userName = self.read_LengthString()
-            self.read_UnsignedLong4Bytes()
-            self.read_UnsignedLong4Bytes()
-            faction = self.read_LengthASCIIString()
-            self.read_UnsignedLong4Bytes()
-            self.read_UnsignedLong4Bytes()
+            userName = self.read_length_string()
+            self.read_unsigned_long_4_bytes()
+            self.read_unsigned_long_4_bytes()
+            faction = self.read_length_ASCII_string()
+            self.read_unsigned_long_4_bytes()
+            self.read_unsigned_long_4_bytes()
 
             self.playerList.append({'name': userName, 'faction': faction})
 
         self.seek(chunkStart + chunkLength, 0)
 
-    def decodeDate(self, timeString) -> datetime:
+    def decode_date(self, timeString) -> datetime:
         """Processes the date string.
 
         The date is in a different format depending on the game locale

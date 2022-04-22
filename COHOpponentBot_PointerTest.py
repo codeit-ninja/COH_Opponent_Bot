@@ -56,21 +56,21 @@ myListOfCOHRECPointers.append([cohrecReplayAddress, cohrecOffsets])
 settings = Settings()
 
 gameData = GameData()
-gameData.GetCOHMemoryAddress()
+gameData.get_COH_memory_address()
 
 loops = 0
 
 event = threading.Event()
 
 timeTakenToSearchStart = datetime.datetime.now()
-gameData.Get_replayParser_BySearch()
+gameData.get_replayParser_by_search()
 timeTakenToSearchEnd = datetime.datetime.now()
 logging.info(
     "Time taken to get replay data by Search : "
     f"{str(timeTakenToSearchEnd-timeTakenToSearchStart)}"
 )
 
-while gameData.GetCOHMemoryAddress():
+while gameData.get_COH_memory_address():
 
     loops += 1
 
@@ -78,7 +78,7 @@ while gameData.GetCOHMemoryAddress():
     for count, item in enumerate(myListOfCOHRECPointers):
         logging.info(f"{count} {item}")
         startGetPointer = datetime.datetime.now()
-        actualCOHRECMemoryAddress = gameData.GetPtrAddr(
+        actualCOHRECMemoryAddress = gameData.get_pointer_address(
             gameData.baseAddress + item[0],
             item[1]
         )
@@ -106,7 +106,7 @@ while gameData.GetCOHMemoryAddress():
                     replayByteData = bytearray(replayByteData)
                     replayParser = ReplayParser(parameters=settings)
                     replayParser.data = bytearray(replayByteData)
-                    success = replayParser.processData()
+                    success = replayParser.process_data()
                     endTimeProcessMemory = datetime.datetime.now()
                     diff = endTimeProcessMemory - startTimeProcessMemory
                     logging.info(
