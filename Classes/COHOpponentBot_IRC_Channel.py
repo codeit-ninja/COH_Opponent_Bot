@@ -2,8 +2,10 @@ import threading
 import logging
 import re
 
+from socket import socket
 from threading import Thread
 from tkinter import END
+from Classes.COHOpponentBot_IRC_Client import IRC_Client
 
 from Classes.COHOpponentBot_Settings import Settings
 from Classes.COHOpponentBot_GameData import GameData
@@ -12,7 +14,14 @@ from Classes.COHOpponentBot_GameData import GameData
 class IRC_Channel(threading.Thread):
     """Iplements an IRC Channel Connection. Checks User Commands."""
 
-    def __init__(self, ircClient, ircSocket, queue, channel, settings=None):
+    def __init__(
+        self,
+        ircClient: IRC_Client,
+        ircSocket: socket,
+        queue,
+        channel,
+        settings=None
+            ):
         Thread.__init__(self)
         self.ircClient = ircClient
         self.running = True
@@ -72,7 +81,7 @@ class IRC_Channel(threading.Thread):
             msgMessage == "exit"
             and msgUserName == self.ircClient.adminUserName
         ):
-            self.ircClient.SendPrivateMessageToIRC("Exiting")
+            self.ircClient.send_private_message_to_IRC("Exiting")
             self.close()
 
     def check_for_user_command(self, userName, message):
@@ -91,7 +100,7 @@ class IRC_Channel(threading.Thread):
                 if self.gameData.get_data_from_game():
                     self.gameData.output_opponent_data()
                 else:
-                    self.ircClient.SendPrivateMessageToIRC(
+                    self.ircClient.send_private_message_to_IRC(
                         "Can't find the opponent right now."
                     )
 
@@ -103,7 +112,7 @@ class IRC_Channel(threading.Thread):
                 and user == admin.lower()
                 or user == channel.lower()
             ):
-                self.ircClient.SendPrivateMessageToIRC(
+                self.ircClient.send_private_message_to_IRC(
                     "I'm here! Pls give me mod to prevent twitch"
                     " from autobanning me for spam if I have to send"
                     " a few messages quickly."
@@ -138,7 +147,7 @@ class IRC_Channel(threading.Thread):
             self.gameData.get_mapDescriptionFull_from_UCS_file()
             self.gameData.get_mapNameFull_from_UCS_file()
             logging.info(self.gameData)
-            self.ircClient.SendPrivateMessageToIRC(
+            self.ircClient.send_private_message_to_IRC(
                 "GameData saved to log file."
             )
         except Exception as e:
@@ -149,7 +158,7 @@ class IRC_Channel(threading.Thread):
     def game_info(self):
         self.gameData = GameData(self.ircClient, settings=self.settings)
         if self.gameData.get_data_from_game():
-            self.ircClient.SendPrivateMessageToIRC(
+            self.ircClient.send_private_message_to_IRC(
                 f"Map : {self.gameData.mapNameFull},"
                 f" High Resources : {self.gameData.highResources},"
                 f" Automatch : {self.gameData.automatch},"
@@ -165,7 +174,7 @@ class IRC_Channel(threading.Thread):
             # Requires parsing the map description from
             # the UCS file this takes time so must be done first
             self.gameData.get_mapDescriptionFull_from_UCS_file()
-            self.ircClient.SendPrivateMessageToIRC(
+            self.ircClient.send_private_message_to_IRC(
                 "{}.".format(self.gameData.mapDescriptionFull))
 
     def test_output(self):

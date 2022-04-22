@@ -11,7 +11,8 @@ class MemoryMonitor(threading.Thread):
     """Checks when COH1 game has started/ended."""
 
     def __init__(
-        self, pollInterval=10,
+        self,
+        pollInterval=10,
         ircClient: IRC_Client = None,
         settings=None
                 ):
