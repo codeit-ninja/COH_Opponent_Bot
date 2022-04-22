@@ -151,7 +151,9 @@ class GUI:
         self.buttonSteam64IDNumber.config(width=10)
         self.buttonSteam64IDNumber.grid(row=2, column=2)
         self.buttonLocateWarningLog = tkinter.Button(
-            self.master, text="browse", command=lambda: self.locate_warning_log()
+            self.master,
+            text="browse",
+            command=lambda: self.locate_warning_log()
             )
         self.buttonLocateWarningLog.config(width=10)
         self.buttonLocateWarningLog.grid(row=3, column=2)

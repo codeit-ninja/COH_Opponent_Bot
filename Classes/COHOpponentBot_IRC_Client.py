@@ -77,7 +77,8 @@ class IRC_Client(threading.Thread):
 
         # Start checking send buffer every 3 seconds.
 
-        self.check_IRC_send_buffer_every_three_seconds()  # only call this once.
+        self.check_IRC_send_buffer_every_three_seconds()
+        # only call this once.
 
         try:
             self.ircSocket.connect((self.server, self.port))
@@ -97,10 +98,12 @@ class IRC_Client(threading.Thread):
             ('CAP REQ :twitch.tv/membership' + '\r\n').encode("utf8"))
         # sends a twitch specific request
         # necessary to recieve mode messages
-        self.ircSocket.send(('CAP REQ :twitch.tv/tags' + '\r\n').encode("utf8"))
+        self.ircSocket.send(
+            ('CAP REQ :twitch.tv/tags' + '\r\n').encode("utf8"))
         # sends a twitch specific request for extra data
         # contained in the PRIVMSG changes the way it is parsed
-        self.ircSocket.send(('CAP REQ :twitch.tv/commands' + '\r\n').encode("utf8"))
+        self.ircSocket.send(
+            ('CAP REQ :twitch.tv/commands' + '\r\n').encode("utf8"))
 
         # start sub thread that uses shared Queue to communicate
         # pass it irc for messaging, channel to join and queue
@@ -129,7 +132,8 @@ class IRC_Client(threading.Thread):
         while self.running:
             try:
                 # maintain non blocking recieve buffer from IRC
-                readbuffer = readbuffer+self.ircSocket.recv(1024).decode("utf-8")
+                readbuffer = readbuffer+self.ircSocket.recv(
+                    1024).decode("utf-8")
                 temp = str.split(readbuffer, "\n")
                 readbuffer = temp.pop()
                 for line in temp:
@@ -169,7 +173,8 @@ class IRC_Client(threading.Thread):
                             logging.exception("Exception : ")
 
                     if(line[0] == "PING"):
-                        self.ircSocket.send(("PONG %s\r\n" % line[0]).encode("utf8"))
+                        self.ircSocket.send(
+                            ("PONG %s\r\n" % line[0]).encode("utf8"))
             except Exception as e:
                 if e:
                     pass
@@ -216,7 +221,7 @@ class IRC_Client(threading.Thread):
 
     def check_IRC_send_buffer_every_three_seconds(self):
         """Starts a new threading timer that calls itself every 3 seconds.
-        
+
         Calls the IRCSendCalledEveryThreeSeconds method in each loop.
         """
 

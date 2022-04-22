@@ -1038,7 +1038,8 @@ class GameData():
                         overlay=True
                     )
                     # second substitue all the html images if used
-                    sfDict.update(self.populate_image_formatting_dictionary(item))
+                    sfDict.update(
+                        self.populate_image_formatting_dictionary(item))
                     theString = self.format_preformatted_string(
                         preFormattedString,
                         sfDict,

@@ -28,10 +28,17 @@ class StatsRequest:
             self.get_available_leaderboards_from_server()
             # Determine server response succeeded
             # and use it to create PlayerStat object
-            if (self.userStatCache['result']['message'] == "SUCCESS"):
-                if self.availableLeaderboards['result']['message'] == "SUCCESS":
-                    playerStat = PlayerStat(self.userStatCache, self.availableLeaderboards, steam64ID)
-                    return playerStat
+            result = self.userStatCache.get('result')
+            if result:
+                if (result.get('message') == "SUCCESS"):
+                    result = self.availableLeaderboards.get('result')
+                    if result:
+                        if result.get('message') == "SUCCESS":
+                            playerStat = PlayerStat(
+                                self.userStatCache,
+                                self.availableLeaderboards,
+                                steam64ID)
+                            return playerStat
         except Exception as e:
             logging.error("Problem in returnStats")
             logging.error(str(e))

@@ -22,9 +22,3 @@ class MatchType(Enum):
     ASSAULT = 15
     PANZERKRIEG = 16
     STONEWALL = 17
-    
-
-
-
-
-

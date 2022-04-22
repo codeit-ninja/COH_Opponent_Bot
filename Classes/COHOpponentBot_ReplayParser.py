@@ -341,7 +341,8 @@ class ReplayParser:
 
             self.read_unsigned_long_4_bytes()  # TSSR
 
-            self.VPCount = 250 * (1 << (int)(self.read_unsigned_long_4_bytes()))
+            self.VPCount = 250 * (1 << (int)(
+                self.read_unsigned_long_4_bytes()))
 
             self.seek(5, 1)
 
