@@ -508,9 +508,9 @@ class GameData():
                 "Streamer Full Stat list formatted according"
                 " to Custom Chat Output Preformat:"
             )
-            self.ircClient.SendToOutputField(output)
+            self.ircClient.send_to_outputfield(output)
             preformat = self.settings.data.get('customStringPreFormat')
-            self.ircClient.SendToOutputField(preformat)
+            self.ircClient.send_to_outputfield(preformat)
 
             for match in MatchType:
                 for faction in Faction:
@@ -530,7 +530,7 @@ class GameData():
                 f"{steamNumber} it might be down or the steam# might "
                 "be invalid."
             )
-            self.ircClient.SendToOutputField(output)
+            self.ircClient.send_to_outputfield(output)
 
     def __produceOutput(self, streamerPlayer):
         sFD = self.populate_string_formatting_dictionary(streamerPlayer)
@@ -538,7 +538,7 @@ class GameData():
         theString = self.format_preformatted_string(cPFOS, sFD)
         outputList = list(self.split_by_n(theString, 500))
         for item in outputList:
-            self.ircClient.SendToOutputField(item)
+            self.ircClient.send_to_outputfield(item)
 
     def output_opponent_data(self):
 
@@ -596,7 +596,7 @@ class GameData():
                             )
 
                 for item in self.ircStringOutputList:
-                    self.ircClient.SendPrivateMessageToIRC(str(item))
+                    self.ircClient.send_private_message_to_IRC(str(item))
                     # outputs the information to IRC
 
     def create_custom_output(self, player) -> list:
