@@ -47,9 +47,9 @@ class IRC_Channel(threading.Thread):
             if (line[0] == "TEST"):
                 self.test_output()
             if (line[0] == "IWON"):
-                self.ircClient.SendPrivateMessageToIRC("!i won")
+                self.ircClient.send_private_message_to_IRC("!i won")
             if (line[0] == "ILOST"):
-                self.ircClient.SendPrivateMessageToIRC("!i lost")
+                self.ircClient.send_private_message_to_IRC("!i lost")
             if (line[0] == "CLEAROVERLAY"):
                 GameData.clear_overlay_HTML()
             if (
