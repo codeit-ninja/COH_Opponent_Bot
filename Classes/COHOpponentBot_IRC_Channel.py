@@ -5,7 +5,6 @@ import re
 from socket import socket
 from threading import Thread
 from tkinter import END
-from Classes.COHOpponentBot_IRC_Client import IRC_Client
 
 from Classes.COHOpponentBot_Settings import Settings
 from Classes.COHOpponentBot_GameData import GameData
@@ -16,7 +15,7 @@ class IRC_Channel(threading.Thread):
 
     def __init__(
         self,
-        ircClient: IRC_Client,
+        ircClient,
         ircSocket: socket,
         queue,
         channel,
