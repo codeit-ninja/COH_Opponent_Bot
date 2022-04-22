@@ -12,11 +12,11 @@ from Classes.COHOpponentBot_GameData import GameData
 class IRC_Channel(threading.Thread):
     """Iplements an IRC Channel Connection. Checks User Commands."""
 
-    def __init__(self, ircClient, irc, queue, channel, settings=None):
+    def __init__(self, ircClient, ircSocket, queue, channel, settings=None):
         Thread.__init__(self)
         self.ircClient = ircClient
         self.running = True
-        self.irc = irc
+        self.ircSocket = ircSocket
         self.queue = queue
         self.channel = channel
 
@@ -27,7 +27,7 @@ class IRC_Channel(threading.Thread):
         self.gameData = GameData(self.ircClient, settings=self.settings)
 
     def run(self):
-        self.irc.send(('JOIN ' + self.channel + '\r\n').encode("utf8"))
+        self.ircSocket.send(('JOIN ' + self.channel + '\r\n').encode("utf8"))
         while self.running:
             line = self.queue.get()
             line = str.rstrip(line)

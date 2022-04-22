@@ -60,13 +60,13 @@ class IRC_Client(threading.Thread):
 
         # create IRC socket
         try:
-            self.irc = socket.socket()
+            self.ircSocket = socket.socket()
         except Exception as e:
             logging.error("A problem occurred trying to connect")
             logging.error("In IRCClient")
             logging.error(str(e))
             logging.exception("Exception : ")
-            self.irc.close()
+            self.ircSocket.close()
             sys.exit(0)
 
         # irc send message buffer
@@ -79,34 +79,34 @@ class IRC_Client(threading.Thread):
         self.CheckIRCSendBufferEveryThreeSeconds()  # only call this once.
 
         try:
-            self.irc.connect((self.server, self.port))
+            self.ircSocket.connect((self.server, self.port))
         except Exception as e:
             logging.error("A problem occurred trying to connect")
             logging.error("In IRCClient")
             logging.error(str(e))
             logging.exception("Exception : ")
-            self.irc.close()
+            self.ircSocket.close()
             sys.exit(0)
 
         # sends variables for connection to twitch chat
-        self.irc.send(('PASS ' + self.password + '\r\n').encode("utf8"))
-        self.irc.send(('USER ' + self.nick + '\r\n').encode("utf8"))
-        self.irc.send(('NICK ' + self.nick + '\r\n').encode("utf8"))
-        self.irc.send(
+        self.ircSocket.send(('PASS ' + self.password + '\r\n').encode("utf8"))
+        self.ircSocket.send(('USER ' + self.nick + '\r\n').encode("utf8"))
+        self.ircSocket.send(('NICK ' + self.nick + '\r\n').encode("utf8"))
+        self.ircSocket.send(
             ('CAP REQ :twitch.tv/membership' + '\r\n').encode("utf8"))
         # sends a twitch specific request
         # necessary to recieve mode messages
-        self.irc.send(('CAP REQ :twitch.tv/tags' + '\r\n').encode("utf8"))
+        self.ircSocket.send(('CAP REQ :twitch.tv/tags' + '\r\n').encode("utf8"))
         # sends a twitch specific request for extra data
         # contained in the PRIVMSG changes the way it is parsed
-        self.irc.send(('CAP REQ :twitch.tv/commands' + '\r\n').encode("utf8"))
+        self.ircSocket.send(('CAP REQ :twitch.tv/commands' + '\r\n').encode("utf8"))
 
         # start sub thread that uses shared Queue to communicate
         # pass it irc for messaging, channel to join and queue
         self.queue = Queue()
         self.channelThread = IRC_Channel(
             self,
-            self.irc,
+            self.ircSocket,
             self.queue,
             self.channel,
             settings=self.settings
@@ -122,13 +122,13 @@ class IRC_Client(threading.Thread):
         timeoutTimer.start()
         # create readbuffer to hold strings from IRC
         readbuffer = ""
-        self.irc.setblocking(0)
+        self.ircSocket.setblocking(0)
 
         # This is the main loop
         while self.running:
             try:
                 # maintain non blocking recieve buffer from IRC
-                readbuffer = readbuffer+self.irc.recv(1024).decode("utf-8")
+                readbuffer = readbuffer+self.ircSocket.recv(1024).decode("utf-8")
                 temp = str.split(readbuffer, "\n")
                 readbuffer = temp.pop()
                 for line in temp:
@@ -168,7 +168,7 @@ class IRC_Client(threading.Thread):
                             logging.exception("Exception : ")
 
                     if(line[0] == "PING"):
-                        self.irc.send(("PONG %s\r\n" % line[0]).encode("utf8"))
+                        self.ircSocket.send(("PONG %s\r\n" % line[0]).encode("utf8"))
             except Exception as e:
                 if e:
                     pass
@@ -190,8 +190,8 @@ class IRC_Client(threading.Thread):
         logging.info("in close in thread")
         try:
             # send closing message immediately
-            if self.irc:
-                self.irc.send(
+            if self.ircSocket:
+                self.ircSocket.send(
                     (
                         f"PRIVMSG {self.channel} :closing opponent"
                         " bot\r\n").encode('utf8')
@@ -277,8 +277,8 @@ class IRC_Client(threading.Thread):
                 # print("Buffered")
                 stringToSend = str(self.ircMessageBuffer.popleft())
                 print("string to send : " + stringToSend)
-                if self.irc:
-                    self.irc.send((stringToSend).encode('utf8'))
+                if self.ircSocket:
+                    self.ircSocket.send((stringToSend).encode('utf8'))
             except Exception as e:
                 logging.error("IRC send error:")
                 logging.error("In IRCSendCalledEveryThreeSeconds")
