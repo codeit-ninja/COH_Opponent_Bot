@@ -405,13 +405,13 @@ class GameData():
                 if rd:
                     if rd[4:12] == bytes("COH__REC".encode('ascii')):
                         logging.info("Pointing to COH__REC")
+                        self.gameInProgress = True
                         replayByteData = bytearray(rd)
                         replayParser = ReplayParser(parameters=self.settings)
                         replayParser.data = bytearray(replayByteData)
                         logging.info("Successfully Parsed Replay Data")
                         success = replayParser.process_data()
                         if success:
-                            self.gameInProgress = True
                             return replayParser
 
         # Sets gameInProgress to False if COH__REC was not found
@@ -433,6 +433,7 @@ class GameData():
                     for address in replayMemoryAddress:
                         # There should be only one COH__REC in memory
                         # if the game is running
+                        self.gameInProgress = True
                         try:
                             rd = self.pm.read_bytes(address-4, 4000)
                             rd = bytearray(rd)
@@ -440,12 +441,14 @@ class GameData():
                             rp.data = bytearray(rd)
                             success = rp.process_data()
                             if success:
-                                self.gameInProgress = True
+                                logging.info(
+                                    "Successfully Parsed Replay Data.")
                                 return rp
                         except Exception as e:
                             if e:
                                 pass
                 else:
+                    logging.info("Cannot detect COH__REC in memory.")
                     self.gameInProgress = False
 
     def get_stats_from_game(self):
