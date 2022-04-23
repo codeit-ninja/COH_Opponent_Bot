@@ -739,6 +739,8 @@ class GameData():
             )
 
             # set default null values for all parameters in dictionary
+            # these should not be used but are here for reference
+
             stringFormattingDictionary['$WINS$'] = (
                 prefixDiv + winsDiv + "0" + postfixDivClose + postfixDivClose
             )
@@ -763,7 +765,7 @@ class GameData():
             )
 
             stringFormattingDictionary['$RANK$'] = (
-                prefixDiv + rankDiv + "-" + postfixDivClose + postfixDivClose
+                prefixDiv + rankDiv + "" + postfixDivClose + postfixDivClose
             )
 
             stringFormattingDictionary['$LEVEL$'] = (
@@ -810,13 +812,18 @@ class GameData():
                             postfixDivClose + postfixDivClose
                         )
 
+                        rank = player.stats.leaderboardData[value].rank
+                        if rank == -1:
+                            rank = ""
                         stringFormattingDictionary['$RANK$'] = (
                             prefixDiv + rankDiv +
-                            str(player.stats.leaderboardData[value].rank) +
+                            str(rank) +
                             postfixDivClose + postfixDivClose
                         )
 
                         rl = player.stats.leaderboardData[value].rankLevel
+                        if rl == -1:
+                            rl = "0"
                         stringFormattingDictionary['$LEVEL$'] = (
                             prefixDiv + levelDiv + str(rl) + postfixDivClose +
                             postfixDivClose
