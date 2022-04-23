@@ -423,33 +423,30 @@ class GameData():
 
         if self.pm:
             with Process.open_process(self.pm.process_id) as p:
-                try:
-                    searchString = bytearray("COH__REC".encode('ascii'))
-                    buff = bytes(searchString)
-                except Exception as e:
-                    logging.error(e)
 
-                if buff:
-                    replayMemoryAddress = p.search_all_memory(buff)
+                searchString = bytearray("COH__REC".encode('ascii'))
+                buff = bytes(searchString)
 
-                    if replayMemoryAddress:
-                        for address in replayMemoryAddress:
-                            # There should be only one COH__REC in memory
-                            # if the game is running
-                            try:
-                                rd = self.pm.read_bytes(address-4, 4000)
-                                rd = bytearray(rd)
-                                rp = ReplayParser(parameters=self.settings)
-                                rp.data = bytearray(rd)
-                                success = rp.process_data()
-                                if success:
-                                    self.gameInProgress = True
-                                    return rp
-                            except Exception as e:
-                                if e:
-                                    pass
-                    else:
-                        self.gameInProgress = False
+                replayMemoryAddress = p.search_all_memory(buff)
+
+                if replayMemoryAddress:
+                    for address in replayMemoryAddress:
+                        # There should be only one COH__REC in memory
+                        # if the game is running
+                        try:
+                            rd = self.pm.read_bytes(address-4, 4000)
+                            rd = bytearray(rd)
+                            rp = ReplayParser(parameters=self.settings)
+                            rp.data = bytearray(rd)
+                            success = rp.process_data()
+                            if success:
+                                self.gameInProgress = True
+                                return rp
+                        except Exception as e:
+                            if e:
+                                pass
+                else:
+                    self.gameInProgress = False
 
     def get_stats_from_game(self):
         """Provides stats from playerList names from game memory."""
