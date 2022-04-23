@@ -22,7 +22,7 @@ class StatsRequest:
         self.userMatchHistoryCache = None
         self.availableLeaderboards = None
 
-    def return_stats(self, steam64ID):
+    def return_stats(self, steam64ID) -> PlayerStat:
         try:
             self.get_user_stat_from_server(steam64ID)
             self.get_available_leaderboards_from_server()
@@ -72,7 +72,7 @@ class StatsRequest:
             logging.error(str(e))
             logging.exception("Exception : ")
 
-    def get_match_history_from_server(self, steam64ID):
+    def get_match_history_from_server(self, steam64ID) -> bool:
         """Cache the player match history."""
 
         try:
@@ -99,14 +99,14 @@ class StatsRequest:
             if (self.userMatchHistoryCache['result']['message'] == "SUCCESS"):
                 # implement custom match history class
                 # and instatiate object here
-                pass
+                return True
 
         except Exception as e:
             logging.error("Problem in getMatchHistory")
             logging.error(str(e))
             logging.exception("Exception : ")
 
-    def get_available_leaderboards_from_server(self):
+    def get_available_leaderboards_from_server(self) -> bool:
         """Cache the available leaderboards."""
 
         try:
@@ -153,12 +153,16 @@ class StatsRequest:
         """Gets the players most recent match from match history."""
 
         if (self.userMatchHistoryCache):
-            hL = list()
+            historyList = list()
             for item in self.userMatchHistoryCache.get('matchHistoryStats'):
-                hL.append(item)
-            hL = sorted(hL, key=lambda d: d['completiontime'], reverse=True)
-            if hL:
-                return hL[0]
+                historyList.append(item)
+            historyList = sorted(
+                historyList,
+                key=lambda d: d['completiontime'],
+                reverse=True
+            )
+            if historyList:
+                return historyList[0]
 
     def get_steam_number(self, profileID):
         """Gets a player steam number from match history."""
