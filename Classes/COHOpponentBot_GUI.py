@@ -619,7 +619,8 @@ class GUI:
             logging.error('Exception : ' + str(e))
 
     def toggle_log_errors_to_file(self):
-        # work in progress
+        """Change preference for logging errors to file."""
+
         if (bool(self.logErrorsToFile.get())):
             logging.getLogger().disabled = False
             logging.info("Logging Started")

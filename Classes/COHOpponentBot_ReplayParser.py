@@ -214,7 +214,15 @@ class ReplayParser:
             self.data = fileHandle.read()
         self.process_data()
 
-    def process_data(self):
+    def process_data(self) -> bool:
+        """Processes replay byte data.
+
+        returns
+        -------
+        True on success.
+        False on failure.
+        """
+
         # Set return flag
         self.success = True
 
