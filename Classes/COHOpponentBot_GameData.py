@@ -440,10 +440,17 @@ class GameData():
                             rp = ReplayParser(parameters=self.settings)
                             rp.data = bytearray(rd)
                             success = rp.process_data()
+                            # Processing game data may not be successful
+                            # if the memory is being moved
+                            # by memory management
                             if success:
                                 logging.info(
                                     "Successfully Parsed Replay Data.")
                                 return rp
+                            else:
+                                logging.info(
+                                    "Replay Data did not parse correctly.")
+                                return None
                         except Exception as e:
                             if e:
                                 pass
