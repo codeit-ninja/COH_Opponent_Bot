@@ -246,6 +246,8 @@ class GUI:
         self.master.mainloop()
 
     def save_preferences(self):
+        """Save preferences drop down."""
+
         files = [('Json', '*.json'), ('All Files', '*.*')]
         workingDirectory = os.getcwd()
         print("workingDirectory : {}".format(workingDirectory))
@@ -264,6 +266,8 @@ class GUI:
             self.settings.save(theFilename)
 
     def load_preferences(self):
+        """load preferences drop down."""
+
         files = [('Json', '*.json'), ('All Files', '*.*')]
         workingDirectory = os.getcwd()
         print("workingDirectory : {}".format(workingDirectory))

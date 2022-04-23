@@ -538,6 +538,7 @@ class GameData():
             self.ircClient.send_to_outputfield(item)
 
     def output_opponent_data(self):
+        """"Outputs game and player information according to formats."""
 
         logging.info("In output opponent data")
         logging.info(str(self))
@@ -1118,6 +1119,8 @@ class GameData():
             seq = seq[n:]
 
     def find_between(self, s, first, last):
+        """Returns the string between two delimiters."""
+
         try:
             start = s.index(first) + len(first)
             end = s.index(last, start)

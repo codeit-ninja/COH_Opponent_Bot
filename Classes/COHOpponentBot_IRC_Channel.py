@@ -11,7 +11,7 @@ from Classes.COHOpponentBot_GameData import GameData
 
 
 class IRC_Channel(threading.Thread):
-    """Iplements an IRC Channel Connection. Checks User Commands."""
+    """Implements an IRC Channel Connection. Checks User Commands."""
 
     def __init__(
         self,
@@ -61,6 +61,8 @@ class IRC_Channel(threading.Thread):
                 self.user_message(line)
 
     def user_message(self, line):
+        """Processes IRC returned raw string data."""
+
         # Dissect out the useful parts of the raw data line
         # into username and message and remove certain characters
         msgFirst = line[1]
@@ -84,6 +86,8 @@ class IRC_Channel(threading.Thread):
             self.close()
 
     def check_for_user_command(self, userName, message):
+        """Performs string comparisons for hardcoded commands."""
+
         logging.info("Checking For User Comamnd")
         try:
             if (
@@ -137,6 +141,8 @@ class IRC_Channel(threading.Thread):
             logging.exception("Exception : ")
 
     def print_info_to_debug(self):
+        """Outputs gameData to the log file."""
+
         try:
             self.gameData = GameData(
                 self.ircClient,
@@ -155,6 +161,8 @@ class IRC_Channel(threading.Thread):
             logging.exception("Exception : ")
 
     def game_info(self):
+        """Outputs a summary of the current game to IRC."""
+
         self.gameData = GameData(self.ircClient, settings=self.settings)
         if self.gameData.get_data_from_game():
             self.ircClient.send_private_message_to_IRC(
@@ -166,6 +174,8 @@ class IRC_Channel(threading.Thread):
             )
 
     def story(self):
+        """Outputs the game description to IRC."""
+
         self.gameData = GameData(self.ircClient, settings=self.settings)
         logging.info(str(self.gameData))
         if self.gameData.get_data_from_game():
@@ -177,6 +187,8 @@ class IRC_Channel(threading.Thread):
                 "{}.".format(self.gameData.mapDescriptionFull))
 
     def test_output(self):
+        """Outputs information general on pressing test button."""
+
         if not self.gameData:
             self.gameData = GameData(
                 self.ircClient,
@@ -186,5 +198,7 @@ class IRC_Channel(threading.Thread):
         self.gameData.test_output()
 
     def close(self):
+        """Closes the IRC channel."""
+
         self.running = False
         logging.info("Closing Channel " + str(self.channel) + " thread.")

@@ -180,6 +180,8 @@ class IRC_Client(threading.Thread):
                     pass
 
     def connection_timedout(self):
+        """Displays notification when IRC fails to connect."""
+
         try:
             message = (
                 f"Connection to {self.channel} timed out, was the channel"
@@ -215,6 +217,8 @@ class IRC_Client(threading.Thread):
             logging.exception("Exception : ")
 
     def assure_path_exists(self, path):
+        """Checks directory exists, if not creates it."""
+
         dir = os.path.dirname(path)
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -234,6 +238,8 @@ class IRC_Client(threading.Thread):
     # above is the send to IRC timer loop that runs every three seconds
 
     def send_private_message_to_IRC(self, message):
+        """Outputs message to IRC chat channel."""
+
         self.send_to_outputfield(message)  # output message to text window
         message = (
             "PRIVMSG " + str(self.channel) + " :" +
@@ -243,6 +249,8 @@ class IRC_Client(threading.Thread):
         # removed this to stop message being sent to IRC
 
     def send_whisper_to_IRC(self, message, whisperTo):
+        """Whispers message to an individual."""
+
         try:
             # whisper is currently disabled by twitch
             self.ircMessageBuffer.append(
