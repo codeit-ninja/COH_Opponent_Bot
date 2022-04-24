@@ -94,7 +94,7 @@ class IRC_Channel(threading.Thread):
                 bool(re.match(r"^(!)?opponent(\?)?$", message.lower()))
                 or bool(re.match(r"^(!)?place your bets$", message.lower()))
                 or bool(re.match(r"^(!)?opp(\?)?$", message.lower()))
-            ):
+                    ):
 
                 self.gameData = GameData(
                     ircClient=self.ircClient,
@@ -112,9 +112,10 @@ class IRC_Channel(threading.Thread):
             channel = str(self.settings.data.get('channel'))
             if (
                 message.lower() == "test"
-                and user == admin.lower()
-                or user == channel.lower()
-            ):
+                and (
+                    user == admin.lower()
+                    or user == channel.lower())
+                    ):
                 self.ircClient.send_private_message_to_IRC(
                     "I'm here! Pls give me mod to prevent twitch"
                     " from autobanning me for spam if I have to send"
