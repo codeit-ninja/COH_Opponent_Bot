@@ -47,3 +47,4 @@ build/COHOpponentBot/pyimod00_crypto_key.py
 *.exe
 overlaystyle.css
 PointerFinder.log
+COHOpponentBot_PointerTest.py
