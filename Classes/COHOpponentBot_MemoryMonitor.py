@@ -77,9 +77,10 @@ class MemoryMonitor(threading.Thread):
     def game_started(self):
         try:
             self.gameData.output_opponent_data()
-            # self.post_steam_number()
+            # legacy posting of data to opponent bot channel
+            self.post_steam_number()
             # enable to output to the opponent bot channel
-            # self.post_data()
+            self.post_data()
             # enable to output to the opponent bot channel
             self.start_bets()
 
