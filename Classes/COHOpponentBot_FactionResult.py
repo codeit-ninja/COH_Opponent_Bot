@@ -49,11 +49,12 @@ class FactionResult():
 
         try:
             if (int(self.losses) != 0):
-                wlr = str(round(int(self.wins)/int(self.losses), 2))
+                wlr = round(int(self.wins)/int(self.losses), 2)
                 self.winLossRatio = wlr
             else:
+                self.winLossRatio = 0
                 if(int(self.wins) > 0):
-                    self.winLossRatio = "Unbeaten"
+                    self.winLossRatio = self.wins
         except Exception as e:
             logging.error("In factionResult Creating winLossRatio")
             logging.error(str(e))
@@ -72,5 +73,6 @@ class FactionResult():
         output += "Rank : " + str(self.rank) + "\n"
         output += "Level : " + str(self.rankLevel) + "\n"
         output += "Last Time : " + str(self.lastMatch) + "\n"
+        output += "winLossRatio : " + str(self.winLossRatio) + "\n"
 
         return output

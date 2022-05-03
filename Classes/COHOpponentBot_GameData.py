@@ -191,15 +191,16 @@ class GameData():
         self.matchType = MatchType.CUSTOM
         if (int(self.numberOfComputers) > 0):
             self.matchType = MatchType.CUSTOM
-        if (0 <= int(self.slots) <= 2):
-            if (int(self.numberOfComputers) == 0):
-                self.matchType = MatchType.ONES
-        if (3 <= int(self.slots) <= 4):
-            if (int(self.numberOfComputers) == 0):
-                self.matchType = MatchType.TWOS
-        if (5 <= int(self.slots) <= 6):
-            if (int(self.numberOfComputers) == 0):
-                self.matchType = MatchType.THREES
+        if self.automatch:
+            if (0 <= int(self.slots) <= 2):
+                if (int(self.numberOfComputers) == 0):
+                    self.matchType = MatchType.ONES
+            if (3 <= int(self.slots) <= 4):
+                if (int(self.numberOfComputers) == 0):
+                    self.matchType = MatchType.TWOS
+            if (5 <= int(self.slots) <= 6):
+                if (int(self.numberOfComputers) == 0):
+                    self.matchType = MatchType.THREES
 
         return True
 
