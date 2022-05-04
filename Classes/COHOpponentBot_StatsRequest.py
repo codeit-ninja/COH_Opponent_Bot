@@ -134,20 +134,23 @@ class StatsRequest:
     def get_player_win_last_match(self, userSteam64Number):
         """Gets Win or Loss from match history."""
 
-        if self.userMatchHistoryCache:
-            if not userSteam64Number:
-                userSteam64Number = self.settings.data.get('steamNumber')
-            if userSteam64Number:
-                playersProfileID = self.get_profile_ID(userSteam64Number)
-                mostRecentMatch = self.get_most_recent_match()
-                if mostRecentMatch:
-                    matches = mostRecentMatch.get('matchhistoryreportresults')
-                    for item in matches:
-                        if str(playersProfileID) == str(item['profile_id']):
-                            if str(item.get('resulttype')) == '1':
-                                return True
-                            else:
-                                return False
+        if not self.userMatchHistoryCache:
+            self.userMatchHistoryCache = self.get_match_history_from_server(
+                userSteam64Number
+            )
+        if not userSteam64Number:
+            userSteam64Number = self.settings.data.get('steamNumber')
+        if userSteam64Number:
+            playersProfileID = self.get_profile_ID(userSteam64Number)
+            mostRecentMatch = self.get_most_recent_match()
+            if mostRecentMatch:
+                matches = mostRecentMatch.get('matchhistoryreportresults')
+                for item in matches:
+                    if str(playersProfileID) == str(item['profile_id']):
+                        if str(item.get('resulttype')) == '1':
+                            return True
+                        else:
+                            return False
 
     def get_most_recent_match(self):
         """Gets the players most recent match from match history."""
