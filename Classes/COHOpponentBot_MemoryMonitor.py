@@ -129,7 +129,7 @@ class MemoryMonitor(threading.Thread):
     def get_win_lose(self):
         try:
             statnumber = self.settings.data.get('steamNumber')
-            statRequest = StatsRequest()
+            statRequest = StatsRequest(settings=self.settings)
             statRequest.get_match_history_from_server(statnumber)
             mostRecentWin = statRequest.get_player_win_last_match(statnumber)
             if mostRecentWin:
