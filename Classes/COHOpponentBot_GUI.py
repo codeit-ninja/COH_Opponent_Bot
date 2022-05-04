@@ -30,8 +30,8 @@ class GUI:
     def __init__(self):
 
         # Enter Build Variables for marking About Box
-        self.VersionNumber = "3.0.4"
-        self.BuildDate = "24-Apr-2022"
+        self.VersionNumber = "3.0.5"
+        self.BuildDate = "04-May-2022"
 
         self.ircClient = None  # reference to the opponentbot
 
@@ -505,13 +505,13 @@ class GUI:
                 variable=self.automaticTrigger,
                 command=self.automatic_trigger_toggle)
             self.checkAutomaticTrigger.grid(sticky=W)
-            self.checkWriteIWonLostInChat = tkinter.Checkbutton(
-                self.frameAutoTrigger,
-                text="Win/Lose message in Chat",
-                variable=self.writeIWonLostInChat,
-                command=self.save_toggles)
+            # self.checkWriteIWonLostInChat = tkinter.Checkbutton(
+            #    self.frameAutoTrigger,
+            #    text="Win/Lose message in Chat",
+            #    variable=self.writeIWonLostInChat,
+            #    command=self.save_toggles)
 
-            self.checkWriteIWonLostInChat.grid(sticky=W)
+            # self.checkWriteIWonLostInChat.grid(sticky=W)
             self.checkWritePlaceYourBetsInChat = tkinter.Checkbutton(
                 self.frameAutoTrigger,
                 text="Write '!Place Your Bets' in Chat at game start",
@@ -693,7 +693,7 @@ class GUI:
 
     def automatic_trigger_toggle(self):
         if(bool(self.automaticTrigger.get())):
-            self.checkWriteIWonLostInChat.config(state=NORMAL)
+            # self.checkWriteIWonLostInChat.config(state=NORMAL)
             self.checkWritePlaceYourBetsInChat.config(state=NORMAL)
             self.checkClearOverlayAfterGame.config(state=NORMAL)
             if (self.ircClient):
@@ -701,7 +701,7 @@ class GUI:
                 self.start_monitors()
         else:
             self.close_monitors()
-            self.checkWriteIWonLostInChat.config(state=DISABLED)
+            # self.checkWriteIWonLostInChat.config(state=DISABLED)
             self.checkWritePlaceYourBetsInChat.config(state=DISABLED)
             self.checkClearOverlayAfterGame.config(state=DISABLED)
         self.save_toggles()

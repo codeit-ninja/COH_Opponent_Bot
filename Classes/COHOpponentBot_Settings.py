@@ -99,7 +99,7 @@ class Settings:
         self.data['filePollInterval'] = 10
         self.data['showSteamProfile'] = False
         self.data['automaticTrigger'] = True
-        self.data['writeIWonLostInChat'] = True
+        self.data['writeIWonLostInChat'] = False
         self.data['writePlaceYourBetsInChat'] = False
         self.data['clearOverlayAfterGameOver'] = True
         self.data['logPath'] = ""

@@ -146,8 +146,16 @@ class StatsRequest:
             if mostRecentMatch:
                 matches = mostRecentMatch.get('matchhistoryreportresults')
                 for item in matches:
+                    profileid = item.get('profile_id')
+                    steamNumber = self.get_steam_number(profileid)
+                    alias = self.get_profile_name(profileid)
+                    resultType = item.get('resulttype')
+                    logging.info(f"Profile_id : {profileid}")
+                    logging.info(f"Player SteamNumber : {steamNumber}")
+                    logging.info(f"Player Alias : {alias}")
+                    logging.info(f"resultType : {resultType}")
                     if str(playersProfileID) == str(item['profile_id']):
-                        if str(item.get('resulttype')) == '1':
+                        if str(resultType) == '1':
                             return True
                         else:
                             return False
@@ -175,10 +183,25 @@ class StatsRequest:
                 mhr = self.userMatchHistoryCache['result']
                 if (mhr['message'] == "SUCCESS"):
                     for item in self.userMatchHistoryCache['profiles']:
-                        if (str(profileID) == item['profile_id']):
+                        if (str(profileID) == str(item.get('profile_id'))):
                             # name should look like this string
                             # "/steam/76561198416060362"
                             return str(item['name']).replace("/steam/", "")
+        except Exception as e:
+            logging.error("Problem in getSteamNumberFromProfilesByProfileID")
+            logging.error(str(e))
+            logging.exception("Exception : ")
+
+    def get_profile_name(self, profileID):
+        """Gets a player profile name from match history."""
+
+        try:
+            if self.userMatchHistoryCache:
+                mhr = self.userMatchHistoryCache['result']
+                if (mhr.get('message') == "SUCCESS"):
+                    for item in self.userMatchHistoryCache.get('profiles'):
+                        if (str(profileID) == str(item.get('profile_id'))):
+                            return str(item['alias'])
         except Exception as e:
             logging.error("Problem in getSteamNumberFromProfilesByProfileID")
             logging.error(str(e))
@@ -189,13 +212,13 @@ class StatsRequest:
 
         try:
             if self.userMatchHistoryCache:
-                mhr = self.userMatchHistoryCache['result']
-                if (mhr['message'] == "SUCCESS"):
-                    for item in self.userMatchHistoryCache['profiles']:
+                mhr = self.userMatchHistoryCache.get('result')
+                if (mhr.get('message') == "SUCCESS"):
+                    for item in self.userMatchHistoryCache.get('profiles'):
                         # name should look like this string
                         # "/steam/76561198416060362"
                         steamNumber = str(item['name']).replace("/steam/", "")
-                        if (str(steam64ID) == steamNumber):
+                        if (str(steam64ID) == str(steamNumber)):
                             return item['profile_id']
         except Exception as e:
             logging.error("Problem in getProfileIDFromProfilesBySteamNumber")

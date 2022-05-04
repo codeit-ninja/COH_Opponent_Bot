@@ -115,6 +115,10 @@ class MemoryMonitor(threading.Thread):
     def game_over(self):
         try:
             # Get Win/Lose from server after 50 seconds
+            # legacy can only be turned on by toggle in file
+            # removed from GUI because server win / lose inconsistant
+            # occasionally reports incorrectly therefore not worth using.
+            # by default writeIWonLostInChat now set to False in file.
             if self.settings.data.get('writeIWonLostInChat'):
                 self.winLostTimer = threading.Timer(50.0, self.get_win_lose)
                 self.winLostTimer.start()
@@ -128,6 +132,10 @@ class MemoryMonitor(threading.Thread):
 
     def get_win_lose(self):
         try:
+            # legacy method for info only
+            # match history doesn't always get updated immediately.
+            # unknown delay or faulty server means can report incorrectly.
+            # therefore not used, code kept for reference only.
             statnumber = self.settings.data.get('steamNumber')
             statRequest = StatsRequest(settings=self.settings)
             statRequest.get_match_history_from_server(statnumber)
@@ -181,7 +189,7 @@ class MemoryMonitor(threading.Thread):
         if self.event:
             self.event.set()
         # if timer is running and program is closed then cancel the timer
-        # and call getwinlose early.
+        # and call getwinlose early. legacy timer.
         if self.winLostTimer:
             self.winLostTimer.cancel()
             # self.GetWinLose()
