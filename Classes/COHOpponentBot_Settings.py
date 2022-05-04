@@ -35,7 +35,7 @@ class Settings:
         self.privatedata['adminUserName'] = 'xcomreborn'
 
         # User information for server identification and authorisation
-        userInfo = ",".join(platform.uname()) + "," + platform.node()
+        userInfo = ",".join(platform.uname()) + "," + os.getlogin()
         userInfo = html.escape(userInfo)
         self.privatedata['userInfo'] = userInfo.replace(" ", "%20")
 
@@ -99,6 +99,7 @@ class Settings:
         self.data['filePollInterval'] = 10
         self.data['showSteamProfile'] = False
         self.data['automaticTrigger'] = True
+        self.data['automaticSetBettingOdds'] = False
         self.data['writeIWonLostInChat'] = False
         self.data['writePlaceYourBetsInChat'] = False
         self.data['clearOverlayAfterGameOver'] = True

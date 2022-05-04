@@ -1,5 +1,6 @@
 import logging
 import threading
+from Classes.COHOpponentBot_Faction import Faction
 
 from Classes.COHOpponentBot_Settings import Settings
 from Classes.COHOpponentBot_GameData import GameData
@@ -83,6 +84,8 @@ class MemoryMonitor(threading.Thread):
             self.post_data()
             # enable to output to the opponent bot channel
             self.start_bets()
+            # enable to set odds
+            self.set_odds()
 
         except Exception as e:
             logging.info("Problem in GameStarted")
@@ -180,6 +183,91 @@ class MemoryMonitor(threading.Thread):
                                 ps = f"{outputList[0]} Vs. {outputList[1]}"
 
                     message = "!startbets {}".format(ps)
+                    self.ircClient.send_private_message_to_IRC(message)
+
+    def set_odds(self):
+        if (bool(self.settings.data.get('automaticSetBettingOdds'))):
+            if self.gameData:
+                if self.gameData.playerList:
+                    odds = 0.5
+                    contenderTeamRatio = 0
+                    opponentTeamRatio = 0
+                    axisTeamList = []
+                    alliesTeamList = []
+
+                    for player in self.gameData.playerList:
+                        if player.stats:
+                            if self.playerList:
+                                for item in self.playerList:
+                                    if (
+                                        str(item.faction) == str(Faction.US)
+                                        or str(item.faction) == str(Faction.CW)
+                                    ):
+                                        if item.name != "":
+                                            alliesTeamList.append(item)
+                                    if (
+                                        str(item.faction) == str(Faction.WM)
+                                        or str(item.faction) == str(Faction.PE)
+                                    ):
+                                        if item.name != "":
+                                            axisTeamList.append(item)
+
+                    team1List = []
+                    team2List = []
+
+                    # by default player team is allies unless
+                    # the player is steam number is present in
+                    # the axisTeamList
+                    team1List = alliesTeamList
+                    team2List = axisTeamList
+
+                    for item in axisTeamList:
+                        if item.stats:
+                            steamNumber = str(
+                                self.settings.data.get('steamNumber'))
+                            if steamNumber == str(
+                                    item.stats.steamNumber):
+                                # logging.info ("Player team is AXIS")
+                                team1List = axisTeamList
+                                team2List = alliesTeamList
+                    # The contender is now in team1List
+                    for player in team1List:
+                        for value in player.stats.leaderboardData:
+                            matchType = str(
+                                player.stats.leaderboardData[value].matchType)
+                            if matchType == str(self.gameData.matchType):
+                                faction = str(
+                                    player.stats.leaderboardData[
+                                        value].faction)
+                                if faction == str(player.faction):
+                                    contenderTeamRatio += (
+                                        player.stats.leaderboardData[
+                                            value].winLossRatio)
+
+                    for player in team2List:
+                        for value in player.stats.leaderboardData:
+                            matchType = str(
+                                player.stats.leaderboardData[value].matchType)
+                            if matchType == str(self.gameData.matchType):
+                                faction = str(
+                                    player.stats.leaderboardData[
+                                        value].faction)
+                                if faction == str(player.faction):
+                                    opponentTeamRatio += (
+                                        player.stats.leaderboardData[
+                                            value].winLossRatio)
+
+                    try:
+                        if opponentTeamRatio:
+                            odds = (contenderTeamRatio / (
+                                contenderTeamRatio + opponentTeamRatio))
+                        else:
+                            odds = 0.5
+                    except Exception as e:
+                        odds = 0.5
+                        logging.error(str(e))
+                        logging.exception("Exception : ")
+                    message = f"!setodds {str(round(odds, 2))}"
                     self.ircClient.send_private_message_to_IRC(message)
 
     def close(self):

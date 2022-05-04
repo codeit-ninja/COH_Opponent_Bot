@@ -52,6 +52,8 @@ class GUI:
         self.automaticTrigger = IntVar(value=v)
         v = int(bool(self.settings.data.get('writeIWonLostInChat')))
         self.writeIWonLostInChat = IntVar(value=v)
+        v = int(bool(self.settings.data.get('automaticSetBettingOdds')))
+        self.automaticSetBettingOdds = IntVar(value=v)
         v = int(bool(self.settings.data.get('writePlaceYourBetsInChat')))
         self.writePlaceYourBetsInChat = IntVar(value=v)
         v = int(bool(self.settings.data.get('clearOverlayAfterGameOver')))
@@ -505,6 +507,21 @@ class GUI:
                 variable=self.automaticTrigger,
                 command=self.automatic_trigger_toggle)
             self.checkAutomaticTrigger.grid(sticky=W)
+
+            self.checkWritePlaceYourBetsInChat = tkinter.Checkbutton(
+                self.frameAutoTrigger,
+                text="Write '!Place Your Bets' in Chat at game start",
+                variable=self.writePlaceYourBetsInChat,
+                command=self.save_toggles)
+            self.checkWritePlaceYourBetsInChat.grid(sticky=W)
+
+            self.checkAutomaticSetBettingOdds = tkinter.Checkbutton(
+                self.frameAutoTrigger,
+                text="Auto Set Betting Odds in Chat",
+                variable=self.automaticSetBettingOdds,
+                command=self.save_toggles)
+            self.checkAutomaticSetBettingOdds.grid(sticky=W)
+
             # self.checkWriteIWonLostInChat = tkinter.Checkbutton(
             #    self.frameAutoTrigger,
             #    text="Win/Lose message in Chat",
@@ -512,19 +529,12 @@ class GUI:
             #    command=self.save_toggles)
 
             # self.checkWriteIWonLostInChat.grid(sticky=W)
-            self.checkWritePlaceYourBetsInChat = tkinter.Checkbutton(
-                self.frameAutoTrigger,
-                text="Write '!Place Your Bets' in Chat at game start",
-                variable=self.writePlaceYourBetsInChat,
-                command=self.save_toggles)
 
-            self.checkWritePlaceYourBetsInChat.grid(sticky=W)
             self.checkClearOverlayAfterGame = tkinter.Checkbutton(
                 self.frameAutoTrigger,
                 text="Clear overlay after game over",
                 variable=self.clearOverlayAfterGameOver,
                 command=self.save_toggles)
-
             self.checkClearOverlayAfterGame.grid(sticky=W)
 
             self.automatic_trigger_toggle()
@@ -696,6 +706,7 @@ class GUI:
             # self.checkWriteIWonLostInChat.config(state=NORMAL)
             self.checkWritePlaceYourBetsInChat.config(state=NORMAL)
             self.checkClearOverlayAfterGame.config(state=NORMAL)
+            self.checkAutomaticSetBettingOdds.config(state=NORMAL)
             if (self.ircClient):
                 logging.info("in automatic trigger toggle")
                 self.start_monitors()
@@ -704,34 +715,38 @@ class GUI:
             # self.checkWriteIWonLostInChat.config(state=DISABLED)
             self.checkWritePlaceYourBetsInChat.config(state=DISABLED)
             self.checkClearOverlayAfterGame.config(state=DISABLED)
+            self.checkAutomaticSetBettingOdds.config(state=DISABLED)
         self.save_toggles()
 
     def save_toggles(self):
         self.settings.data['showOwn'] = bool(self.showOwn.get())
 
-        automaticTrigger = bool(self.automaticTrigger.get())
-        self.settings.data['automaticTrigger'] = automaticTrigger
+        self.settings.data['automaticTrigger'] = (
+            bool(self.automaticTrigger.get()))
 
-        wiwlc = bool(self.writeIWonLostInChat.get())
-        self.settings.data['writeIWonLostInChat'] = wiwlc
+        self.settings.data['automaticSetBettingOdds'] = (
+            bool(self.automaticSetBettingOdds.get()))
 
-        wpyb = bool(self.writePlaceYourBetsInChat.get())
-        self.settings.data['writePlaceYourBetsInChat'] = wpyb
+        self.settings.data['writeIWonLostInChat'] = (
+            bool(self.writeIWonLostInChat.get()))
 
-        coago = bool(self.clearOverlayAfterGameOver.get())
-        self.settings.data['clearOverlayAfterGameOver'] = coago
+        self.settings.data['writePlaceYourBetsInChat'] = (
+            bool(self.writePlaceYourBetsInChat.get()))
 
-        uop = bool(self.useOverlayPreFormat.get())
-        self.settings.data['useOverlayPreFormat'] = uop
+        self.settings.data['clearOverlayAfterGameOver'] = (
+            bool(self.clearOverlayAfterGameOver.get()))
 
-        mrtl = bool(self.mirrorLeftToRightOverlay.get())
-        self.settings.data['mirrorLeftToRightOverlay'] = mrtl
+        self.settings.data['useOverlayPreFormat'] = (
+            bool(self.useOverlayPreFormat.get()))
 
-        ucp = bool(self.useCustomPreFormat.get())
-        self.settings.data['useCustomPreFormat'] = ucp
+        self.settings.data['mirrorLeftToRightOverlay'] = (
+            bool(self.mirrorLeftToRightOverlay.get()))
 
-        letf = bool(self.logErrorsToFile.get())
-        self.settings.data['logErrorsToFile'] = letf
+        self.settings.data['useCustomPreFormat'] = (
+            bool(self.useCustomPreFormat.get()))
+
+        self.settings.data['logErrorsToFile'] = (
+            bool(self.logErrorsToFile.get()))
 
         self.settings.save()
         try:
