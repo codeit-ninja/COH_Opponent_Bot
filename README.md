@@ -3,7 +3,7 @@
 
 This COH_Opponent_Bot is a Company of Heroes (COH) Opponent Chat Bot that uses a simple python socket partial implementation of the IRC protocol for twitch.tv
 
-For use with COH 1 only.
+For use with COH 1 only. (For Windows, tested only on Windows 10)
 
 This program is for people who stream/broadcast COH1 games on twitch.tv to provide COH opponents information to their viewers:
 
@@ -31,13 +31,15 @@ HERE : https://github.com/XcomReborn/COH_Opponent_Bot/releases
 
 To use the executable:
 
-1. Download the rar file and unrar (unzip) it into a new folder.
+1. Download the zip file and uncompress (unzip) it into a new folder.
 1. Execute the main file (COHOpponentBot.exe) by double clicking on the icon.
 2. Check the information is correct, if not edit the fields using the buttons with your twitch user name, your Steam64ID*, and your company of heroes warning.log file location#
 3. Click Connect and Start Streaming on twitch the usual way.
-4. Any user typing "opponent" or "!opponent" or "!opp" or "opp" in chat will trigger the bot to find you opponents name, steam profile and coh1 1v1 stats.
+4. When the game is running : Any user typing "opponent" or "!opponent" or "!opp" or "opp" in chat will trigger the bot to find you opponents name, steam profile and coh1 1v1 stats.
 
-if you also add a twitch username to the bot user name field you'll also need to add an OAuth key to the bot OAuth key field.
+See all available options in the options menu in the graphical user interface of the program.
+
+The program allows you to add a twitch username to the bot user name field you'll also need to add an OAuth key to the bot OAuth key field.
 Doing so will connect using this user name as your bot. It is ok to use the same user account as your channel user or a different one.
 
 Get your OAuth Key from twitch at this address  : https://twitchapps.com/tmi/
