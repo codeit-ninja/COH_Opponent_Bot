@@ -195,22 +195,19 @@ class MemoryMonitor(threading.Thread):
                     axisTeamList = []
                     alliesTeamList = []
 
-                    for player in self.gameData.playerList:
-                        if player.stats:
-                            if self.playerList:
-                                for item in self.playerList:
-                                    if (
-                                        str(item.faction) == str(Faction.US)
-                                        or str(item.faction) == str(Faction.CW)
-                                    ):
-                                        if item.name != "":
-                                            alliesTeamList.append(item)
-                                    if (
-                                        str(item.faction) == str(Faction.WM)
-                                        or str(item.faction) == str(Faction.PE)
-                                    ):
-                                        if item.name != "":
-                                            axisTeamList.append(item)
+                    for item in self.gameData.playerList:
+                        if (
+                            str(item.faction) == str(Faction.US)
+                            or str(item.faction) == str(Faction.CW)
+                        ):
+                            if item.name != "":
+                                alliesTeamList.append(item)
+                        if (
+                            str(item.faction) == str(Faction.WM)
+                            or str(item.faction) == str(Faction.PE)
+                        ):
+                            if item.name != "":
+                                axisTeamList.append(item)
 
                     team1List = []
                     team2List = []
