@@ -31,7 +31,7 @@ class GUI:
 
         # Enter Build Variables for marking About Box
         self.VersionNumber = "3.0.5"
-        self.BuildDate = "04-May-2022"
+        self.BuildDate = "05-May-2022"
 
         self.ircClient = None  # reference to the opponentbot
 
