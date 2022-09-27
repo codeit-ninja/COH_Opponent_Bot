@@ -11,15 +11,68 @@ class OverlayTemplates:
         var previousDate;
         var backgroundScript = setInterval(checkIfFileHasChanged, 5000);
 
-        function checkIfFileHasChanged() {{
+        function checkIfFileHasChanged() {
             date = new Date(window.location.pathname.lastModified);
-            if (previousDate != null) {{
-                if (date.getTime() !== previousDate.getTime()) {{
+            if (previousDate != null) {
+                if (date.getTime() !== previousDate.getTime()) {
                     window.location.reload();
-                }}
-            }}
+                }
+            }
             previousDate = date;
-        }}
+        }
+
+        const chunk = (chunks) => {
+            let chunk = [];
+            let chunked = [];
+            
+            chunks.forEach(child => {
+                if(child.tagName.toLowerCase() !== 'br') {
+                    chunk.push(child);
+
+                    return;
+                }
+
+                chunked.push(chunk);
+                chunk = [];
+            });
+
+            return chunked;
+        }
+
+        const createPlayerElement = (player, index) => {
+            const playerDiv = document.createElement('div')
+
+            playerDiv.classList.add(`player`);
+            playerDiv.classList.add(`player-${index + 1}`);
+
+            player.forEach(el => playerDiv.appendChild(el));
+
+            return playerDiv;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const playerTeam = document.querySelector('.playerTeam');
+            const opponentTeam = document.querySelector('.opponentTeam');
+            const childs = [...playerTeam.children];
+
+            const playerTeamPlayers = chunk([...playerTeam.children]);
+            const opponentTeamPlayers = chunk([...opponentTeam.children]);
+
+            playerTeam.innerHTML = '';
+            opponentTeam.innerHTML = '';
+
+            playerTeamPlayers.forEach((player, index) => {
+                const playerDiv = createPlayerElement(player, index);
+
+                playerTeam.appendChild(playerDiv);
+            });
+
+            opponentTeamPlayers.forEach((player, index) => {
+                const playerDiv = createPlayerElement(player, index);
+
+                opponentTeam.appendChild(playerDiv);
+            });
+        })
     </script>
 </head>
 <body>
@@ -38,217 +91,76 @@ class OverlayTemplates:
 
     overlaycss = """
 
-
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@200;400&family=Special+Elite&display=swap');
 
 body {
     position: relative;
     background-color: transparent;
     padding: 0pt;
-
-  }
+}
 
 html {
     position: relative;
     padding: 0pt;
 }
 
-.container{width:100%;
+body, html {
+    padding: 0;
+    margin: 0;
+}
+
+.container {
+    display: flex;
+    max-width: 690px;
+    margin: 0 auto;
+    justify-content: space-between;
+    height: 100vh;
     position: relative;
     top: 0pt;
-    font-size: 14pt;
+    font-size: 14px;
 }
 
-.countryflagimg{
-    position: relative;
-    display: inline;
-    height: 16pt;
-    top: 0pt;
+/* Try some bs here */
+.playerTeam,
+.opponentTeam {
+    display: flex;
+    flex-direction: column;
 }
 
-.countryflagimg img{
-    position: relative;
-    display: inline;
-    height:16pt;
-    top: -3pt;
+.nonVariableText, 
+.countryflagimg {
+    display: none;
 }
 
-
-.factionflagimg{
-    position: relative;
-    display: inline;
-    height: 16pt;
-    top: 0pt;
+.player {
+    font-family: 'Special Elite', cursive;
+    display: flex;
+    align-items: center;
+    color: white;
+    text-shadow: 2px 2px black;
 }
 
-.factionflagimg img{
+.player .name {
     position: relative;
-    height:18pt;
-    top: -3pt;
+    top: -1px;
+}
+
+.rankimg img,
+.factionflagimg img  {
+    max-width: 31px;
+}
+
+.factionflagimg img {
+    position: relative;
+    top: 2px;
 }
 
 .rankimg {
-    position: relative;
-    top: 10pt;
-    height: 30pt;
-    display: inline;
+    margin-left: auto;
 }
 
-.rankimg img{
-    position: relative;
-    height: 24pt;
-    display: inline;
-    top: -8pt;
-}
-
-.textVariables {
-    position: relative;
-    display: inline;
-    top: -6pt;
-}
-
-.name {
-    position: relative;
-    display: inline;
-    top: 0pt;
-}
-
-.faction {
-    position: relative;
-    display: inline;
-    top: 0pt;
-}
-
-.matchtype {
-    position: relative;
-    display: inline;
-    top: 0pt;
-}
-
-.country {
-    position: relative;
-    display: inline;
-    top: 0pt;
-}
-
-.totalwins {
-    position: relative;
-    display: inline;
-    top: 0pt;
-}
-
-.totallosses {
-    position: relative;
-    display: inline;
-    top: 0pt;
-}
-
-.totalwlratio {
-    position: relative;
-    display: inline;
-    top: 0pt;
-}
-
-.wins {
-    position: relative;
-    display: inline;
-    top: 0pt;
-}
-
-.losses {
-    position: relative;
-    display: inline;
-    top: 0pt;
-}
-
-.disputes {
-    position: relative;
-    display: inline;
-    top: 0pt;
-}
-
-.streak {
-    position: relative;
-    display: inline;
-    top: 0pt;
-}
-
-.drops {
-    position: relative;
-    display: inline;
-    top: 0pt;
-}
-
-.rank {
-    position: relative;
-    display: inline;
-    top: 0pt;
-}
-
-.level {
-    position: relative;
-    display: inline;
-    top: 0pt;
-}
-
-.wlratio {
-    position: relative;
-    display: inline;
-    top: 0pt;
-}
-
-.nonVariableText{
-    position: relative;
-    display: inline;
-    top: -6pt;
-}
-
-.steamprofile{
-    position: relative;
-    display: inline;
-    top: 0pt;
-}
-
-.cohstatslink{
-position: relative;
-display: inline;
-top: 0pt;
-}
-
-.opponentTeam {
-
-      position : absolute;
-      top: 0pt;
-      background-color: rgba(0, 0, 0, 0.5);
-      color: white;
-      float: left;
-      margin-left: 58%;
-      text-align: left;
-      padding-bottom: 0pt;
-      }
-
-.opponentTeam .name{
-
-color: white;
-
-}
-
-.playerTeam {
-
-      position: relative;
-      top: 0pt;
-      background-color: rgba(0, 0, 0, 0.5);
-      color: white;
-      float: right;
-      margin-right: 58%;
-      text-align: right;
-      padding-bottom: 0pt;
-
-  }
-
-  .playerTeam .name{
-
-    color: white;
-
+.player-3 {
+    margin-top: auto;
 }
 
     """
